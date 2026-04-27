@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { SearchBar } from './components/SearchBar';
 import { ResultCard } from './components/ResultCard';
 import { fetchStockData, fetchMarketCap } from './utils/fetchStockData';
@@ -81,6 +83,9 @@ function App() {
       {match && !isLoading && (
         <ResultCard match={match} stockName={stockName} symbol={symbol} currentPrice={currentPrice} />
       )}
+
+      <Analytics />
+      <SpeedInsights />
     </div>
   );
 }
