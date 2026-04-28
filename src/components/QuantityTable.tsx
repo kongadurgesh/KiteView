@@ -67,8 +67,8 @@ export function QuantityTable({ buyPrice }: QuantityTableProps) {
   const ranges = getRanges(buyPrice);
 
   return (
-    <div className="mt-6">
-      <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">
+    <div>
+      <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
         Quantity &amp; Investment
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
