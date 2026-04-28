@@ -3,7 +3,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { SearchBar } from './components/SearchBar';
 import { ResultCard } from './components/ResultCard';
-import { fetchStockData, fetchMarketCap } from './utils/fetchStockData';
+import { fetchStockData, fetchMarketCap, fetchAllTimeHigh } from './utils/fetchStockData';
 import { detectPattern } from './utils/patternDetector';
 import { PatternMatch } from './types';
 
@@ -14,6 +14,10 @@ function App() {
   const [stockName, setStockName] = useState('');
   const [symbol, setSymbol] = useState('');
   const [currentPrice, setCurrentPrice] = useState(0);
+  const [fiftyTwoWeekHigh, setFiftyTwoWeekHigh] = useState(0);
+  const [fiftyTwoWeekLow, setFiftyTwoWeekLow] = useState(0);
+  const [allTimeHigh, setAllTimeHigh] = useState(0);
+  const [marketCapCr, setMarketCapCr] = useState(0);
   const [noMatch, setNoMatch] = useState(false);
 
   const handleSearch = async (sym: string) => {
@@ -24,16 +28,21 @@ function App() {
     setSymbol(sym);
 
     try {
-      const stockInfo = await fetchStockData(sym);
+      const [stockInfo, ath, quoteMcCr] = await Promise.all([
+        fetchStockData(sym),
+        fetchAllTimeHigh(sym),
+        fetchMarketCap(sym),
+      ]);
       setStockName(stockInfo.shortName);
       setCurrentPrice(stockInfo.currentPrice);
+      setFiftyTwoWeekHigh(stockInfo.fiftyTwoWeekHigh);
+      setFiftyTwoWeekLow(stockInfo.fiftyTwoWeekLow);
+      setAllTimeHigh(ath);
 
-      let marketCapCr = stockInfo.marketCap;
-      if (marketCapCr === 0) {
-        marketCapCr = await fetchMarketCap(sym);
-      }
+      const mcCr = stockInfo.marketCap > 0 ? stockInfo.marketCap : quoteMcCr;
+      setMarketCapCr(mcCr);
 
-      const result = detectPattern(stockInfo.candles, marketCapCr);
+      const result = detectPattern(stockInfo.candles, mcCr);
 
       if (result) {
         setMatch(result);
@@ -81,7 +90,16 @@ function App() {
       )}
 
       {match && !isLoading && (
-        <ResultCard match={match} stockName={stockName} symbol={symbol} currentPrice={currentPrice} />
+        <ResultCard
+          match={match}
+          stockName={stockName}
+          symbol={symbol}
+          currentPrice={currentPrice}
+          fiftyTwoWeekHigh={fiftyTwoWeekHigh}
+          fiftyTwoWeekLow={fiftyTwoWeekLow}
+          allTimeHigh={allTimeHigh}
+          marketCapCr={marketCapCr}
+        />
       )}
 
       <Analytics />

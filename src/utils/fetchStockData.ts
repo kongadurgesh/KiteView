@@ -34,16 +34,39 @@ export async function fetchStockData(symbol: string): Promise<StockInfo> {
     });
   }
 
-  const shortName = result.meta?.shortName ?? result.meta?.symbol ?? symbol;
-  const regularMarketPrice = result.meta?.regularMarketPrice ?? 0;
-  const sharesOutstanding = result.meta?.sharesOutstanding;
+  const meta = result.meta ?? {};
+  const shortName = meta.shortName ?? meta.symbol ?? symbol;
+  const regularMarketPrice = meta.regularMarketPrice ?? 0;
+  const sharesOutstanding = meta.sharesOutstanding;
+  const fiftyTwoWeekHigh = meta.fiftyTwoWeekHigh ?? 0;
+  const fiftyTwoWeekLow = meta.fiftyTwoWeekLow ?? 0;
 
   let marketCapCr = 0;
   if (sharesOutstanding && regularMarketPrice) {
-    marketCapCr = (regularMarketPrice * sharesOutstanding) / 1e7; // 1 Cr = 10 million
+    marketCapCr = (regularMarketPrice * sharesOutstanding) / 1e7;
   }
 
-  return { symbol, shortName, marketCap: marketCapCr, currentPrice: regularMarketPrice, candles };
+  return {
+    symbol, shortName, marketCap: marketCapCr, currentPrice: regularMarketPrice,
+    fiftyTwoWeekHigh, fiftyTwoWeekLow, candles,
+  };
+}
+
+export async function fetchAllTimeHigh(symbol: string): Promise<number> {
+  try {
+    const url = `${PROXY_BASE}/api/chart/${encodeURIComponent(symbol)}?range=max&interval=1mo`;
+    const res = await fetch(url);
+    if (!res.ok) return 0;
+    const data = await res.json();
+    const highs: number[] = data?.chart?.result?.[0]?.indicators?.quote?.[0]?.high ?? [];
+    let ath = 0;
+    for (const h of highs) {
+      if (h != null && h > ath) ath = h;
+    }
+    return parseFloat(ath.toFixed(2));
+  } catch {
+    return 0;
+  }
 }
 
 export async function fetchMarketCap(symbol: string): Promise<number> {
@@ -52,8 +75,8 @@ export async function fetchMarketCap(symbol: string): Promise<number> {
     const quoteRes = await fetch(quoteUrl);
     if (!quoteRes.ok) return 0;
     const quoteData = await quoteRes.json();
-    const mc = quoteData?.quoteSummary?.result?.[0]?.summaryDetail?.marketCap?.raw;
-    return mc ? mc / 1e7 : 0; // convert to crores
+    const mc = quoteData?.quoteResponse?.result?.[0]?.marketCap;
+    return mc ? mc / 1e7 : 0;
   } catch {
     return 0;
   }

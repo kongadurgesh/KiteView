@@ -23,5 +23,7 @@ export interface StockInfo {
   shortName: string;
   marketCap: number; // in crores
   currentPrice: number;
+  fiftyTwoWeekHigh: number;
+  fiftyTwoWeekLow: number;
   candles: Candle[];
 }
