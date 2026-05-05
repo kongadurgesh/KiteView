@@ -27,3 +27,28 @@ export interface StockInfo {
   fiftyTwoWeekLow: number;
   candles: Candle[];
 }
+
+export interface Transaction {
+  id: string;
+  symbol: string;
+  stockName: string;
+  type: 'BUY' | 'SELL';
+  qty: number;
+  price: number;
+  date: string;
+  createdAt: number;
+}
+
+export interface Position {
+  symbol: string;
+  stockName: string;
+  avgBuyPrice: number;
+  totalQty: number;
+  investedAmount: number;
+  realizedPnl: number;
+  transactions: Transaction[];
+}
+
+export interface Portfolio {
+  positions: Record<string, Position>;
+}
