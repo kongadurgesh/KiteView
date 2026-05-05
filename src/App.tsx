@@ -3,11 +3,16 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { SearchBar } from './components/SearchBar';
 import { ResultCard } from './components/ResultCard';
-import { fetchStockData, fetchMarketCap, fetchAllTimeHigh } from './utils/fetchStockData';
+import { PortfolioPage } from './components/PortfolioPage';
+import { fetchStockData, fetchStockMeta, fetchAllTimeHigh } from './utils/fetchStockData';
 import { detectPattern } from './utils/patternDetector';
 import { PatternMatch } from './types';
 
+type Tab = 'scanner' | 'portfolio';
+
 function App() {
+  const [activeTab, setActiveTab] = useState<Tab>('scanner');
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [match, setMatch] = useState<PatternMatch | null>(null);
@@ -18,6 +23,8 @@ function App() {
   const [fiftyTwoWeekLow, setFiftyTwoWeekLow] = useState(0);
   const [allTimeHigh, setAllTimeHigh] = useState(0);
   const [marketCapCr, setMarketCapCr] = useState(0);
+  const [sector, setSector] = useState('');
+  const [industry, setIndustry] = useState('');
   const [noMatch, setNoMatch] = useState(false);
 
   const handleSearch = async (sym: string) => {
@@ -28,18 +35,20 @@ function App() {
     setSymbol(sym);
 
     try {
-      const [stockInfo, ath, quoteMcCr] = await Promise.all([
+      const [stockInfo, ath, meta] = await Promise.all([
         fetchStockData(sym),
         fetchAllTimeHigh(sym),
-        fetchMarketCap(sym),
+        fetchStockMeta(sym),
       ]);
       setStockName(stockInfo.shortName);
       setCurrentPrice(stockInfo.currentPrice);
       setFiftyTwoWeekHigh(stockInfo.fiftyTwoWeekHigh);
       setFiftyTwoWeekLow(stockInfo.fiftyTwoWeekLow);
       setAllTimeHigh(ath);
+      setSector(meta.sector);
+      setIndustry(meta.industry);
 
-      const mcCr = stockInfo.marketCap > 0 ? stockInfo.marketCap : quoteMcCr;
+      const mcCr = stockInfo.marketCap > 0 ? stockInfo.marketCap : meta.marketCapCr;
       setMarketCapCr(mcCr);
 
       const result = detectPattern(stockInfo.candles, mcCr);
@@ -57,50 +66,75 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center px-4 py-12">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center px-4 py-8">
+      <div className="text-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">
           Bullish Pattern Buy Price Calculator
         </h1>
       </div>
 
-      <SearchBar onSearch={handleSearch} isLoading={isLoading} />
+      {/* Tab Navigation */}
+      <div className="flex bg-white rounded-xl border border-gray-200 shadow-sm p-1 mb-8">
+        {([['scanner', 'Scanner'], ['portfolio', 'Portfolio']] as const).map(([key, label]) => (
+          <button
+            key={key}
+            onClick={() => setActiveTab(key)}
+            className={`px-6 py-2 rounded-lg text-sm font-semibold transition-colors ${
+              activeTab === key
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
 
-      {isLoading && (
-        <div className="mt-12 flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-          <p className="text-gray-500 text-sm">Fetching data & scanning for pattern...</p>
-        </div>
+      {activeTab === 'scanner' && (
+        <>
+          <SearchBar onSearch={handleSearch} isLoading={isLoading} />
+
+          {isLoading && (
+            <div className="mt-12 flex flex-col items-center gap-3">
+              <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+              <p className="text-gray-500 text-sm">Fetching data & scanning for pattern...</p>
+            </div>
+          )}
+
+          {error && (
+            <div className="mt-8 max-w-lg w-full rounded-lg bg-red-50 border border-red-200 p-4">
+              <p className="text-red-700 text-sm font-medium">Error</p>
+              <p className="text-red-600 text-sm mt-1">{error}</p>
+            </div>
+          )}
+
+          {noMatch && !isLoading && (
+            <div className="mt-8 max-w-lg w-full rounded-lg bg-amber-50 border border-amber-200 p-4 text-center">
+              <p className="text-amber-700 text-sm font-medium">No Pattern Found</p>
+              <p className="text-amber-600 text-sm mt-1">
+                No Bullish Harami or Bullish Engulfing pattern was detected for <strong>{symbol}</strong> in the last 1 year of data.
+              </p>
+            </div>
+          )}
+
+          {match && !isLoading && (
+            <ResultCard
+              match={match}
+              stockName={stockName}
+              symbol={symbol}
+              currentPrice={currentPrice}
+              fiftyTwoWeekHigh={fiftyTwoWeekHigh}
+              fiftyTwoWeekLow={fiftyTwoWeekLow}
+              allTimeHigh={allTimeHigh}
+              marketCapCr={marketCapCr}
+              sector={sector}
+              industry={industry}
+            />
+          )}
+        </>
       )}
 
-      {error && (
-        <div className="mt-8 max-w-lg w-full rounded-lg bg-red-50 border border-red-200 p-4">
-          <p className="text-red-700 text-sm font-medium">Error</p>
-          <p className="text-red-600 text-sm mt-1">{error}</p>
-        </div>
-      )}
-
-      {noMatch && !isLoading && (
-        <div className="mt-8 max-w-lg w-full rounded-lg bg-amber-50 border border-amber-200 p-4 text-center">
-          <p className="text-amber-700 text-sm font-medium">No Pattern Found</p>
-          <p className="text-amber-600 text-sm mt-1">
-            No Bullish Harami or Bullish Engulfing pattern was detected for <strong>{symbol}</strong> in the last 1 year of data.
-          </p>
-        </div>
-      )}
-
-      {match && !isLoading && (
-        <ResultCard
-          match={match}
-          stockName={stockName}
-          symbol={symbol}
-          currentPrice={currentPrice}
-          fiftyTwoWeekHigh={fiftyTwoWeekHigh}
-          fiftyTwoWeekLow={fiftyTwoWeekLow}
-          allTimeHigh={allTimeHigh}
-          marketCapCr={marketCapCr}
-        />
-      )}
+      {activeTab === 'portfolio' && <PortfolioPage />}
 
       <Analytics />
       <SpeedInsights />

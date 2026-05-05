@@ -23,6 +23,7 @@ export async function fetchStockData(symbol: string): Promise<StockInfo> {
     const c = quote.close?.[i];
     const v = quote.volume?.[i];
     if (o == null || h == null || l == null || c == null || v == null) continue;
+    if (v === 0) continue;
 
     candles.push({
       date: new Date(timestamps[i] * 1000).toISOString().split('T')[0],
@@ -69,15 +70,47 @@ export async function fetchAllTimeHigh(symbol: string): Promise<number> {
   }
 }
 
-export async function fetchMarketCap(symbol: string): Promise<number> {
+export interface StockMeta {
+  marketCapCr: number;
+  sector: string;
+  industry: string;
+}
+
+export async function fetchStockMeta(symbol: string): Promise<StockMeta> {
   try {
     const quoteUrl = `${PROXY_BASE}/api/quote/${encodeURIComponent(symbol)}`;
     const quoteRes = await fetch(quoteUrl);
-    if (!quoteRes.ok) return 0;
+    if (!quoteRes.ok) return { marketCapCr: 0, sector: '', industry: '' };
     const quoteData = await quoteRes.json();
-    const mc = quoteData?.quoteResponse?.result?.[0]?.marketCap;
-    return mc ? mc / 1e7 : 0;
+    const r = quoteData?.quoteResponse?.result?.[0];
+    const mc = r?.marketCap;
+    return {
+      marketCapCr: mc ? mc / 1e7 : 0,
+      sector: r?.sector ?? '',
+      industry: r?.industry ?? '',
+    };
   } catch {
-    return 0;
+    return { marketCapCr: 0, sector: '', industry: '' };
+  }
+}
+
+export async function fetchBatchQuotes(symbols: string[]): Promise<Record<string, number>> {
+  if (symbols.length === 0) return {};
+  try {
+    const joined = symbols.join(',');
+    const url = `${PROXY_BASE}/api/quote/${encodeURIComponent(joined)}`;
+    const res = await fetch(url);
+    if (!res.ok) return {};
+    const data = await res.json();
+    const results = data?.quoteResponse?.result ?? [];
+    const prices: Record<string, number> = {};
+    for (const r of results) {
+      if (r.symbol && r.regularMarketPrice != null) {
+        prices[r.symbol] = r.regularMarketPrice;
+      }
+    }
+    return prices;
+  } catch {
+    return {};
   }
 }

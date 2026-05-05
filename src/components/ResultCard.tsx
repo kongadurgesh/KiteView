@@ -11,6 +11,8 @@ interface ResultCardProps {
   fiftyTwoWeekLow: number;
   allTimeHigh: number;
   marketCapCr: number;
+  sector: string;
+  industry: string;
 }
 
 function getCapCategory(mcCr: number): { label: string; color: string } {
@@ -37,6 +39,8 @@ export function ResultCard({
   fiftyTwoWeekLow,
   allTimeHigh,
   marketCapCr,
+  sector,
+  industry,
 }: ResultCardProps) {
   const priceDiff = currentPrice - match.buyPrice;
   const priceDiffPct = ((priceDiff / match.buyPrice) * 100).toFixed(2);
@@ -84,6 +88,13 @@ export function ResultCard({
                 {match.candle3.date}
               </span>
             </Indicator>
+            {(sector || industry) && (
+              <Indicator label="Sector">
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-700">
+                  {[industry, sector].filter(Boolean).join(' · ')}
+                </span>
+              </Indicator>
+            )}
           </div>
         </div>
       </div>
