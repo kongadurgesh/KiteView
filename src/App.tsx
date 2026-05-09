@@ -68,9 +68,10 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center px-4 py-8">
       <div className="text-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">
-          Bullish Pattern Buy Price Calculator
+        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+          Kite<span className="text-blue-600">View</span>
         </h1>
+        <p className="text-sm text-gray-400 mt-1">A soaring view of the markets</p>
       </div>
 
       {/* Tab Navigation */}

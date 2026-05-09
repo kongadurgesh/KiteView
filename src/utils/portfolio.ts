@@ -98,3 +98,9 @@ export function removePosition(portfolio: Portfolio, symbol: string): Portfolio 
   const { [symbol]: _, ...rest } = portfolio.positions;
   return { positions: rest };
 }
+
+export function clearPortfolio(): Portfolio {
+  const empty: Portfolio = { positions: {} };
+  savePortfolio(empty);
+  return empty;
+}
