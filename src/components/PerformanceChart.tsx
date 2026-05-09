@@ -292,21 +292,23 @@ export function PerformanceChart({ portfolio }: Props) {
                 fontSize: 12,
                 boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
               }}
-              formatter={(value: number, name: string) => {
+              formatter={(value, name) => {
+                const v = Number(value);
+                const n = String(name);
                 const label =
-                  name === 'portfolio'
+                  n === 'portfolio'
                     ? 'My Portfolio'
-                    : INDICES.find((i) => i.key === name)?.label ?? name;
+                    : INDICES.find((i) => i.key === n)?.label ?? n;
                 const formatted =
                   viewMode === 'percent'
-                    ? `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`
-                    : value.toLocaleString('en-IN', {
+                    ? `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`
+                    : v.toLocaleString('en-IN', {
                         maximumFractionDigits: 2,
                       });
                 return [formatted, label];
               }}
-              labelFormatter={(label: string) => {
-                const d = new Date(label);
+              labelFormatter={(label) => {
+                const d = new Date(String(label));
                 return d.toLocaleDateString('en-IN', {
                   day: 'numeric',
                   month: 'short',
