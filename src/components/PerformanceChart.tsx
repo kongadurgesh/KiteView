@@ -21,7 +21,7 @@ const INDICES = [
   { key: 'nifty50', symbol: '^NSEI', label: 'Nifty 50', color: '#f59e0b' },
   { key: 'bankNifty', symbol: '^NSEBANK', label: 'Bank Nifty', color: '#8b5cf6' },
   { key: 'midcap50', symbol: '^NSEMDCP50', label: 'Midcap 50', color: '#06b6d4' },
-  { key: 'smallcap100', symbol: 'NIFSMCP100.NS', label: 'Smallcap 100', color: '#f43f5e' },
+  { key: 'nifty200', symbol: '^CNX200', label: 'Nifty 200', color: '#f43f5e' },
 ] as const;
 
 type IndexKey = (typeof INDICES)[number]['key'];

@@ -196,11 +196,56 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
 
       {/* Metric cards */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-        <MetricCard label="Diversification" value={`${divScore}`} unit="/100" interpretation={divScore >= 70 ? 'Good' : divScore >= 40 ? 'Moderate' : 'Low'} color={divScore >= 70 ? 'text-green-600' : divScore >= 40 ? 'text-amber-600' : 'text-red-600'} />
-        <MetricCard label="Beta" value={`${beta}`} unit="vs Nifty" interpretation={beta < 0.8 ? 'Defensive' : beta > 1.2 ? 'Aggressive' : 'Balanced'} color={beta <= 1 ? 'text-green-600' : 'text-amber-600'} />
-        <MetricCard label="Volatility" value={`${volatility}%`} unit="annualized" interpretation={volatility < 15 ? 'Low' : volatility < 30 ? 'Medium' : 'High'} color={volatility < 15 ? 'text-green-600' : volatility < 30 ? 'text-amber-600' : 'text-red-600'} />
-        <MetricCard label="Sharpe Ratio" value={`${sharpe}`} unit="risk-adj" interpretation={sharpe > 1 ? 'Good' : sharpe > 0 ? 'OK' : 'Poor'} color={sharpe > 1 ? 'text-green-600' : sharpe > 0 ? 'text-amber-600' : 'text-red-600'} />
-        <MetricCard label="Max Drawdown" value={`-${maxDd}%`} unit="peak to trough" interpretation={maxDd < 10 ? 'Mild' : maxDd < 25 ? 'Moderate' : 'Severe'} color={maxDd < 10 ? 'text-green-600' : maxDd < 25 ? 'text-amber-600' : 'text-red-600'} />
+        <MetricCard
+          label="Diversification" value={`${divScore}`} unit="/100"
+          interpretation={divScore >= 70 ? 'Good' : divScore >= 40 ? 'Moderate' : 'Low'}
+          color={divScore >= 70 ? 'text-green-600' : divScore >= 40 ? 'text-amber-600' : 'text-red-600'}
+          tip={divScore >= 70
+            ? 'Your portfolio is well diversified across holdings.'
+            : divScore >= 40
+              ? 'Consider adding more stocks from different sectors to reduce concentration risk.'
+              : 'Your portfolio is heavily concentrated. Spread investments across 8-12 stocks in different sectors.'}
+        />
+        <MetricCard
+          label="Beta" value={`${beta}`} unit="vs Nifty"
+          interpretation={beta < 0.8 ? 'Defensive' : beta > 1.2 ? 'Aggressive' : 'Balanced'}
+          color={beta <= 1 ? 'text-green-600' : 'text-amber-600'}
+          tip={beta > 1.2
+            ? 'High beta means your portfolio swings more than the market. Add defensive stocks (FMCG, Pharma, Utilities) to lower it.'
+            : beta < 0.8
+              ? 'Low beta means less market sensitivity. Add growth stocks (IT, Banking) if you want higher returns.'
+              : 'Your portfolio moves in line with the market — a balanced risk profile.'}
+        />
+        <MetricCard
+          label="Volatility" value={`${volatility}%`} unit="annualized"
+          interpretation={volatility < 15 ? 'Low' : volatility < 30 ? 'Medium' : 'High'}
+          color={volatility < 15 ? 'text-green-600' : volatility < 30 ? 'text-amber-600' : 'text-red-600'}
+          tip={volatility >= 30
+            ? 'High volatility — your portfolio value fluctuates sharply. Add large-cap or debt-like instruments to stabilize.'
+            : volatility >= 15
+              ? 'Moderate swings. Consider rebalancing towards stable large-cap stocks to reduce volatility.'
+              : 'Low volatility — your portfolio is relatively stable. Good for risk-averse investors.'}
+        />
+        <MetricCard
+          label="Sharpe Ratio" value={`${sharpe}`} unit="risk-adj"
+          interpretation={sharpe > 1 ? 'Good' : sharpe > 0 ? 'OK' : 'Poor'}
+          color={sharpe > 1 ? 'text-green-600' : sharpe > 0 ? 'text-amber-600' : 'text-red-600'}
+          tip={sharpe <= 0
+            ? 'Returns are below the risk-free rate. Review underperformers and consider replacing them with stronger picks.'
+            : sharpe <= 1
+              ? 'Decent risk-adjusted returns. Trimming volatile low-return holdings can improve this ratio.'
+              : 'Great risk-adjusted returns — you\'re being well compensated for the risk taken.'}
+        />
+        <MetricCard
+          label="Max Drawdown" value={`-${maxDd}%`} unit="peak to trough"
+          interpretation={maxDd < 10 ? 'Mild' : maxDd < 25 ? 'Moderate' : 'Severe'}
+          color={maxDd < 10 ? 'text-green-600' : maxDd < 25 ? 'text-amber-600' : 'text-red-600'}
+          tip={maxDd >= 25
+            ? 'Severe drawdown — consider adding stop losses, hedging, or shifting some allocation to defensive sectors.'
+            : maxDd >= 10
+              ? 'Moderate drawdown. Diversifying across uncorrelated sectors can reduce peak-to-trough falls.'
+              : 'Minimal drawdown — your portfolio has been resilient during downturns.'}
+        />
       </div>
 
       {/* Charts row */}
@@ -348,15 +393,38 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
   );
 }
 
-function MetricCard({ label, value, unit, interpretation, color }: {
-  label: string; value: string; unit: string; interpretation: string; color: string;
+function MetricCard({ label, value, unit, interpretation, color, tip }: {
+  label: string; value: string; unit: string; interpretation: string; color: string; tip?: string;
 }) {
+  const [showTip, setShowTip] = useState(false);
+
   return (
-    <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl px-3 py-3 text-center">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">{label}</p>
-      <p className={`text-xl font-bold font-mono ${color}`}>{value}</p>
-      <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">{unit}</p>
-      <p className={`text-[10px] font-semibold mt-1 ${color}`}>{interpretation}</p>
+    <div className="flex flex-col">
+      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl px-3 py-3 text-center relative">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">{label}</p>
+        <p className={`text-xl font-bold font-mono ${color}`}>{value}</p>
+        <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">{unit}</p>
+        <p className={`text-[10px] font-semibold mt-1 ${color}`}>{interpretation}</p>
+        {tip && (
+          <button
+            onClick={() => setShowTip((v) => !v)}
+            className="absolute -top-1.5 -right-1.5 group cursor-pointer"
+            aria-label="Suggestion"
+          >
+            <span className="absolute inset-0 rounded-full bg-amber-400/30 animate-ping" />
+            <span className="relative flex items-center justify-center w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-900/40 border border-amber-300 dark:border-amber-700 text-amber-500 group-hover:bg-amber-400 group-hover:text-white group-hover:border-amber-400 group-hover:shadow-[0_0_12px_rgba(251,191,36,0.8)] transition-all duration-200">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z" />
+              </svg>
+            </span>
+          </button>
+        )}
+      </div>
+      {showTip && tip && (
+        <div className="mt-1.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg px-2.5 py-2 text-left">
+          <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">{tip}</p>
+        </div>
+      )}
     </div>
   );
 }
