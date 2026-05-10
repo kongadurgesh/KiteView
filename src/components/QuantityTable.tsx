@@ -68,7 +68,7 @@ export function QuantityTable({ buyPrice }: QuantityTableProps) {
 
   return (
     <div>
-      <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">
         Quantity &amp; Investment
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -77,28 +77,28 @@ export function QuantityTable({ buyPrice }: QuantityTableProps) {
           return (
             <div
               key={range.min}
-              className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden"
+              className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden"
             >
-              <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <div className="bg-gray-50 dark:bg-gray-700/50 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                   {formatCurrency(range.min)} &ndash; {formatCurrency(range.max)}
                 </p>
               </div>
               {rows.length === 0 ? (
-                <p className="px-4 py-3 text-sm text-gray-400 italic">No quantity fits this range</p>
+                <p className="px-4 py-3 text-sm text-gray-400 dark:text-gray-500 italic">No quantity fits this range</p>
               ) : (
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-100">
-                      <th className="px-4 py-2 text-left text-gray-500 font-medium">Qty</th>
-                      <th className="px-4 py-2 text-right text-gray-500 font-medium">Required Amount</th>
+                    <tr className="border-b border-gray-100 dark:border-gray-700">
+                      <th className="px-4 py-2 text-left text-gray-500 dark:text-gray-400 font-medium">Qty</th>
+                      <th className="px-4 py-2 text-right text-gray-500 dark:text-gray-400 font-medium">Required Amount</th>
                     </tr>
                   </thead>
                   <tbody>
                     {rows.map((row) => (
-                      <tr key={row.qty} className="border-b border-gray-50 last:border-b-0">
-                        <td className="px-4 py-2 font-mono font-semibold text-gray-800">{row.qty}</td>
-                        <td className="px-4 py-2 text-right font-mono text-gray-700">
+                      <tr key={row.qty} className="border-b border-gray-50 dark:border-gray-700 last:border-b-0">
+                        <td className="px-4 py-2 font-mono font-semibold text-gray-800 dark:text-gray-200">{row.qty}</td>
+                        <td className="px-4 py-2 text-right font-mono text-gray-700 dark:text-gray-300">
                           {formatCurrency(row.amount)}
                         </td>
                       </tr>

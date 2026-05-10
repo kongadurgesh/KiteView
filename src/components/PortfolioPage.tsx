@@ -6,6 +6,7 @@ import { AddTransactionModal } from './AddTransactionModal';
 import { ImportExcelModal } from './ImportExcelModal';
 import { TransactionHistory } from './TransactionHistory';
 import { PerformanceChart } from './PerformanceChart';
+import { RiskDashboard } from './RiskDashboard';
 
 function fmt(n: number): string {
   return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -173,20 +174,20 @@ export function PortfolioPage() {
   return (
     <div className="w-full max-w-6xl mt-10 space-y-6">
       {/* Summary */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-          <h2 className="text-lg font-bold text-gray-900">Portfolio</h2>
+          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Portfolio</h2>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={refreshPrices}
               disabled={loadingPrices}
-              className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
             >
               {loadingPrices ? 'Refreshing...' : 'Refresh Prices'}
             </button>
             <button
               onClick={() => setShowImport(true)}
-              className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               Import Excel
             </button>
@@ -199,7 +200,7 @@ export function PortfolioPage() {
             {positions.length > 0 && (
               <button
                 onClick={handleClearPortfolio}
-                className="px-4 py-2 text-sm font-medium rounded-lg border border-red-300 text-red-600 hover:bg-red-50 transition-colors"
+                className="px-4 py-2 text-sm font-medium rounded-lg border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
               >
                 Delete Portfolio
               </button>
@@ -214,12 +215,12 @@ export function PortfolioPage() {
             <SummaryCard
               label="Total P&L"
               value={`${totalUnrealizedPnl >= 0 ? '+' : ''}${fmt(totalUnrealizedPnl)}`}
-              valueColor={totalUnrealizedPnl >= 0 ? 'text-green-600' : 'text-red-600'}
+              valueColor={totalUnrealizedPnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}
             />
             <SummaryCard
               label="Total P&L %"
               value={`${totalPnlPct >= 0 ? '+' : ''}${totalPnlPct.toFixed(2)}%`}
-              valueColor={totalPnlPct >= 0 ? 'text-green-600' : 'text-red-600'}
+              valueColor={totalPnlPct >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}
               sub={totalRealizedPnl !== 0
                 ? `Realized: ${totalRealizedPnl >= 0 ? '+' : ''}${fmt(totalRealizedPnl)}`
                 : undefined}
@@ -231,16 +232,19 @@ export function PortfolioPage() {
       {/* Performance Chart */}
       <PerformanceChart portfolio={portfolio} />
 
+      {/* Risk Dashboard */}
+      <RiskDashboard portfolio={portfolio} livePrices={livePrices} />
+
       {/* Positions Table */}
       {positions.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-10 text-center">
-          <p className="text-gray-400 text-sm">No positions yet. Add a transaction to get started.</p>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-10 text-center">
+          <p className="text-gray-400 dark:text-gray-500 text-sm">No positions yet. Add a transaction to get started.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
                 <tr>
                   <SortHeader label="Stock" sortKey="name" current={sortKey} dir={sortDir} onSort={toggleSort} align="left" />
                   <SortHeader label="Qty" sortKey="qty" current={sortKey} dir={sortDir} onSort={toggleSort} />
@@ -301,46 +305,46 @@ function PositionTableRow({ pos, cmp, currentValue, unrealized, unrealizedPct, i
   isClosed: boolean; isExpanded: boolean; loadingPrices: boolean;
   onToggle: () => void; onRemove: () => void;
 }) {
-  const pnlColor = unrealized >= 0 ? 'text-green-600' : 'text-red-600';
+  const pnlColor = unrealized >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
 
   return (
     <>
       <tr
-        className={`border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${isClosed ? 'opacity-50' : ''}`}
+        className={`border-b border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${isClosed ? 'opacity-50' : ''}`}
         onClick={onToggle}
       >
         <td className="px-3 py-3 text-left">
-          <p className="font-semibold text-gray-900 truncate max-w-[160px]">{pos.stockName}</p>
-          <p className="text-[11px] text-gray-400">{pos.symbol}</p>
+          <p className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[160px]">{pos.stockName}</p>
+          <p className="text-[11px] text-gray-400 dark:text-gray-500">{pos.symbol}</p>
           {isClosed && (
-            <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-gray-200 text-gray-500">Closed</span>
+            <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400">Closed</span>
           )}
         </td>
-        <td className="px-3 py-3 text-right font-mono text-gray-700">{isClosed ? '—' : pos.totalQty}</td>
-        <td className="px-3 py-3 text-right font-mono text-gray-700">{isClosed ? '—' : fmt(pos.avgBuyPrice)}</td>
-        <td className="px-3 py-3 text-right font-mono text-gray-700">
+        <td className="px-3 py-3 text-right font-mono text-gray-700 dark:text-gray-300">{isClosed ? '—' : pos.totalQty}</td>
+        <td className="px-3 py-3 text-right font-mono text-gray-700 dark:text-gray-300">{isClosed ? '—' : fmt(pos.avgBuyPrice)}</td>
+        <td className="px-3 py-3 text-right font-mono text-gray-700 dark:text-gray-300">
           {isClosed ? '—' : cmp ? fmt(cmp) : (loadingPrices ? '...' : '—')}
         </td>
-        <td className="px-3 py-3 text-right font-mono text-gray-700">{isClosed ? '—' : fmt(pos.investedAmount)}</td>
-        <td className="px-3 py-3 text-right font-mono text-gray-700">{isClosed ? '—' : cmp ? fmt(currentValue) : '—'}</td>
-        <td className={`px-3 py-3 text-right font-mono font-semibold ${isClosed ? 'text-gray-400' : pnlColor}`}>
+        <td className="px-3 py-3 text-right font-mono text-gray-700 dark:text-gray-300">{isClosed ? '—' : fmt(pos.investedAmount)}</td>
+        <td className="px-3 py-3 text-right font-mono text-gray-700 dark:text-gray-300">{isClosed ? '—' : cmp ? fmt(currentValue) : '—'}</td>
+        <td className={`px-3 py-3 text-right font-mono font-semibold ${isClosed ? 'text-gray-400 dark:text-gray-500' : pnlColor}`}>
           {isClosed ? '—' : `${unrealized >= 0 ? '+' : ''}${fmt(unrealized)}`}
         </td>
-        <td className={`px-3 py-3 text-right font-mono font-semibold ${isClosed ? 'text-gray-400' : pnlColor}`}>
+        <td className={`px-3 py-3 text-right font-mono font-semibold ${isClosed ? 'text-gray-400 dark:text-gray-500' : pnlColor}`}>
           {isClosed ? '—' : `${unrealizedPct >= 0 ? '+' : ''}${unrealizedPct.toFixed(2)}%`}
         </td>
         <td className="px-3 py-3 text-center">
           <div className="flex items-center gap-2 justify-end">
             <button
               onClick={(e) => { e.stopPropagation(); onRemove(); }}
-              className="text-gray-300 hover:text-red-500 transition-colors"
+              className="text-gray-300 dark:text-gray-600 hover:text-red-500 transition-colors"
               title="Remove position"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
             </button>
-            <span className="text-gray-300 text-xs">{isExpanded ? '▲' : '▼'}</span>
+            <span className="text-gray-300 dark:text-gray-600 text-xs">{isExpanded ? '▲' : '▼'}</span>
           </div>
         </td>
       </tr>
@@ -364,7 +368,7 @@ function SortHeader({ label, sortKey, current, dir, onSort, align = 'right' }: {
     <th
       className={`px-3 py-3 font-medium text-xs uppercase tracking-wider cursor-pointer select-none whitespace-nowrap
         ${align === 'left' ? 'text-left' : 'text-right'}
-        ${isActive ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+        ${isActive ? 'text-blue-600' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400'}`}
       onClick={() => onSort(sortKey)}
     >
       {label}
@@ -379,10 +383,10 @@ function SummaryCard({ label, value, valueColor, sub }: {
   label: string; value: string; valueColor?: string; sub?: string;
 }) {
   return (
-    <div className="bg-gray-50 rounded-xl px-4 py-3 text-center">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">{label}</p>
-      <p className={`text-lg font-bold font-mono ${valueColor ?? 'text-gray-800'}`}>{value}</p>
-      {sub && <p className="text-[11px] text-gray-400 mt-0.5">{sub}</p>}
+    <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl px-4 py-3 text-center">
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">{label}</p>
+      <p className={`text-lg font-bold font-mono ${valueColor ?? 'text-gray-800 dark:text-gray-200'}`}>{value}</p>
+      {sub && <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">{sub}</p>}
     </div>
   );
 }

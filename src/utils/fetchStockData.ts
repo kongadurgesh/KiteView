@@ -78,16 +78,20 @@ export interface StockMeta {
 
 export async function fetchStockMeta(symbol: string): Promise<StockMeta> {
   try {
-    const quoteUrl = `${PROXY_BASE}/api/quote/${encodeURIComponent(symbol)}`;
-    const quoteRes = await fetch(quoteUrl);
-    if (!quoteRes.ok) return { marketCapCr: 0, sector: '', industry: '' };
-    const quoteData = await quoteRes.json();
+    const [quoteRes, profileRes] = await Promise.all([
+      fetch(`${PROXY_BASE}/api/quote/${encodeURIComponent(symbol)}`),
+      fetch(`${PROXY_BASE}/api/profile/${encodeURIComponent(symbol)}`),
+    ]);
+
+    const quoteData = quoteRes.ok ? await quoteRes.json() : null;
+    const profileData = profileRes.ok ? await profileRes.json() : null;
+
     const r = quoteData?.quoteResponse?.result?.[0];
     const mc = r?.marketCap;
     return {
       marketCapCr: mc ? mc / 1e7 : 0,
-      sector: r?.sector ?? '',
-      industry: r?.industry ?? '',
+      sector: profileData?.sector || r?.sector || '',
+      industry: profileData?.industry || r?.industry || '',
     };
   } catch {
     return { marketCapCr: 0, sector: '', industry: '' };

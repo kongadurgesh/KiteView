@@ -64,11 +64,20 @@ export function computeDailyPortfolioValue(
   if (sortedDates.length === 0) return [];
 
   const firstTxnDate = txns[0].date;
-  const relevantDates = sortedDates.filter((d) => d >= firstTxnDate);
+  const lastAvailableDate = sortedDates[sortedDates.length - 1];
+  let relevantDates = sortedDates.filter((d) => d >= firstTxnDate);
 
+  // When all transactions are after the last available market date (e.g. imported
+  // on a weekend/holiday), use the full date range and seed holdings from positions.
   const holdings: Record<string, number> = {};
-  let txnIdx = 0;
+  if (firstTxnDate > lastAvailableDate) {
+    relevantDates = sortedDates;
+    for (const pos of Object.values(portfolio.positions)) {
+      if (pos.totalQty > 0) holdings[pos.symbol] = pos.totalQty;
+    }
+  }
 
+  let txnIdx = 0;
   const series: { date: string; portfolioValue: number }[] = [];
 
   for (const date of relevantDates) {

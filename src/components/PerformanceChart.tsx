@@ -157,8 +157,8 @@ export function PerformanceChart({ portfolio }: Props) {
 
   if (activeSymbols.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 text-center">
-        <p className="text-gray-400 text-sm">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-8 text-center">
+        <p className="text-gray-400 dark:text-gray-500 text-sm">
           Add holdings to see portfolio performance chart.
         </p>
       </div>
@@ -166,10 +166,10 @@ export function PerformanceChart({ portfolio }: Props) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
       <div className="flex flex-col gap-4 mb-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
+          <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider">
             Performance
           </h3>
           <div className="flex flex-wrap items-center gap-2">
@@ -180,18 +180,18 @@ export function PerformanceChart({ portfolio }: Props) {
                 className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
                   timeRange === tr.value
                     ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
                 }`}
               >
                 {tr.label}
               </button>
             ))}
-            <div className="w-px h-5 bg-gray-200 mx-1" />
+            <div className="w-px h-5 bg-gray-200 dark:bg-gray-600 mx-1" />
             <button
               onClick={() =>
                 setViewMode((m) => (m === 'percent' ? 'absolute' : 'percent'))
               }
-              className="px-3 py-1 text-xs font-semibold rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+              className="px-3 py-1 text-xs font-semibold rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
             >
               {viewMode === 'percent' ? '% Return' : 'Absolute'}
             </button>
@@ -200,7 +200,7 @@ export function PerformanceChart({ portfolio }: Props) {
 
         <div className="flex flex-wrap gap-2">
           <span
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800"
           >
             <span
               className="w-2.5 h-2.5 rounded-full"
@@ -216,8 +216,8 @@ export function PerformanceChart({ portfolio }: Props) {
                 onClick={() => toggleIndex(idx.key)}
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors ${
                   active
-                    ? 'bg-gray-50 text-gray-800 border-gray-300'
-                    : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300'
+                    ? 'bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600'
+                    : 'bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500'
                 }`}
               >
                 <span
@@ -235,11 +235,11 @@ export function PerformanceChart({ portfolio }: Props) {
 
       {loading ? (
         <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin" />
         </div>
       ) : chartData.length === 0 ? (
         <div className="flex items-center justify-center h-64">
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-400 dark:text-gray-500 text-sm">
             No data available for the selected range.
           </p>
         </div>
@@ -288,8 +288,10 @@ export function PerformanceChart({ portfolio }: Props) {
             <Tooltip
               contentStyle={{
                 borderRadius: '12px',
-                border: '1px solid #e5e7eb',
+                border: `1px solid ${document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'}`,
                 fontSize: 12,
+                backgroundColor: document.documentElement.classList.contains('dark') ? '#1f2937' : '#ffffff',
+                color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#111827',
                 boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
               }}
               formatter={(value, name) => {
