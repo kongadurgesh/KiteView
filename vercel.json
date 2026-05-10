@@ -4,7 +4,10 @@
   "routes": [
     { "src": "/api/chart/([^/]+)", "dest": "/api/chart/[symbol].js?symbol=$1" },
     { "src": "/api/quote/([^/]+)", "dest": "/api/quote/[symbol].js?symbol=$1" },
+    { "src": "/api/profile/([^/]+)", "dest": "/api/profile/[symbol].js?symbol=$1" },
     { "src": "/api/search", "dest": "/api/search.js" },
+    { "src": "/api/screener-list", "dest": "/api/screener-list.js" },
+    { "src": "/api/screener-scan", "dest": "/api/screener-scan.js" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]

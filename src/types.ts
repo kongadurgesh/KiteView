@@ -52,3 +52,9 @@ export interface Position {
 export interface Portfolio {
   positions: Record<string, Position>;
 }
+
+export interface PortfolioChartPoint {
+  date: string;
+  portfolioValue: number;
+  [indexKey: string]: number | string;
+}

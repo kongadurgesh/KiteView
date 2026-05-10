@@ -112,37 +112,37 @@ export function AddTransactionModal({ onAdd, onClose, maxSellQty = {} }: AddTran
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md mx-4 p-6">
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-lg font-bold text-gray-900">Add Transaction</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Add Transaction</h3>
+          <button onClick={onClose} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none">&times;</button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Symbol */}
           <div ref={wrapperRef} className="relative">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Symbol</label>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Symbol</label>
             <input
               type="text"
               value={symbolInput}
               onChange={handleSymbolChange}
               onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
               placeholder="e.g. RELIANCE, TCS"
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             {showSuggestions && (
-              <ul className="absolute z-10 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+              <ul className="absolute z-10 left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                 {suggestions.map((s) => (
                   <li
                     key={s.symbol}
-                    className="px-3 py-2 cursor-pointer hover:bg-blue-50 flex justify-between text-sm"
+                    className="px-3 py-2 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 flex justify-between text-sm"
                     onMouseDown={() => pickSuggestion(s)}
                   >
                     <div>
-                      <span className="font-semibold text-gray-800">{s.symbol}</span>
-                      <span className="ml-2 text-gray-400 text-xs">{s.shortname}</span>
+                      <span className="font-semibold text-gray-800 dark:text-gray-200">{s.symbol}</span>
+                      <span className="ml-2 text-gray-400 dark:text-gray-500 text-xs">{s.shortname}</span>
                     </div>
-                    <span className="text-xs text-gray-400">{s.exchange === 'NSI' ? 'NSE' : 'BSE'}</span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500">{s.exchange === 'NSI' ? 'NSE' : 'BSE'}</span>
                   </li>
                 ))}
               </ul>
@@ -151,7 +151,7 @@ export function AddTransactionModal({ onAdd, onClose, maxSellQty = {} }: AddTran
 
           {/* BUY / SELL toggle */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Type</label>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Type</label>
             <div className="flex gap-2">
               {(['BUY', 'SELL'] as const).map((t) => (
                 <button
@@ -163,7 +163,7 @@ export function AddTransactionModal({ onAdd, onClose, maxSellQty = {} }: AddTran
                       ? t === 'BUY'
                         ? 'bg-green-600 text-white'
                         : 'bg-red-600 text-white'
-                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
                   }`}
                 >
                   {t}
@@ -175,41 +175,41 @@ export function AddTransactionModal({ onAdd, onClose, maxSellQty = {} }: AddTran
           {/* Qty + Price */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Quantity</label>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Quantity</label>
               <input
                 type="number"
                 min="1"
                 value={qty}
                 onChange={(e) => setQty(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Price / Share</label>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Price / Share</label>
               <input
                 type="number"
                 min="0.01"
                 step="0.01"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
 
           {/* Date */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Date</label>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Date</label>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           {error && (
-            <p className="text-sm text-red-600 font-medium">{error}</p>
+            <p className="text-sm text-red-600 dark:text-red-400 font-medium">{error}</p>
           )}
 
           <button

@@ -16,9 +16,9 @@ interface ResultCardProps {
 }
 
 function getCapCategory(mcCr: number): { label: string; color: string } {
-  if (mcCr >= 20000) return { label: "Large Cap", color: "text-blue-700 bg-blue-50" };
-  if (mcCr >= 5000) return { label: "Mid Cap", color: "text-teal-700 bg-teal-50" };
-  return { label: "Small Cap", color: "text-gray-600 bg-gray-100" };
+  if (mcCr >= 20000) return { label: "Large Cap", color: "text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30" };
+  if (mcCr >= 5000) return { label: "Mid Cap", color: "text-teal-700 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30" };
+  return { label: "Small Cap", color: "text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700" };
 }
 
 function formatMarketCap(mcCr: number): string {
@@ -53,15 +53,15 @@ export function ResultCard({
   return (
     <div className="w-full max-w-5xl mt-10 space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">{stockName}</h2>
-            <p className="text-sm text-gray-400 mt-0.5">{symbol}</p>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{stockName}</h2>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">{symbol}</p>
           </div>
           <div className="flex flex-wrap items-center gap-4">
             <Indicator label="Pattern">
-              <span className="text-xs font-semibold uppercase px-2.5 py-1 rounded-full bg-purple-50 text-purple-700">
+              <span className="text-xs font-semibold uppercase px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
                 {match.patternName}
               </span>
             </Indicator>
@@ -84,13 +84,13 @@ export function ResultCard({
               </span>
             </Indicator>
             <Indicator label="Pattern Date">
-              <span className="text-xs font-medium text-gray-600 bg-gray-100 px-2.5 py-1 rounded-full">
+              <span className="text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2.5 py-1 rounded-full">
                 {match.candle3.date}
               </span>
             </Indicator>
             {(sector || industry) && (
               <Indicator label="Sector">
-                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-700">
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300">
                   {[industry, sector].filter(Boolean).join(' · ')}
                 </span>
               </Indicator>
@@ -113,28 +113,28 @@ export function ResultCard({
           sub={`0.98 × ${fmt(match.candle3.close)}`}
           accent="green"
         />
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 text-center">
-          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-5 text-center">
+          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">
             Current Price
           </p>
-          <p className="text-3xl font-bold text-gray-900 font-mono">{fmt(currentPrice)}</p>
+          <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 font-mono">{fmt(currentPrice)}</p>
           <p className={`text-sm font-semibold mt-2 ${isAbove ? "text-green-600" : "text-red-500"}`}>
             {isAbove ? "+" : ""}
             {priceDiffPct}%
-            <span className="font-normal text-gray-400 text-xs ml-1">from buy price</span>
+            <span className="font-normal text-gray-400 dark:text-gray-500 text-xs ml-1">from buy price</span>
           </p>
         </div>
       </div>
 
       {/* Stop Loss */}
-      <div className="bg-white rounded-2xl border border-red-200 shadow-sm p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-red-200 dark:border-red-800 shadow-sm p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Stop Loss %</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Stop Loss %</p>
           <select
             value={slPct}
             onChange={(e) => setSlPct(Number(e.target.value))}
-            className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700
-                       focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent cursor-pointer"
+            className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200
+                       focus:outline-none focus:ring-2 focus:ring-red-400 dark:focus:ring-red-500 focus:border-transparent cursor-pointer"
           >
             <option value={5}>5%</option>
             <option value={10}>10%</option>
@@ -143,9 +143,9 @@ export function ResultCard({
           </select>
         </div>
         <div className="text-center sm:text-right">
-          <p className="text-xs font-semibold uppercase tracking-wider text-red-400 mb-1">Stop Loss Price</p>
-          <p className="text-2xl font-bold text-red-600 font-mono">{fmt(stopLossPrice)}</p>
-          <p className="text-xs text-red-400 mt-0.5">
+          <p className="text-xs font-semibold uppercase tracking-wider text-red-400 dark:text-red-500 mb-1">Stop Loss Price</p>
+          <p className="text-2xl font-bold text-red-600 dark:text-red-400 font-mono">{fmt(stopLossPrice)}</p>
+          <p className="text-xs text-red-400 dark:text-red-500 mt-0.5">
             {(1 - slPct / 100).toFixed(3)} &times; {fmt(match.buyPrice)} (Buy Price)
           </p>
         </div>
@@ -177,7 +177,7 @@ export function ResultCard({
       </div>
 
       {/* Quantity Table */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
         <QuantityTable buyPrice={match.buyPrice} />
       </div>
     </div>
@@ -188,9 +188,9 @@ function PriceCard({ label, value, sub, accent }: {
   label: string; value: string; sub: string; accent: "amber" | "green";
 }) {
   const colors = accent === "amber"
-    ? "border-amber-200 bg-amber-50 text-amber-900"
-    : "border-green-200 bg-green-50 text-green-900";
-  const subColor = accent === "amber" ? "text-amber-600" : "text-green-600";
+    ? "border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/30 text-amber-900 dark:text-amber-100"
+    : "border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/30 text-green-900 dark:text-green-100";
+  const subColor = accent === "amber" ? "text-amber-600 dark:text-amber-400" : "text-green-600 dark:text-green-400";
 
   return (
     <div className={`rounded-2xl border shadow-sm p-5 text-center ${colors}`}>
@@ -205,10 +205,10 @@ function StatChip({ label, value, note }: {
   label: string; value: string; note?: string;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-4 py-3 text-center">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">{label}</p>
-      <p className="text-lg font-bold text-gray-800 font-mono">{value}</p>
-      {note && <p className="text-[11px] text-gray-400 mt-0.5">{note}</p>}
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm px-4 py-3 text-center">
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">{label}</p>
+      <p className="text-lg font-bold text-gray-800 dark:text-gray-200 font-mono">{value}</p>
+      {note && <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">{note}</p>}
     </div>
   );
 }
@@ -216,7 +216,7 @@ function StatChip({ label, value, note }: {
 function Indicator({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col items-center gap-1">
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">{label}</span>
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">{label}</span>
       {children}
     </div>
   );
