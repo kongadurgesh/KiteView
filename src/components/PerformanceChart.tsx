@@ -56,9 +56,10 @@ export function PerformanceChart({ portfolio }: Props) {
   >({});
 
   const positions = getPositions(portfolio);
-  const activeSymbols = positions
-    .filter((p) => p.totalQty > 0)
-    .map((p) => p.symbol);
+  const activeSymbols: string[] = [];
+  for (const p of positions) {
+    if (p.totalQty > 0) activeSymbols.push(p.symbol);
+  }
 
   const symbolsKey = activeSymbols.sort().join(',');
   const indicesKey = Array.from(selectedIndices).sort().join(',');
@@ -211,7 +212,7 @@ export function PerformanceChart({ portfolio }: Props) {
             className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800"
           >
             <span
-              className="w-2.5 h-2.5 rounded-full"
+              className="size-2.5 rounded-full"
               style={{ backgroundColor: PORTFOLIO_COLOR }}
             />
             My Portfolio
@@ -229,7 +230,7 @@ export function PerformanceChart({ portfolio }: Props) {
                 }`}
               >
                 <span
-                  className="w-2.5 h-2.5 rounded-full"
+                  className="size-2.5 rounded-full"
                   style={{
                     backgroundColor: active ? idx.color : '#d1d5db',
                   }}
@@ -243,7 +244,7 @@ export function PerformanceChart({ portfolio }: Props) {
 
       {loading ? (
         <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin" />
+          <div className="size-8 border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin" />
         </div>
       ) : chartData.length === 0 ? (
         <div className="flex items-center justify-center h-64">

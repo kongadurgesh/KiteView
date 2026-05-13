@@ -267,11 +267,11 @@ export function ScreenerPage({ onViewStock }: Props) {
                     className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
                     onClick={() => onViewStock?.(r.symbol)}
                   >
-                    <td className="px-3 py-3 text-left">
+                    <td className="p-3 text-left">
                       <p className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[180px]">{r.shortName}</p>
                       <p className="text-[11px] text-gray-400 dark:text-gray-500">{r.symbol}</p>
                     </td>
-                    <td className="px-3 py-3 text-right">
+                    <td className="p-3 text-right">
                       <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-bold uppercase ${
                         r.match.patternName === 'Bullish Harami'
                           ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
@@ -280,39 +280,39 @@ export function ScreenerPage({ onViewStock }: Props) {
                         {r.match.patternName === 'Bullish Harami' ? 'Harami' : 'Engulfing'}
                       </span>
                     </td>
-                    <td className="px-3 py-3 text-right font-mono text-gray-700 dark:text-gray-300">
+                    <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">
                       {r.currentPrice ? fmt(r.currentPrice) : '—'}
                     </td>
                     {showBuyPrices && (
                       <>
-                        <td className="px-3 py-3 text-right font-mono text-gray-700 dark:text-gray-300">
+                        <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">
                           {fmt(r.match.buyPrice)}
                         </td>
-                        <td className="px-3 py-3 text-right font-mono text-gray-700 dark:text-gray-300">
+                        <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">
                           {fmt(r.match.buyTriggerPrice)}
                         </td>
                       </>
                     )}
-                    <td className="px-3 py-3 text-right font-mono text-gray-700 dark:text-gray-300 text-xs">
+                    <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300 text-xs">
                       {r.fiftyTwoWeekLow ? fmt(r.fiftyTwoWeekLow) : '—'}
                     </td>
-                    <td className={`px-3 py-3 text-right font-mono text-xs font-semibold ${
+                    <td className={`p-3 text-right font-mono text-xs font-semibold ${
                       r.fiftyTwoWeekLow && r.currentPrice > r.fiftyTwoWeekLow ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                     }`}>
                       {distPct(r.currentPrice, r.fiftyTwoWeekLow)}
                     </td>
-                    <td className="px-3 py-3 text-right font-mono text-gray-700 dark:text-gray-300 text-xs">
+                    <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300 text-xs">
                       {r.fiftyTwoWeekHigh ? fmt(r.fiftyTwoWeekHigh) : '—'}
                     </td>
-                    <td className={`px-3 py-3 text-right font-mono text-xs font-semibold ${
+                    <td className={`p-3 text-right font-mono text-xs font-semibold ${
                       r.fiftyTwoWeekHigh && r.currentPrice >= r.fiftyTwoWeekHigh ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                     }`}>
                       {distPct(r.currentPrice, r.fiftyTwoWeekHigh)}
                     </td>
-                    <td className="px-3 py-3 text-right font-mono text-gray-700 dark:text-gray-300 text-xs">
+                    <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300 text-xs">
                       {r.allTimeHigh ? fmt(r.allTimeHigh) : '—'}
                     </td>
-                    <td className="px-3 py-3 text-right font-mono text-gray-600 dark:text-gray-400 text-xs">
+                    <td className="p-3 text-right font-mono text-gray-600 dark:text-gray-400 text-xs">
                       {r.marketCapCr ? formatMcap(r.marketCapCr) : '—'}
                     </td>
                   </tr>
@@ -341,7 +341,7 @@ function SortHeader({ label, k, current, dir, onSort, align = 'right' }: {
   const isActive = current === k;
   return (
     <th
-      className={`px-3 py-3 font-medium text-xs uppercase tracking-wider cursor-pointer select-none whitespace-nowrap
+      className={`p-3 font-medium text-xs uppercase tracking-wider cursor-pointer select-none whitespace-nowrap
         ${align === 'left' ? 'text-left' : 'text-right'}
         ${isActive ? 'text-blue-600' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400'}`}
       onClick={() => onSort(k)}

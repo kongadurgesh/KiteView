@@ -9,7 +9,7 @@ function fmt(n: number): string {
 }
 
 export function TransactionHistory({ transactions }: TransactionHistoryProps) {
-  const sorted = [...transactions].sort((a, b) => b.createdAt - a.createdAt);
+  const sorted = transactions.toSorted((a, b) => b.createdAt - a.createdAt);
 
   return (
     <div className="border-t border-gray-100 dark:border-gray-700 mt-2">

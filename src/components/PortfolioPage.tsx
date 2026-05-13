@@ -277,7 +277,7 @@ export function PortfolioPage() {
                   <SortHeader label="Current" sortKey="current" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="P&L" sortKey="pnl" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="P&L %" sortKey="pnlPct" current={sortKey} dir={sortDir} onSort={toggleSort} />
-                  <th className="px-3 py-3 w-16" />
+                  <th className="p-3 w-16" />
                 </tr>
               </thead>
               <tbody>
@@ -336,27 +336,27 @@ function PositionTableRow({ pos, cmp, currentValue, unrealized, unrealizedPct, i
         className={`border-b border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${isClosed ? 'opacity-50' : ''}`}
         onClick={onToggle}
       >
-        <td className="px-3 py-3 text-left">
+        <td className="p-3 text-left">
           <p className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[160px]">{pos.stockName}</p>
           <p className="text-[11px] text-gray-400 dark:text-gray-500">{pos.symbol}</p>
           {isClosed && (
             <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400">Closed</span>
           )}
         </td>
-        <td className="px-3 py-3 text-right font-mono text-gray-700 dark:text-gray-300">{isClosed ? '—' : pos.totalQty}</td>
-        <td className="px-3 py-3 text-right font-mono text-gray-700 dark:text-gray-300">{isClosed ? '—' : fmt(pos.avgBuyPrice)}</td>
-        <td className="px-3 py-3 text-right font-mono text-gray-700 dark:text-gray-300">
+        <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">{isClosed ? '—' : pos.totalQty}</td>
+        <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">{isClosed ? '—' : fmt(pos.avgBuyPrice)}</td>
+        <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">
           {isClosed ? '—' : cmp ? fmt(cmp) : (loadingPrices ? '...' : '—')}
         </td>
-        <td className="px-3 py-3 text-right font-mono text-gray-700 dark:text-gray-300">{isClosed ? '—' : fmt(pos.investedAmount)}</td>
-        <td className="px-3 py-3 text-right font-mono text-gray-700 dark:text-gray-300">{isClosed ? '—' : cmp ? fmt(currentValue) : '—'}</td>
-        <td className={`px-3 py-3 text-right font-mono font-semibold ${isClosed ? 'text-gray-400 dark:text-gray-500' : pnlColor}`}>
+        <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">{isClosed ? '—' : fmt(pos.investedAmount)}</td>
+        <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">{isClosed ? '—' : cmp ? fmt(currentValue) : '—'}</td>
+        <td className={`p-3 text-right font-mono font-semibold ${isClosed ? 'text-gray-400 dark:text-gray-500' : pnlColor}`}>
           {isClosed ? '—' : `${unrealized >= 0 ? '+' : ''}${fmt(unrealized)}`}
         </td>
-        <td className={`px-3 py-3 text-right font-mono font-semibold ${isClosed ? 'text-gray-400 dark:text-gray-500' : pnlColor}`}>
+        <td className={`p-3 text-right font-mono font-semibold ${isClosed ? 'text-gray-400 dark:text-gray-500' : pnlColor}`}>
           {isClosed ? '—' : `${unrealizedPct >= 0 ? '+' : ''}${unrealizedPct.toFixed(2)}%`}
         </td>
-        <td className="px-3 py-3 text-center">
+        <td className="p-3 text-center">
           <div className="flex items-center gap-2 justify-end">
             <button
               onClick={(e) => { e.stopPropagation(); onRemove(); }}
@@ -389,7 +389,7 @@ function SortHeader({ label, sortKey, current, dir, onSort, align = 'right' }: {
   const isActive = current === sortKey;
   return (
     <th
-      className={`px-3 py-3 font-medium text-xs uppercase tracking-wider cursor-pointer select-none whitespace-nowrap
+      className={`p-3 font-medium text-xs uppercase tracking-wider cursor-pointer select-none whitespace-nowrap
         ${align === 'left' ? 'text-left' : 'text-right'}
         ${isActive ? 'text-blue-600' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400'}`}
       onClick={() => onSort(sortKey)}
