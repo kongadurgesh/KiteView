@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Portfolio, Position, Transaction } from '../types';
 import { loadPortfolio, savePortfolio, addTransaction, getPositions, removePosition, clearPortfolio } from '../utils/portfolio';
-import { fetchBatchQuotes } from '../utils/fetchStockData';
+import { fetchBatchQuotesDetailed } from '../utils/fetchStockData';
 import { AddTransactionModal } from './AddTransactionModal';
 import { ImportExcelModal } from './ImportExcelModal';
 import { TransactionHistory } from './TransactionHistory';
@@ -51,6 +51,7 @@ function getSortValue(row: PositionRow, key: SortKey): number | string {
 export function PortfolioPage() {
   const [portfolio, setPortfolio] = useState<Portfolio>(loadPortfolio);
   const [livePrices, setLivePrices] = useState<Record<string, number>>({});
+  const [livePrevClose, setLivePrevClose] = useState<Record<string, number>>({});
   const [loadingPrices, setLoadingPrices] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showImport, setShowImport] = useState(false);
@@ -66,8 +67,15 @@ export function PortfolioPage() {
     if (symbols.length === 0) return;
     setLoadingPrices(true);
     try {
-      const prices = await fetchBatchQuotes(symbols);
+      const detailed = await fetchBatchQuotesDetailed(symbols);
+      const prices: Record<string, number> = {};
+      const prevClose: Record<string, number> = {};
+      for (const [sym, data] of Object.entries(detailed)) {
+        prices[sym] = data.price;
+        prevClose[sym] = data.previousClose;
+      }
       setLivePrices(prices);
+      setLivePrevClose(prevClose);
     } finally {
       setLoadingPrices(false);
     }
@@ -172,6 +180,18 @@ export function PortfolioPage() {
     ? ((totalUnrealizedPnl + totalRealizedPnl) / totalInvested) * 100
     : 0;
 
+  let todayPnl = 0;
+  let totalPrevValue = 0;
+  for (const p of activePositions) {
+    const price = livePrices[p.symbol];
+    const prevClose = livePrevClose[p.symbol];
+    if (price && prevClose) {
+      todayPnl += (price - prevClose) * p.totalQty;
+      totalPrevValue += prevClose * p.totalQty;
+    }
+  }
+  const todayPnlPct = totalPrevValue > 0 ? (todayPnl / totalPrevValue) * 100 : 0;
+
   return (
     <div className="w-full max-w-6xl mt-10 space-y-6">
       {/* Summary */}
@@ -210,21 +230,20 @@ export function PortfolioPage() {
         </div>
 
         {activePositions.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <SummaryCard label="Invested" value={fmt(totalInvested)} />
             <SummaryCard label="Current Value" value={fmt(totalCurrentValue)} />
             <SummaryCard
               label="Total P&L"
               value={`${totalUnrealizedPnl >= 0 ? '+' : ''}${fmt(totalUnrealizedPnl)}`}
               valueColor={totalUnrealizedPnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}
+              sub={`${totalPnlPct >= 0 ? '+' : ''}${totalPnlPct.toFixed(2)}%${totalRealizedPnl !== 0 ? ` · Realized: ${totalRealizedPnl >= 0 ? '+' : ''}${fmt(totalRealizedPnl)}` : ''}`}
             />
             <SummaryCard
-              label="Total P&L %"
-              value={`${totalPnlPct >= 0 ? '+' : ''}${totalPnlPct.toFixed(2)}%`}
-              valueColor={totalPnlPct >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}
-              sub={totalRealizedPnl !== 0
-                ? `Realized: ${totalRealizedPnl >= 0 ? '+' : ''}${fmt(totalRealizedPnl)}`
-                : undefined}
+              label="Day's P&L"
+              value={`${todayPnl >= 0 ? '+' : ''}${fmt(todayPnl)}`}
+              valueColor={todayPnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}
+              sub={`${todayPnlPct >= 0 ? '+' : ''}${todayPnlPct.toFixed(2)}%`}
             />
           </div>
         )}

@@ -13,7 +13,6 @@ import { Portfolio } from '../types';
 import {
   fetchHistoricalPrices,
   computeDailyPortfolioValue,
-  normalizeToPercent,
 } from '../utils/portfolioChart';
 import { getPositions } from '../utils/portfolio';
 
@@ -104,50 +103,59 @@ export function PerformanceChart({ portfolio }: Props) {
   };
 
   const chartData = useMemo(() => {
-    if (portfolioSeries.length === 0) return [];
+    const allDates = new Set<string>();
+    for (const p of portfolioSeries) allDates.add(p.date);
+    for (const key of Object.keys(indexSeries)) {
+      for (const d of Object.keys(indexSeries[key])) allDates.add(d);
+    }
+    const dates = Array.from(allDates).sort();
+    if (dates.length === 0) return [];
 
-    const dates = portfolioSeries.map((p) => p.date);
-    const portfolioValues = portfolioSeries.map((p) => p.portfolioValue);
-
+    const portfolioMap = new Map(
+      portfolioSeries.map((p) => [p.date, p.portfolioValue]),
+    );
     const activeIndices = INDICES.filter((idx) => selectedIndices.has(idx.key));
 
     if (viewMode === 'percent') {
-      const pctPortfolio = normalizeToPercent(portfolioValues);
+      const pBase =
+        portfolioSeries.length > 0 ? portfolioSeries[0].portfolioValue : 1;
 
-      const indexPcts: Record<string, number[]> = {};
+      const indexBases: Record<string, number> = {};
       for (const idx of activeIndices) {
-        const raw = dates.map((d) => indexSeries[idx.key]?.[d] ?? null);
-        const firstValid = raw.findIndex((v) => v !== null);
-        if (firstValid === -1) {
-          indexPcts[idx.key] = dates.map(() => 0);
-          continue;
-        }
-        const base = raw[firstValid]!;
-        indexPcts[idx.key] = raw.map((v, i) => {
-          if (v === null || i < firstValid) return 0;
-          return parseFloat((((v - base) / base) * 100).toFixed(2));
-        });
+        const firstDate = dates.find(
+          (d) => indexSeries[idx.key]?.[d] != null,
+        );
+        indexBases[idx.key] = firstDate ? indexSeries[idx.key][firstDate] : 1;
       }
 
-      return dates.map((date, i) => {
-        const point: Record<string, number | string> = {
-          date,
-          portfolio: pctPortfolio[i],
-        };
+      return dates.map((date) => {
+        const point: Record<string, number | string | undefined> = { date };
+        const pVal = portfolioMap.get(date);
+        if (pVal != null && pBase !== 0) {
+          point.portfolio = parseFloat(
+            (((pVal - pBase) / pBase) * 100).toFixed(2),
+          );
+        }
         for (const idx of activeIndices) {
-          point[idx.key] = indexPcts[idx.key][i];
+          const val = indexSeries[idx.key]?.[date];
+          const base = indexBases[idx.key];
+          if (val != null && base !== 0) {
+            point[idx.key] = parseFloat(
+              (((val - base) / base) * 100).toFixed(2),
+            );
+          }
         }
         return point;
       });
     }
 
-    return dates.map((date, i) => {
-      const point: Record<string, number | string> = {
-        date,
-        portfolio: portfolioValues[i],
-      };
+    return dates.map((date) => {
+      const point: Record<string, number | string | undefined> = { date };
+      const pVal = portfolioMap.get(date);
+      if (pVal != null) point.portfolio = pVal;
       for (const idx of activeIndices) {
-        point[idx.key] = indexSeries[idx.key]?.[date] ?? 0;
+        const val = indexSeries[idx.key]?.[date];
+        if (val != null) point[idx.key] = val;
       }
       return point;
     });
@@ -327,13 +335,14 @@ export function PerformanceChart({ portfolio }: Props) {
               wrapperStyle={{ fontSize: 12 }}
             />
             <Line
-              yAxisId={viewMode === 'absolute' ? 'left' : 'left'}
+              yAxisId="left"
               type="monotone"
               dataKey="portfolio"
               stroke={PORTFOLIO_COLOR}
               strokeWidth={2.5}
               dot={false}
               activeDot={{ r: 4 }}
+              connectNulls
             />
             {INDICES.filter((idx) => selectedIndices.has(idx.key)).map(
               (idx) => (
@@ -349,6 +358,7 @@ export function PerformanceChart({ portfolio }: Props) {
                   dot={false}
                   activeDot={{ r: 3 }}
                   strokeDasharray="5 3"
+                  connectNulls
                 />
               ),
             )}
