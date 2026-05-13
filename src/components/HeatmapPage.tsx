@@ -28,14 +28,17 @@ const INDICES: IndexOption[] = [
 
 function heatColor(pct: number): string {
   const c = Math.max(-4, Math.min(4, pct));
-  const t = Math.min(Math.abs(c) / 2.5, 1);
-  const nr = 55, ng = 65, nb = 81;
+  const t = Math.min(Math.abs(c) / 3, 1);
+  // Neutral: rgb(198, 195, 195)
+  const nr = 198, ng = 195, nb = 195;
 
   if (c > 0) {
-    return `rgb(${Math.round(nr + (15 - nr) * t)},${Math.round(ng + (148 - ng) * t)},${Math.round(nb + (60 - nb) * t)})`;
+    // Green target: rgb(0, 144, 74)
+    return `rgb(${Math.round(nr + (0 - nr) * t)},${Math.round(ng + (144 - ng) * t)},${Math.round(nb + (74 - nb) * t)})`;
   }
   if (c < 0) {
-    return `rgb(${Math.round(nr + (195 - nr) * t)},${Math.round(ng + (28 - ng) * t)},${Math.round(nb + (28 - nb) * t)})`;
+    // Red target: rgb(204, 50, 56)
+    return `rgb(${Math.round(nr + (204 - nr) * t)},${Math.round(ng + (50 - ng) * t)},${Math.round(nb + (56 - nb) * t)})`;
   }
   return `rgb(${nr},${ng},${nb})`;
 }
@@ -127,7 +130,6 @@ function squarify(items: QuoteFull[], width: number, height: number): TreemapRec
 export function HeatmapPage({ onViewStock }: Props) {
   const [allStocks, setAllStocks] = useState<ScreenerStock[]>([]);
   const [selectedIndex, setSelectedIndex] = useState('nifty50');
-  const [sectorFilter, setSectorFilter] = useState('All');
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState({ loaded: 0, total: 0 });
   const [error, setError] = useState<string | null>(null);
@@ -199,32 +201,20 @@ export function HeatmapPage({ onViewStock }: Props) {
     loadQuotes(stocks, true);
   };
 
-  useEffect(() => { setSectorFilter('All'); }, [selectedIndex]);
-
-  const sectors = useMemo(() => {
-    const s = new Set(displayQuotes.map((q) => q.sector).filter(Boolean));
-    return ['All', ...Array.from(s).sort()];
-  }, [displayQuotes]);
-
-  const filtered = useMemo(() => {
-    if (sectorFilter === 'All') return displayQuotes;
-    return displayQuotes.filter((q) => q.sector === sectorFilter);
-  }, [displayQuotes, sectorFilter]);
-
   const CW = 1600;
   const CH = useMemo(() => {
-    const n = filtered.length;
+    const n = displayQuotes.length;
     if (n <= 30) return 750;
     if (n <= 50) return 850;
     if (n <= 100) return 800;
     return 700;
-  }, [filtered.length]);
+  }, [displayQuotes.length]);
 
-  const rects = useMemo(() => squarify(filtered, CW, CH), [filtered, CH]);
+  const rects = useMemo(() => squarify(displayQuotes, CW, CH), [displayQuotes, CH]);
 
-  const gainers = filtered.filter((q) => q.regularMarketChangePercent > 0).length;
-  const losers = filtered.filter((q) => q.regularMarketChangePercent < 0).length;
-  const unchanged = filtered.length - gainers - losers;
+  const gainers = displayQuotes.filter((q) => q.regularMarketChangePercent > 0).length;
+  const losers = displayQuotes.filter((q) => q.regularMarketChangePercent < 0).length;
+  const unchanged = displayQuotes.length - gainers - losers;
 
   const progressPct = progress.total > 0 ? (progress.loaded / progress.total) * 100 : 0;
 
@@ -267,25 +257,12 @@ export function HeatmapPage({ onViewStock }: Props) {
               </select>
             </div>
 
-            <div className="flex items-center gap-2">
-              <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Sector</label>
-              <select
-                value={sectorFilter}
-                onChange={(e) => setSectorFilter(e.target.value)}
-                className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {sectors.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </div>
-
             <div className="h-5 w-px bg-gray-200 dark:bg-gray-700 hidden sm:block" />
 
             {/* Stats */}
-            {!loading && filtered.length > 0 && (
+            {!loading && displayQuotes.length > 0 && (
               <div className="flex items-center gap-3 text-xs font-medium">
-                <span className="text-gray-500 dark:text-gray-400">{filtered.length} stocks</span>
+                <span className="text-gray-500 dark:text-gray-400">{displayQuotes.length} stocks</span>
                 <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                   <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L10 6.414l-3.293 3.293a1 1 0 01-1.414 0z" clipRule="evenodd"/></svg>
                   {gainers}
@@ -345,7 +322,7 @@ export function HeatmapPage({ onViewStock }: Props) {
       )}
 
       {/* Heatmap treemap */}
-      {filtered.length > 0 && (
+      {displayQuotes.length > 0 && (
         <div className="bg-gray-900 dark:bg-gray-950 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg overflow-hidden p-1.5">
           <div className="relative w-full" style={{ paddingBottom: `${(CH / CW) * 100}%` }}>
             <div className="absolute inset-0">
@@ -360,11 +337,15 @@ export function HeatmapPage({ onViewStock }: Props) {
                 const showPrice = sizeFactor > 5;
                 const fontSize = sizeFactor > 7 ? 15 : sizeFactor > 5 ? 13 : sizeFactor > 3 ? 11 : sizeFactor > 2 ? 9 : 7;
                 const changePct = r.quote.regularMarketChangePercent;
+                const intensity = Math.min(Math.abs(changePct) / 1.5, 1);
+                const useDarkText = intensity < 0.4;
+                const textColor = useDarkText ? '#1f2937' : '#ffffff';
+                const shadowColor = useDarkText ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.5)';
 
                 return (
                   <div
                     key={r.quote.symbol}
-                    className="absolute overflow-hidden cursor-pointer flex flex-col items-center justify-center text-white transition-all duration-150 hover:brightness-125 hover:z-10"
+                    className="absolute overflow-hidden cursor-pointer flex flex-col items-center justify-center transition-all duration-150 hover:brightness-110 hover:z-10"
                     style={{
                       left: `calc(${pctX}% + 1px)`,
                       top: `calc(${pctY}% + 1px)`,
@@ -373,7 +354,8 @@ export function HeatmapPage({ onViewStock }: Props) {
                       backgroundColor: heatColor(changePct),
                       borderRadius: '3px',
                       fontSize: `${fontSize}px`,
-                      textShadow: '0 1px 3px rgba(0,0,0,0.6)',
+                      color: textColor,
+                      textShadow: `0 1px 2px ${shadowColor}`,
                     }}
                     onClick={() => onViewStock?.(r.quote.symbol)}
                     title={`${r.quote.shortName}\n${r.quote.symbol}\n${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}%\n₹${r.quote.regularMarketPrice.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`}
@@ -384,12 +366,12 @@ export function HeatmapPage({ onViewStock }: Props) {
                       </span>
                     )}
                     {showChange && (
-                      <span className={`font-semibold leading-tight ${changePct >= 0 ? 'text-green-200' : 'text-red-200'}`} style={{ fontSize: `${Math.max(fontSize - 2, 7)}px` }}>
+                      <span className="font-semibold leading-tight opacity-90" style={{ fontSize: `${Math.max(fontSize - 2, 7)}px` }}>
                         {changePct >= 0 ? '+' : ''}{changePct.toFixed(2)}%
                       </span>
                     )}
                     {showPrice && (
-                      <span className="text-white/70 leading-tight mt-0.5" style={{ fontSize: `${Math.max(fontSize - 3, 7)}px` }}>
+                      <span className="leading-tight mt-0.5 opacity-70" style={{ fontSize: `${Math.max(fontSize - 3, 7)}px` }}>
                         {fmtPrice(r.quote.regularMarketPrice)}
                       </span>
                     )}
@@ -401,7 +383,7 @@ export function HeatmapPage({ onViewStock }: Props) {
         </div>
       )}
 
-      {!loading && filtered.length === 0 && !error && (
+      {!loading && displayQuotes.length === 0 && !error && (
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-12 text-center">
           <p className="text-gray-400 dark:text-gray-500 text-sm">No data available. Click Refresh to load.</p>
         </div>

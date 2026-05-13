@@ -59,14 +59,17 @@ export function computeDailyPortfolioValue(
   const sortedDates = Array.from(allDates).sort();
   if (sortedDates.length === 0) return [];
 
+  const lastKnownPrice: Record<string, number> = {};
   const series: { date: string; portfolioValue: number }[] = [];
   for (const date of sortedDates) {
     let value = 0;
     let hasAnyPrice = false;
     for (const [sym, qty] of Object.entries(holdings)) {
       const price = historicalPrices[sym]?.[date];
-      if (price != null) {
-        value += qty * price;
+      if (price != null) lastKnownPrice[sym] = price;
+      const usePrice = price ?? lastKnownPrice[sym];
+      if (usePrice != null) {
+        value += qty * usePrice;
         hasAnyPrice = true;
       }
     }
