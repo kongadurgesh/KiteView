@@ -1,25 +1,51 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { fetchScreenerList } from '../utils/screener';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { fetchScreenerList, ScreenerStock } from '../utils/screener';
 import { fetchBatchQuotesFull, QuoteFull } from '../utils/fetchStockData';
 
 interface Props {
   onViewStock?: (symbol: string) => void;
 }
 
-function changeColor(pct: number): string {
-  const clamped = Math.max(-3, Math.min(3, pct));
-  if (clamped >= 0) {
-    const t = clamped / 3;
-    const r = Math.round(75 - 75 * t);
-    const g = Math.round(85 + 100 * t);
-    const b = Math.round(75 - 75 * t);
-    return `rgb(${r},${g},${b})`;
+interface IndexOption {
+  id: string;
+  label: string;
+  start: number;
+  end: number;
+}
+
+const INDICES: IndexOption[] = [
+  { id: 'nifty50', label: 'Nifty 50', start: 0, end: 50 },
+  { id: 'sensex30', label: 'Sensex 30', start: 0, end: 30 },
+  { id: 'niftynext50', label: 'Nifty Next 50', start: 50, end: 100 },
+  { id: 'nifty100', label: 'Nifty 100', start: 0, end: 100 },
+  { id: 'niftymidcap50', label: 'Nifty Midcap 50', start: 100, end: 150 },
+  { id: 'niftymidcap100', label: 'Nifty Midcap 100', start: 100, end: 200 },
+  { id: 'nifty200', label: 'Nifty 200', start: 0, end: 200 },
+  { id: 'nifty500', label: 'Nifty 500', start: 0, end: 500 },
+  { id: 'niftysmallcap100', label: 'Nifty Smallcap 100', start: 200, end: 300 },
+  { id: 'all', label: 'All Stocks', start: 0, end: Infinity },
+];
+
+function heatColor(pct: number): string {
+  const c = Math.max(-4, Math.min(4, pct));
+  const t = Math.min(Math.abs(c) / 3, 1);
+  // Neutral: rgb(198, 195, 195)
+  const nr = 198, ng = 195, nb = 195;
+
+  if (c > 0) {
+    // Green target: rgb(0, 144, 74)
+    return `rgb(${Math.round(nr + (0 - nr) * t)},${Math.round(ng + (144 - ng) * t)},${Math.round(nb + (74 - nb) * t)})`;
   }
-  const t = -clamped / 3;
-  const r = Math.round(75 + 120 * t);
-  const g = Math.round(85 - 55 * t);
-  const b = Math.round(75 - 45 * t);
-  return `rgb(${r},${g},${b})`;
+  if (c < 0) {
+    // Red target: rgb(204, 50, 56)
+    return `rgb(${Math.round(nr + (204 - nr) * t)},${Math.round(ng + (50 - ng) * t)},${Math.round(nb + (56 - nb) * t)})`;
+  }
+  return `rgb(${nr},${ng},${nb})`;
+}
+
+function fmtPrice(n: number): string {
+  if (n >= 10000) return `₹${(n / 1000).toFixed(1)}K`;
+  return `₹${Math.round(n).toLocaleString('en-IN')}`;
 }
 
 interface TreemapRect {
@@ -31,25 +57,24 @@ interface TreemapRect {
 }
 
 function squarify(items: QuoteFull[], width: number, height: number): TreemapRect[] {
+  if (items.length === 0) return [];
   const rects: TreemapRect[] = [];
   let x = 0, y = 0, remainW = width, remainH = height;
-
   const sorted = [...items].sort((a, b) => b.marketCap - a.marketCap);
   let i = 0;
 
-  while (i < sorted.length) {
+  while (i < sorted.length && remainW > 0 && remainH > 0) {
     const isHorizontal = remainW >= remainH;
     const side = isHorizontal ? remainH : remainW;
     const remainTotal = sorted.slice(i).reduce((s, q) => s + Math.max(q.marketCap, 1), 0);
 
-    let row: QuoteFull[] = [];
+    const row: QuoteFull[] = [];
     let rowTotal = 0;
     let bestAspect = Infinity;
 
     for (let j = i; j < sorted.length; j++) {
       const val = Math.max(sorted[j].marketCap, 1);
       const newTotal = rowTotal + val;
-      const newCount = row.length + 1;
       const rowFraction = newTotal / remainTotal;
       const rowLen = rowFraction * (isHorizontal ? remainW : remainH);
 
@@ -62,7 +87,7 @@ function squarify(items: QuoteFull[], width: number, height: number): TreemapRec
         if (aspect > worstAspect) worstAspect = aspect;
       }
 
-      if (worstAspect <= bestAspect || newCount === 1) {
+      if (worstAspect <= bestAspect || row.length === 0) {
         bestAspect = worstAspect;
         row.push(sorted[j]);
         rowTotal = newTotal;
@@ -103,147 +128,252 @@ function squarify(items: QuoteFull[], width: number, height: number): TreemapRec
 }
 
 export function HeatmapPage({ onViewStock }: Props) {
-  const [loading, setLoading] = useState(false);
-  const [quotes, setQuotes] = useState<QuoteFull[]>([]);
-  const [sectorFilter, setSectorFilter] = useState('All');
+  const [allStocks, setAllStocks] = useState<ScreenerStock[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState('nifty50');
+  const [loading, setLoading] = useState(true);
+  const [progress, setProgress] = useState({ loaded: 0, total: 0 });
   const [error, setError] = useState<string | null>(null);
+  const [displayQuotes, setDisplayQuotes] = useState<QuoteFull[]>([]);
 
-  const loadData = useCallback(async () => {
+  const cache = useRef(new Map<string, QuoteFull>());
+  const runId = useRef(0);
+
+  const loadQuotes = useCallback(async (stocks: ScreenerStock[], force: boolean) => {
+    const id = ++runId.current;
     setLoading(true);
     setError(null);
-    try {
-      const stocks = await fetchScreenerList();
-      const allQuotes: QuoteFull[] = [];
-      for (let i = 0; i < stocks.length; i += 50) {
-        const batch = stocks.slice(i, i + 50).map((s) => s.symbol);
-        const results = await fetchBatchQuotesFull(batch);
-        allQuotes.push(...results);
+
+    const needed = force ? stocks : stocks.filter((s) => !cache.current.has(s.symbol));
+
+    if (needed.length === 0) {
+      if (runId.current === id) {
+        setDisplayQuotes(stocks.map((s) => cache.current.get(s.symbol)!).filter(Boolean));
+        setLoading(false);
       }
-      setQuotes(allQuotes.filter((q) => q.regularMarketPrice > 0));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load heatmap data');
-    } finally {
+      return;
+    }
+
+    setProgress({ loaded: 0, total: needed.length });
+
+    for (let i = 0; i < needed.length; i += 50) {
+      if (runId.current !== id) return;
+      const batch = needed.slice(i, i + 50).map((s) => s.symbol);
+      try {
+        const results = await fetchBatchQuotesFull(batch);
+        for (const q of results) {
+          if (q.regularMarketPrice > 0) cache.current.set(q.symbol, q);
+        }
+      } catch { /* continue */ }
+      if (runId.current === id) {
+        setProgress({ loaded: Math.min(i + 50, needed.length), total: needed.length });
+      }
+    }
+
+    if (runId.current === id) {
+      setDisplayQuotes(stocks.map((s) => cache.current.get(s.symbol)!).filter(Boolean));
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => {
+    (async () => {
+      try {
+        const stocks = await fetchScreenerList();
+        setAllStocks(stocks);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load stock list');
+        setLoading(false);
+      }
+    })();
+  }, []);
 
-  const sectors = useMemo(() => {
-    const s = new Set(quotes.map((q) => q.sector).filter(Boolean));
-    return ['All', ...Array.from(s).sort()];
-  }, [quotes]);
+  useEffect(() => {
+    if (allStocks.length === 0) return;
+    const idx = INDICES.find((i) => i.id === selectedIndex) ?? INDICES[0];
+    const stocks = allStocks.slice(idx.start, Math.min(idx.end, allStocks.length));
+    loadQuotes(stocks, false);
+  }, [allStocks, selectedIndex, loadQuotes]);
 
-  const filtered = useMemo(() => {
-    if (sectorFilter === 'All') return quotes;
-    return quotes.filter((q) => q.sector === sectorFilter);
-  }, [quotes, sectorFilter]);
+  const handleRefresh = () => {
+    if (allStocks.length === 0) return;
+    const idx = INDICES.find((i) => i.id === selectedIndex) ?? INDICES[0];
+    const stocks = allStocks.slice(idx.start, Math.min(idx.end, allStocks.length));
+    loadQuotes(stocks, true);
+  };
 
-  const containerWidth = 1200;
-  const containerHeight = 600;
-  const rects = useMemo(() => squarify(filtered, containerWidth, containerHeight), [filtered]);
+  const CW = 1600;
+  const CH = useMemo(() => {
+    const n = displayQuotes.length;
+    if (n <= 30) return 750;
+    if (n <= 50) return 850;
+    if (n <= 100) return 800;
+    return 700;
+  }, [displayQuotes.length]);
 
-  const gainers = filtered.filter((q) => q.regularMarketChangePercent > 0).length;
-  const losers = filtered.filter((q) => q.regularMarketChangePercent < 0).length;
+  const rects = useMemo(() => squarify(displayQuotes, CW, CH), [displayQuotes, CH]);
+
+  const gainers = displayQuotes.filter((q) => q.regularMarketChangePercent > 0).length;
+  const losers = displayQuotes.filter((q) => q.regularMarketChangePercent < 0).length;
+  const unchanged = displayQuotes.length - gainers - losers;
+
+  const progressPct = progress.total > 0 ? (progress.loaded / progress.total) * 100 : 0;
 
   return (
-    <div className="w-full max-w-7xl mt-10 space-y-6">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Market Heatmap</h2>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-              NSE stocks by market cap, colored by daily change
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <select
-              value={sectorFilter}
-              onChange={(e) => setSectorFilter(e.target.value)}
-              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {sectors.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
+    <div className="w-full max-w-7xl mt-6 space-y-4">
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-5">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Market Heatmap</h2>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                Sized by market cap, colored by daily change &mdash; approximated by cap ranking
+              </p>
+            </div>
             <button
-              onClick={loadData}
+              onClick={handleRefresh}
               disabled={loading}
-              className="px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors shrink-0"
             >
+              <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
               {loading ? 'Loading...' : 'Refresh'}
             </button>
           </div>
-        </div>
 
-        {!loading && filtered.length > 0 && (
-          <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
-            <span>{filtered.length} stocks</span>
-            <span className="text-green-600 dark:text-green-400">{gainers} gainers</span>
-            <span className="text-red-600 dark:text-red-400">{losers} losers</span>
-            <span className="ml-auto flex items-center gap-1">
-              <span className="w-3 h-2 rounded-sm" style={{ backgroundColor: changeColor(-3) }} />
-              -3%
-              <span className="w-3 h-2 rounded-sm" style={{ backgroundColor: changeColor(0) }} />
-              0%
-              <span className="w-3 h-2 rounded-sm" style={{ backgroundColor: changeColor(3) }} />
-              +3%
-            </span>
+          {/* Controls row */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Index</label>
+              <select
+                value={selectedIndex}
+                onChange={(e) => setSelectedIndex(e.target.value)}
+                className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {INDICES.map((idx) => (
+                  <option key={idx.id} value={idx.id}>{idx.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="h-5 w-px bg-gray-200 dark:bg-gray-700 hidden sm:block" />
+
+            {/* Stats */}
+            {!loading && displayQuotes.length > 0 && (
+              <div className="flex items-center gap-3 text-xs font-medium">
+                <span className="text-gray-500 dark:text-gray-400">{displayQuotes.length} stocks</span>
+                <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                  <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L10 6.414l-3.293 3.293a1 1 0 01-1.414 0z" clipRule="evenodd"/></svg>
+                  {gainers}
+                </span>
+                <span className="flex items-center gap-1 text-red-500 dark:text-red-400">
+                  <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L10 13.586l3.293-3.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                  {losers}
+                </span>
+                {unchanged > 0 && (
+                  <span className="text-gray-400 dark:text-gray-500">{unchanged} flat</span>
+                )}
+              </div>
+            )}
+
+            {/* Legend gradient */}
+            <div className="ml-auto hidden sm:flex items-center gap-2 text-[10px] font-medium text-gray-400 dark:text-gray-500">
+              <span>-3%</span>
+              <div
+                className="h-2.5 w-28 rounded-full"
+                style={{
+                  background: `linear-gradient(to right, ${heatColor(-3)}, ${heatColor(-1.5)}, ${heatColor(0)}, ${heatColor(1.5)}, ${heatColor(3)})`,
+                }}
+              />
+              <span>+3%</span>
+            </div>
           </div>
-        )}
+
+          {/* Progress bar */}
+          {loading && progress.total > 0 && (
+            <div className="w-full">
+              <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
+                <div
+                  className="bg-blue-600 h-1.5 rounded-full transition-all duration-300 ease-out"
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+              <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+                Loading {progress.loaded} / {progress.total} stocks...
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 p-4">
-          <p className="text-red-700 dark:text-red-400 text-sm">{error}</p>
+        <div className="rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 p-4">
+          <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
         </div>
       )}
 
-      {loading && (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-20 flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin" />
-          <p className="text-gray-400 dark:text-gray-500 text-sm">Loading market data...</p>
+      {/* Loading skeleton */}
+      {loading && displayQuotes.length === 0 && (
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-16 flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin" />
+          <p className="text-gray-400 dark:text-gray-500 text-sm">Fetching market data...</p>
         </div>
       )}
 
-      {!loading && filtered.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden p-2">
-          <div className="relative w-full" style={{ paddingBottom: `${(containerHeight / containerWidth) * 100}%` }}>
+      {/* Heatmap treemap */}
+      {displayQuotes.length > 0 && (
+        <div className="bg-gray-900 dark:bg-gray-950 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg overflow-hidden p-1.5">
+          <div className="relative w-full" style={{ paddingBottom: `${(CH / CW) * 100}%` }}>
             <div className="absolute inset-0">
               {rects.map((r) => {
-                const pctX = (r.x / containerWidth) * 100;
-                const pctY = (r.y / containerHeight) * 100;
-                const pctW = (r.w / containerWidth) * 100;
-                const pctH = (r.h / containerHeight) * 100;
-                const area = pctW * pctH;
-                const fontSize = area > 4 ? 12 : area > 1 ? 10 : 8;
-                const showName = area > 0.3;
+                const pctX = (r.x / CW) * 100;
+                const pctY = (r.y / CH) * 100;
+                const pctW = (r.w / CW) * 100;
+                const pctH = (r.h / CH) * 100;
+                const sizeFactor = Math.sqrt(pctW * pctH);
+                const showSymbol = sizeFactor > 1.2;
+                const showChange = sizeFactor > 1.8;
+                const showPrice = sizeFactor > 5;
+                const fontSize = sizeFactor > 7 ? 15 : sizeFactor > 5 ? 13 : sizeFactor > 3 ? 11 : sizeFactor > 2 ? 9 : 7;
+                const changePct = r.quote.regularMarketChangePercent;
+                const intensity = Math.min(Math.abs(changePct) / 1.5, 1);
+                const useDarkText = intensity < 0.4;
+                const textColor = useDarkText ? '#1f2937' : '#ffffff';
+                const shadowColor = useDarkText ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.5)';
 
                 return (
                   <div
                     key={r.quote.symbol}
-                    className="absolute overflow-hidden cursor-pointer border border-black/10 dark:border-white/10 flex flex-col items-center justify-center text-white transition-opacity hover:opacity-80"
+                    className="absolute overflow-hidden cursor-pointer flex flex-col items-center justify-center transition-all duration-150 hover:brightness-110 hover:z-10"
                     style={{
-                      left: `${pctX}%`,
-                      top: `${pctY}%`,
-                      width: `${pctW}%`,
-                      height: `${pctH}%`,
-                      backgroundColor: changeColor(r.quote.regularMarketChangePercent),
+                      left: `calc(${pctX}% + 1px)`,
+                      top: `calc(${pctY}% + 1px)`,
+                      width: `calc(${pctW}% - 2px)`,
+                      height: `calc(${pctH}% - 2px)`,
+                      backgroundColor: heatColor(changePct),
+                      borderRadius: '3px',
                       fontSize: `${fontSize}px`,
+                      color: textColor,
+                      textShadow: `0 1px 2px ${shadowColor}`,
                     }}
                     onClick={() => onViewStock?.(r.quote.symbol)}
-                    title={`${r.quote.shortName} (${r.quote.symbol})\n${r.quote.regularMarketChangePercent >= 0 ? '+' : ''}${r.quote.regularMarketChangePercent.toFixed(2)}%\n₹${r.quote.regularMarketPrice.toLocaleString('en-IN')}`}
+                    title={`${r.quote.shortName}\n${r.quote.symbol}\n${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}%\n₹${r.quote.regularMarketPrice.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`}
                   >
-                    {showName && (
-                      <>
-                        <span className="font-bold leading-tight truncate max-w-full px-0.5">
-                          {r.quote.symbol.replace('.NS', '')}
-                        </span>
-                        <span className="font-medium leading-tight">
-                          {r.quote.regularMarketChangePercent >= 0 ? '+' : ''}
-                          {r.quote.regularMarketChangePercent.toFixed(1)}%
-                        </span>
-                      </>
+                    {showSymbol && (
+                      <span className="font-bold leading-tight truncate max-w-full px-1">
+                        {r.quote.symbol.replace('.NS', '')}
+                      </span>
+                    )}
+                    {showChange && (
+                      <span className="font-semibold leading-tight opacity-90" style={{ fontSize: `${Math.max(fontSize - 2, 7)}px` }}>
+                        {changePct >= 0 ? '+' : ''}{changePct.toFixed(2)}%
+                      </span>
+                    )}
+                    {showPrice && (
+                      <span className="leading-tight mt-0.5 opacity-70" style={{ fontSize: `${Math.max(fontSize - 3, 7)}px` }}>
+                        {fmtPrice(r.quote.regularMarketPrice)}
+                      </span>
                     )}
                   </div>
                 );
@@ -253,8 +383,8 @@ export function HeatmapPage({ onViewStock }: Props) {
         </div>
       )}
 
-      {!loading && filtered.length === 0 && !error && (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-10 text-center">
+      {!loading && displayQuotes.length === 0 && !error && (
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-12 text-center">
           <p className="text-gray-400 dark:text-gray-500 text-sm">No data available. Click Refresh to load.</p>
         </div>
       )}

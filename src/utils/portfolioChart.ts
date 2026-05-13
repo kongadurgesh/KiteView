@@ -1,4 +1,4 @@
-import { Portfolio, Transaction } from '../types';
+import { Portfolio } from '../types';
 
 const PROXY_BASE = import.meta.env.DEV ? 'http://localhost:3006' : '';
 
@@ -39,69 +39,40 @@ export async function fetchHistoricalPrices(
   return result;
 }
 
-function getAllTransactionsSorted(portfolio: Portfolio): Transaction[] {
-  const all: Transaction[] = [];
-  for (const pos of Object.values(portfolio.positions)) {
-    all.push(...pos.transactions);
-  }
-  return all.sort((a, b) => a.date.localeCompare(b.date));
-}
-
 export function computeDailyPortfolioValue(
   portfolio: Portfolio,
   historicalPrices: Record<string, Record<string, number>>,
 ): { date: string; portfolioValue: number }[] {
-  const txns = getAllTransactionsSorted(portfolio);
-  if (txns.length === 0) return [];
+  const holdings: Record<string, number> = {};
+  for (const pos of Object.values(portfolio.positions)) {
+    if (pos.totalQty > 0) holdings[pos.symbol] = pos.totalQty;
+  }
+  if (Object.keys(holdings).length === 0) return [];
 
   const allDates = new Set<string>();
-  for (const priceMap of Object.values(historicalPrices)) {
-    for (const d of Object.keys(priceMap)) {
-      allDates.add(d);
+  for (const sym of Object.keys(holdings)) {
+    const priceMap = historicalPrices[sym];
+    if (priceMap) {
+      for (const d of Object.keys(priceMap)) allDates.add(d);
     }
   }
   const sortedDates = Array.from(allDates).sort();
   if (sortedDates.length === 0) return [];
 
-  const firstTxnDate = txns[0].date;
-  const lastAvailableDate = sortedDates[sortedDates.length - 1];
-  let relevantDates = sortedDates.filter((d) => d >= firstTxnDate);
-
-  // When all transactions are after the last available market date (e.g. imported
-  // on a weekend/holiday), use the full date range and seed holdings from positions.
-  const holdings: Record<string, number> = {};
-  if (firstTxnDate > lastAvailableDate) {
-    relevantDates = sortedDates;
-    for (const pos of Object.values(portfolio.positions)) {
-      if (pos.totalQty > 0) holdings[pos.symbol] = pos.totalQty;
-    }
-  }
-
-  let txnIdx = 0;
+  const lastKnownPrice: Record<string, number> = {};
   const series: { date: string; portfolioValue: number }[] = [];
-
-  for (const date of relevantDates) {
-    while (txnIdx < txns.length && txns[txnIdx].date <= date) {
-      const t = txns[txnIdx];
-      if (t.type === 'BUY') {
-        holdings[t.symbol] = (holdings[t.symbol] ?? 0) + t.qty;
-      } else {
-        holdings[t.symbol] = (holdings[t.symbol] ?? 0) - t.qty;
-        if (holdings[t.symbol] <= 0) delete holdings[t.symbol];
-      }
-      txnIdx++;
-    }
-
+  for (const date of sortedDates) {
     let value = 0;
     let hasAnyPrice = false;
     for (const [sym, qty] of Object.entries(holdings)) {
       const price = historicalPrices[sym]?.[date];
-      if (price != null) {
-        value += qty * price;
+      if (price != null) lastKnownPrice[sym] = price;
+      const usePrice = price ?? lastKnownPrice[sym];
+      if (usePrice != null) {
+        value += qty * usePrice;
         hasAnyPrice = true;
       }
     }
-
     if (hasAnyPrice) {
       series.push({ date, portfolioValue: parseFloat(value.toFixed(2)) });
     }

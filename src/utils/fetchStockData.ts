@@ -119,6 +119,35 @@ export async function fetchBatchQuotes(symbols: string[]): Promise<Record<string
   }
 }
 
+export interface LiveQuoteDetailed {
+  price: number;
+  previousClose: number;
+}
+
+export async function fetchBatchQuotesDetailed(symbols: string[]): Promise<Record<string, LiveQuoteDetailed>> {
+  if (symbols.length === 0) return {};
+  try {
+    const joined = symbols.join(',');
+    const url = `${PROXY_BASE}/api/quote/${encodeURIComponent(joined)}`;
+    const res = await fetch(url);
+    if (!res.ok) return {};
+    const data = await res.json();
+    const results = data?.quoteResponse?.result ?? [];
+    const out: Record<string, LiveQuoteDetailed> = {};
+    for (const r of results) {
+      if (r.symbol && r.regularMarketPrice != null) {
+        out[r.symbol] = {
+          price: r.regularMarketPrice,
+          previousClose: r.regularMarketPreviousClose ?? r.regularMarketPrice,
+        };
+      }
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
+
 export interface QuoteFull {
   symbol: string;
   shortName: string;
