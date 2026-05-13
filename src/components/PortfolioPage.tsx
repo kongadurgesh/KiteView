@@ -7,6 +7,7 @@ import { ImportExcelModal } from './ImportExcelModal';
 import { TransactionHistory } from './TransactionHistory';
 import { PerformanceChart } from './PerformanceChart';
 import { RiskDashboard } from './RiskDashboard';
+import { DividendDashboard } from './DividendDashboard';
 
 function fmt(n: number): string {
   return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -234,6 +235,9 @@ export function PortfolioPage() {
 
       {/* Risk Dashboard */}
       <RiskDashboard portfolio={portfolio} livePrices={livePrices} />
+
+      {/* Dividend Dashboard */}
+      <DividendDashboard portfolio={portfolio} livePrices={livePrices} />
 
       {/* Positions Table */}
       {positions.length === 0 ? (

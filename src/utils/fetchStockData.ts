@@ -118,3 +118,34 @@ export async function fetchBatchQuotes(symbols: string[]): Promise<Record<string
     return {};
   }
 }
+
+export interface QuoteFull {
+  symbol: string;
+  shortName: string;
+  regularMarketPrice: number;
+  regularMarketChangePercent: number;
+  marketCap: number;
+  sector: string;
+}
+
+export async function fetchBatchQuotesFull(symbols: string[]): Promise<QuoteFull[]> {
+  if (symbols.length === 0) return [];
+  try {
+    const joined = symbols.join(',');
+    const url = `${PROXY_BASE}/api/quote/${encodeURIComponent(joined)}`;
+    const res = await fetch(url);
+    if (!res.ok) return [];
+    const data = await res.json();
+    const results = data?.quoteResponse?.result ?? [];
+    return results.map((r: Record<string, unknown>) => ({
+      symbol: (r.symbol as string) ?? '',
+      shortName: (r.shortName as string) ?? (r.symbol as string) ?? '',
+      regularMarketPrice: (r.regularMarketPrice as number) ?? 0,
+      regularMarketChangePercent: (r.regularMarketChangePercent as number) ?? 0,
+      marketCap: (r.marketCap as number) ?? 0,
+      sector: (r.sector as string) ?? '',
+    }));
+  } catch {
+    return [];
+  }
+}

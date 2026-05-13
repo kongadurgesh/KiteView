@@ -323,6 +323,59 @@ app.get('/api/search', async (req, res) => {
   }
 });
 
+app.get('/api/dividends/:symbol', async (req, res) => {
+  const { symbol } = req.params;
+  try {
+    const { crumb, cookie } = await getYahooCrumb();
+    const url = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=summaryDetail,calendarEvents&crumb=${encodeURIComponent(crumb)}`;
+    const response = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0', Cookie: cookie },
+    });
+    const data = await response.json();
+    const result = data?.quoteSummary?.result?.[0] ?? {};
+    const sd = result.summaryDetail ?? {};
+    const ce = result.calendarEvents ?? {};
+    res.json({
+      dividendRate: sd.dividendRate?.raw ?? 0,
+      dividendYield: sd.dividendYield?.raw ?? 0,
+      trailingAnnualDividendRate: sd.trailingAnnualDividendRate?.raw ?? 0,
+      exDividendDate: ce.exDividendDate?.fmt ?? null,
+    });
+  } catch {
+    res.json({ dividendRate: 0, dividendYield: 0, trailingAnnualDividendRate: 0, exDividendDate: null });
+  }
+});
+
+app.get('/api/stats/:symbol', async (req, res) => {
+  const { symbol } = req.params;
+  try {
+    const { crumb, cookie } = await getYahooCrumb();
+    const url = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=defaultKeyStatistics,summaryDetail,price&crumb=${encodeURIComponent(crumb)}`;
+    const response = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0', Cookie: cookie },
+    });
+    const data = await response.json();
+    const result = data?.quoteSummary?.result?.[0] ?? {};
+    const ks = result.defaultKeyStatistics ?? {};
+    const sd = result.summaryDetail ?? {};
+    const pr = result.price ?? {};
+    res.json({
+      pe: sd.trailingPE?.raw ?? null,
+      forwardPE: sd.forwardPE?.raw ?? null,
+      pb: ks.priceToBook?.raw ?? null,
+      beta: ks.beta?.raw ?? null,
+      dividendYield: sd.dividendYield?.raw ?? null,
+      fiftyTwoWeekChange: ks.fiftyTwoWeekChange?.raw ?? null,
+      marketCap: pr.marketCap?.raw ?? null,
+      shortName: pr.shortName ?? symbol,
+      regularMarketPrice: pr.regularMarketPrice?.raw ?? null,
+      sector: pr.sector ?? '',
+    });
+  } catch {
+    res.json({ pe: null, pb: null, beta: null, forwardPE: null, dividendYield: null, fiftyTwoWeekChange: null, marketCap: null, shortName: symbol, regularMarketPrice: null, sector: '' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Proxy server running on http://localhost:${PORT}`);
 });
