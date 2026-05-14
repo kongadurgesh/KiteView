@@ -111,8 +111,8 @@ export function AddTransactionModal({ onAdd, onClose, maxSellQty = {} }: AddTran
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md mx-4 p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-md mx-4 p-6">
         <div className="flex items-center justify-between mb-5">
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Add Transaction</h3>
           <button onClick={onClose} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none">&times;</button>
@@ -129,14 +129,14 @@ export function AddTransactionModal({ onAdd, onClose, maxSellQty = {} }: AddTran
               onChange={handleSymbolChange}
               onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
               placeholder="e.g. RELIANCE, TCS"
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             {showSuggestions && (
-              <ul className="absolute z-10 left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+              <ul className="absolute z-10 left-0 right-0 mt-1 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-800 rounded-lg max-h-48 overflow-y-auto">
                 {suggestions.map((s) => (
                   <li
                     key={s.symbol}
-                    className="px-3 py-2 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 flex justify-between text-sm"
+                    className="px-3 py-2 cursor-pointer hover:bg-blue-900/30 flex justify-between text-sm"
                     onMouseDown={() => pickSuggestion(s)}
                   >
                     <div>
@@ -164,7 +164,7 @@ export function AddTransactionModal({ onAdd, onClose, maxSellQty = {} }: AddTran
                       ? t === 'BUY'
                         ? 'bg-green-600 text-white'
                         : 'bg-red-600 text-white'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-600'
                   }`}
                 >
                   {t}
@@ -183,7 +183,7 @@ export function AddTransactionModal({ onAdd, onClose, maxSellQty = {} }: AddTran
                 min="1"
                 value={qty}
                 onChange={(e) => setQty(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
@@ -195,7 +195,7 @@ export function AddTransactionModal({ onAdd, onClose, maxSellQty = {} }: AddTran
                 step="0.01"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -208,7 +208,7 @@ export function AddTransactionModal({ onAdd, onClose, maxSellQty = {} }: AddTran
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
@@ -218,7 +218,7 @@ export function AddTransactionModal({ onAdd, onClose, maxSellQty = {} }: AddTran
 
           <button
             type="submit"
-            className="w-full py-2.5 rounded-lg bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors"
+            className="w-full py-2.5 rounded-lg bg-blue-600 text-white font-semibold text-sm hover:bg-blue-500 transition-colors"
           >
             Add {txnType} Transaction
           </button>

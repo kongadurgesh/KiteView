@@ -142,7 +142,7 @@ export function ScreenerPage({ onViewStock }: Props) {
   return (
     <div className="w-full max-w-7xl mt-10 space-y-6">
       {/* Controls */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Live Screener</h2>
@@ -154,12 +154,12 @@ export function ScreenerPage({ onViewStock }: Props) {
             <button
               onClick={() => setAutoScan((v) => !v)}
               className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
-                autoScan ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
+                autoScan ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
               }`}
               title={autoScan ? 'Auto-scan enabled' : 'Auto-scan disabled'}
             >
               <span
-                className={`inline-block h-5 w-5 rounded-full bg-white dark:bg-gray-200 shadow transform transition-transform ${
+                className={`inline-block h-5 w-5 rounded-full bg-white dark:bg-gray-200 transform transition-transform ${
                   autoScan ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />
@@ -171,14 +171,14 @@ export function ScreenerPage({ onViewStock }: Props) {
             {scanning ? (
               <button
                 onClick={stopScan}
-                className="px-4 py-2 text-sm font-medium rounded-lg border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                className="px-4 py-2 text-sm font-medium rounded-lg border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
               >
                 Stop Scan
               </button>
             ) : (
               <button
                 onClick={() => startScan()}
-                className="px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-500 transition-colors"
               >
                 Scan Now
               </button>
@@ -200,7 +200,7 @@ export function ScreenerPage({ onViewStock }: Props) {
                 {progress.found} pattern{progress.found !== 1 ? 's' : ''} found
               </span>
             </div>
-            <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2 overflow-hidden">
               <div
                 className={`h-2 rounded-full transition-all duration-300 ${
                   scanning ? 'bg-blue-500' : 'bg-green-500'
@@ -213,27 +213,27 @@ export function ScreenerPage({ onViewStock }: Props) {
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 p-4">
-          <p className="text-red-700 dark:text-red-400 text-sm font-medium">Error</p>
+        <div className="rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-300 dark:border-red-800 p-4">
+          <p className="text-red-600 dark:text-red-400 text-sm font-medium">Error</p>
           <p className="text-red-600 dark:text-red-400 text-sm mt-1">{error}</p>
         </div>
       )}
 
       {results.length === 0 && !scanning && progress.total > 0 && (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-10 text-center">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-10 text-center">
           <p className="text-gray-400 dark:text-gray-500 text-sm">No patterns found in the current scan.</p>
         </div>
       )}
 
       {results.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-          <div className="flex items-center justify-end px-4 py-2 border-b border-gray-100 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+          <div className="flex items-center justify-end px-4 py-2 border-b border-gray-200 dark:border-gray-800">
             <button
               onClick={() => setShowBuyPrices((v) => !v)}
               className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
                 showBuyPrices
                   ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               {showBuyPrices ? 'Hide Buy Prices' : 'Show Buy Prices'}
@@ -241,7 +241,7 @@ export function ScreenerPage({ onViewStock }: Props) {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+              <thead className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-800">
                 <tr>
                   <SortHeader label="Stock" k="name" current={sortKey} dir={sortDir} onSort={toggleSort} align="left" />
                   <SortHeader label="Pattern" k="pattern" current={sortKey} dir={sortDir} onSort={toggleSort} />
@@ -264,7 +264,7 @@ export function ScreenerPage({ onViewStock }: Props) {
                 {sortedResults.map((r) => (
                   <tr
                     key={r.symbol}
-                    className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                    className="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
                     onClick={() => onViewStock?.(r.symbol)}
                   >
                     <td className="p-3 text-left">
@@ -274,8 +274,8 @@ export function ScreenerPage({ onViewStock }: Props) {
                     <td className="p-3 text-right">
                       <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-bold uppercase ${
                         r.match.patternName === 'Bullish Harami'
-                          ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
-                          : 'bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400'
+                          ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                          : 'bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400'
                       }`}>
                         {r.match.patternName === 'Bullish Harami' ? 'Harami' : 'Engulfing'}
                       </span>
@@ -297,7 +297,7 @@ export function ScreenerPage({ onViewStock }: Props) {
                       {r.fiftyTwoWeekLow ? fmt(r.fiftyTwoWeekLow) : '—'}
                     </td>
                     <td className={`p-3 text-right font-mono text-xs font-semibold ${
-                      r.fiftyTwoWeekLow && r.currentPrice > r.fiftyTwoWeekLow ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                      r.fiftyTwoWeekLow && r.currentPrice > r.fiftyTwoWeekLow ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
                     }`}>
                       {distPct(r.currentPrice, r.fiftyTwoWeekLow)}
                     </td>
@@ -305,14 +305,14 @@ export function ScreenerPage({ onViewStock }: Props) {
                       {r.fiftyTwoWeekHigh ? fmt(r.fiftyTwoWeekHigh) : '—'}
                     </td>
                     <td className={`p-3 text-right font-mono text-xs font-semibold ${
-                      r.fiftyTwoWeekHigh && r.currentPrice >= r.fiftyTwoWeekHigh ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                      r.fiftyTwoWeekHigh && r.currentPrice >= r.fiftyTwoWeekHigh ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
                     }`}>
                       {distPct(r.currentPrice, r.fiftyTwoWeekHigh)}
                     </td>
                     <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300 text-xs">
                       {r.allTimeHigh ? fmt(r.allTimeHigh) : '—'}
                     </td>
-                    <td className="p-3 text-right font-mono text-gray-600 dark:text-gray-400 text-xs">
+                    <td className="p-3 text-right font-mono text-gray-500 dark:text-gray-400 text-xs">
                       {r.marketCapCr ? formatMcap(r.marketCapCr) : '—'}
                     </td>
                   </tr>
@@ -324,7 +324,7 @@ export function ScreenerPage({ onViewStock }: Props) {
       )}
 
       {results.length === 0 && !scanning && progress.total === 0 && (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-10 text-center">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-10 text-center">
           <p className="text-gray-400 dark:text-gray-500 text-sm">
             Click <strong>Scan Now</strong> or enable <strong>Auto</strong> to start scanning for patterns.
           </p>
@@ -343,7 +343,7 @@ function SortHeader({ label, k, current, dir, onSort, align = 'right' }: {
     <th
       className={`p-3 font-medium text-xs uppercase tracking-wider cursor-pointer select-none whitespace-nowrap
         ${align === 'left' ? 'text-left' : 'text-right'}
-        ${isActive ? 'text-blue-600' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400'}`}
+        ${isActive ? 'text-blue-600' : 'text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400'}`}
       onClick={() => onSort(k)}
     >
       {label}

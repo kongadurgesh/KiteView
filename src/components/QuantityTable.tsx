@@ -77,9 +77,9 @@ export function QuantityTable({ buyPrice }: QuantityTableProps) {
           return (
             <div
               key={range.min}
-              className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden"
+              className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden"
             >
-              <div className="bg-gray-50 dark:bg-gray-700/50 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+              <div className="bg-white dark:bg-gray-900 px-4 py-2 border-b border-gray-200 dark:border-gray-800">
                 <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                   {formatCurrency(range.min)} &ndash; {formatCurrency(range.max)}
                 </p>
@@ -89,14 +89,14 @@ export function QuantityTable({ buyPrice }: QuantityTableProps) {
               ) : (
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-100 dark:border-gray-700">
+                    <tr className="border-b border-gray-200 dark:border-gray-800">
                       <th className="px-4 py-2 text-left text-gray-500 dark:text-gray-400 font-medium">Qty</th>
                       <th className="px-4 py-2 text-right text-gray-500 dark:text-gray-400 font-medium">Required Amount</th>
                     </tr>
                   </thead>
                   <tbody>
                     {rows.map((row) => (
-                      <tr key={row.qty} className="border-b border-gray-50 dark:border-gray-700 last:border-b-0">
+                      <tr key={row.qty} className="border-b border-gray-200 dark:border-gray-800 last:border-b-0">
                         <td className="px-4 py-2 font-mono font-semibold text-gray-800 dark:text-gray-200">{row.qty}</td>
                         <td className="px-4 py-2 text-right font-mono text-gray-700 dark:text-gray-300">
                           {formatCurrency(row.amount)}

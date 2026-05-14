@@ -103,7 +103,7 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
           onKeyDown={handleKeyDown}
           onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
           placeholder="Search stock (e.g. NALCO, RELIANCE, TCS)"
-          className="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-base
+          className="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-base
                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
                      placeholder:text-gray-400 dark:placeholder:text-gray-500"
           disabled={isLoading}
@@ -112,7 +112,7 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
           type="submit"
           disabled={isLoading || !input.trim()}
           className="px-6 py-3 rounded-lg bg-blue-600 text-white font-semibold text-base
-                     hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed
+                     hover:bg-blue-500 disabled:bg-gray-600 disabled:cursor-not-allowed
                      transition-colors duration-200"
         >
           {isLoading ? 'Scanning...' : 'Scan'}
@@ -120,7 +120,7 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
       </form>
 
       {showDropdown && (
-        <ul className="absolute z-10 left-0 right-16 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+        <ul className="absolute z-10 left-0 right-16 mt-1 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg max-h-64 overflow-y-auto">
           {noResults ? (
             <li className="px-4 py-3 text-sm text-gray-400 dark:text-gray-500 italic">
               No match found. Try the full name (e.g. "National Aluminium" for NALCO).
@@ -130,13 +130,13 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
               <li
                 key={s.symbol}
                 className={`px-4 py-2.5 cursor-pointer flex justify-between items-center text-sm
-                  ${idx === activeIdx ? 'bg-blue-50 dark:bg-blue-900/30' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                  ${idx === activeIdx ? 'bg-blue-50 dark:bg-blue-900/30' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}
                 onMouseDown={() => selectSymbol(s.symbol)}
                 onMouseEnter={() => setActiveIdx(idx)}
               >
                 <div>
                   <span className="font-semibold text-gray-800 dark:text-gray-200">{s.symbol}</span>
-                  <span className="ml-2 text-gray-500 dark:text-gray-400 text-xs">{s.shortname}</span>
+                  <span className="ml-2 text-gray-400 dark:text-gray-500 text-xs">{s.shortname}</span>
                 </div>
                 <span className="text-xs text-gray-400 dark:text-gray-500">{s.exchange === 'NSI' ? 'NSE' : 'BSE'}</span>
               </li>

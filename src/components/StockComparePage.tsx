@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import {
   ResponsiveContainer,
   LineChart,
@@ -12,7 +12,22 @@ import {
 
 const PROXY_BASE = import.meta.env.DEV ? 'http://localhost:3006' : '';
 
+const BENCHMARK_STRIKE = '#64748b';
+
+type BenchmarkMode = 'off' | 'nifty' | 'sensex';
+
+const BENCHMARK_OPTIONS: { mode: BenchmarkMode; label: string; sym: string; dataKey: string }[] = [
+  { mode: 'off', label: 'No index', sym: '', dataKey: '' },
+  { mode: 'nifty', label: 'Nifty 50', sym: '^NSEI', dataKey: 'NIFTY_50' },
+  { mode: 'sensex', label: 'Sensex', sym: '^BSESN', dataKey: 'SENSEX_IDX' },
+];
+
 const CHART_COLORS = ['#2563eb', '#f59e0b', '#10b981', '#f43f5e'];
+
+interface StockComparePageProps {
+  seedSymbol?: string | null;
+  onSeedConsumed?: () => void;
+}
 
 type RangeKey = '1mo' | '3mo' | '6mo' | '1y';
 
@@ -93,6 +108,7 @@ function parseChartPayload(data: unknown): { date: string; close: number }[] {
 function mergeNormalized(
   seriesMap: Record<string, { date: string; close: number }[]>,
   orderedSymbols: string[],
+  benchmark?: { key: string; points: { date: string; close: number }[] } | null,
 ): Record<string, string | number>[] {
   const symbols = orderedSymbols.filter((s) => (seriesMap[s]?.length ?? 0) > 0);
   if (symbols.length === 0) return [];
@@ -102,6 +118,14 @@ function mergeNormalized(
     const ds = new Set(seriesMap[symbols[i]].map((p) => p.date));
     common = new Set([...common].filter((d) => ds.has(d)));
   }
+
+  const benchLookup: Record<string, number> = {};
+  if (benchmark?.points.length) {
+    const ds = new Set(benchmark.points.map((p) => p.date));
+    common = new Set([...common].filter((d) => ds.has(d)));
+    for (const p of benchmark.points) benchLookup[p.date] = p.close;
+  }
+
   if (common.size === 0) return [];
 
   const sorted = [...common].sort();
@@ -114,6 +138,7 @@ function mergeNormalized(
   const first = sorted[0];
   const base: Record<string, number> = {};
   for (const s of symbols) base[s] = lookup[s][first] ?? 0;
+  const benchBase = benchmark ? benchLookup[first] ?? 0 : 0;
 
   return sorted.map((date) => {
     const row: Record<string, string | number> = { date };
@@ -122,17 +147,60 @@ function mergeNormalized(
       const b = base[s];
       row[s] = b > 0 && close != null ? (close / b - 1) * 100 : 0;
     }
+    if (benchmark && benchBase > 0) {
+      const bc = benchLookup[date];
+      row[benchmark.key] = bc != null ? (bc / benchBase - 1) * 100 : 0;
+    }
     return row;
   });
 }
 
-export function StockComparePage() {
+function computeRowHighlights(
+  syms: string[],
+  rank: 'none' | 'higher' | 'lower',
+  value: (s: string) => number | null,
+): Record<string, 'best' | 'worst'> {
+  if (rank === 'none' || syms.length < 2) return {};
+  const pairs = syms
+    .map((sym) => ({ sym, v: value(sym) }))
+    .filter((p): p is { sym: string; v: number } => p.v != null && typeof p.v === 'number' && !Number.isNaN(p.v));
+  if (pairs.length < 2) return {};
+  const values = pairs.map((p) => p.v);
+  const max = Math.max(...values);
+  const min = Math.min(...values);
+  if (max === min) return {};
+  const out: Record<string, 'best' | 'worst'> = {};
+  for (const { sym, v } of pairs) {
+    if (rank === 'higher') {
+      if (v === max) out[sym] = 'best';
+      else if (v === min) out[sym] = 'worst';
+    } else {
+      if (v === min) out[sym] = 'best';
+      else if (v === max) out[sym] = 'worst';
+    }
+  }
+  return out;
+}
+
+function subscribeDarkMode(onStoreChange: () => void) {
+  const el = document.documentElement;
+  const mo = new MutationObserver(onStoreChange);
+  mo.observe(el, { attributes: true, attributeFilter: ['class'] });
+  return () => mo.disconnect();
+}
+
+function getDarkModeSnapshot() {
+  return document.documentElement.classList.contains('dark');
+}
+
+export function StockComparePage({ seedSymbol, onSeedConsumed }: StockComparePageProps) {
   const [symbols, setSymbols] = useState<string[]>([]);
   const [input, setInput] = useState('');
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [activeIdx, setActiveIdx] = useState(-1);
   const [range, setRange] = useState<RangeKey>('1y');
+  const [benchmarkMode, setBenchmarkMode] = useState<BenchmarkMode>('off');
   const [chartRows, setChartRows] = useState<Record<string, string | number>[]>([]);
   const [chartLoading, setChartLoading] = useState(false);
   const [statsBySymbol, setStatsBySymbol] = useState<Record<string, StockStats>>({});
@@ -141,6 +209,8 @@ export function StockComparePage() {
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const wrapperRef = useRef<HTMLDivElement>(null);
 
+  const isDark = useSyncExternalStore(subscribeDarkMode, getDarkModeSnapshot, () => false);
+
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) setShowDropdown(false);
@@ -148,6 +218,17 @@ export function StockComparePage() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (!seedSymbol?.trim()) return;
+    const raw = seedSymbol.trim();
+    const finalSym = raw.includes('.') ? raw : `${raw}.NS`;
+    setSymbols((prev) => {
+      if (prev.includes(finalSym) || prev.length >= 4) return prev;
+      return [finalSym, ...prev];
+    });
+    onSeedConsumed?.();
+  }, [seedSymbol, onSeedConsumed]);
 
   const fetchSuggestions = useCallback((query: string) => {
     if (query.length < 2) {
@@ -198,6 +279,13 @@ export function StockComparePage() {
       return;
     }
 
+    const benchOpt = BENCHMARK_OPTIONS.find((o) => o.mode === benchmarkMode && o.mode !== 'off');
+    const showChart = symbols.length >= 2 || (symbols.length >= 1 && benchOpt);
+    if (!showChart) {
+      setChartRows([]);
+      return;
+    }
+
     let cancelled = false;
     async function loadCharts() {
       setChartLoading(true);
@@ -214,7 +302,18 @@ export function StockComparePage() {
         if (cancelled) return;
         const map: Record<string, { date: string; close: number }[]> = {};
         for (const r of results) map[r.sym] = r.series;
-        setChartRows(mergeNormalized(map, symbols));
+
+        let benchArg: { key: string; points: { date: string; close: number }[] } | null = null;
+        if (benchOpt) {
+          const res = await fetch(
+            `${PROXY_BASE}/api/chart/${encodeURIComponent(benchOpt.sym)}?range=${range}&interval=1d`,
+          );
+          const data = await res.json();
+          const pts = parseChartPayload(data);
+          if (pts.length > 0) benchArg = { key: benchOpt.dataKey, points: pts };
+        }
+        if (cancelled) return;
+        setChartRows(mergeNormalized(map, symbols, benchArg));
       } finally {
         if (!cancelled) setChartLoading(false);
       }
@@ -223,7 +322,7 @@ export function StockComparePage() {
     return () => {
       cancelled = true;
     };
-  }, [symbols, range]);
+  }, [symbols, range, benchmarkMode]);
 
   useEffect(() => {
     if (symbols.length === 0) {
@@ -275,25 +374,76 @@ export function StockComparePage() {
   }, [symbols]);
 
   const comparisonRows = useMemo(
-    () => [
-      {
-        label: 'CMP',
-        fmt: (s: string) => {
-          const p = statsBySymbol[s]?.regularMarketPrice;
-          return p != null ? fmtInr(p) : '—';
+    () =>
+      [
+        {
+          label: 'CMP',
+          rank: 'none' as const,
+          value: (_s: string) => null as number | null,
+          fmt: (s: string) => {
+            const p = statsBySymbol[s]?.regularMarketPrice;
+            return p != null ? fmtInr(p) : '—';
+          },
         },
-      },
-      { label: 'Market Cap', fmt: (s: string) => fmtMarketCap(statsBySymbol[s]?.marketCap ?? null) },
-      { label: 'P/E', fmt: (s: string) => fmtRatio(statsBySymbol[s]?.pe ?? null) },
-      { label: 'Forward P/E', fmt: (s: string) => fmtRatio(statsBySymbol[s]?.forwardPE ?? null) },
-      { label: 'P/B', fmt: (s: string) => fmtRatio(statsBySymbol[s]?.pb ?? null) },
-      { label: 'Beta', fmt: (s: string) => fmtRatio(statsBySymbol[s]?.beta ?? null) },
-      { label: 'Div Yield', fmt: (s: string) => fmtPct(statsBySymbol[s]?.dividendYield ?? null) },
-      { label: '52W Change', fmt: (s: string) => fmtPct(statsBySymbol[s]?.fiftyTwoWeekChange ?? null) },
-      { label: 'Sector', fmt: (s: string) => statsBySymbol[s]?.sector || '—' },
-    ],
+        {
+          label: 'Market Cap',
+          rank: 'higher' as const,
+          value: (s: string) => statsBySymbol[s]?.marketCap ?? null,
+          fmt: (s: string) => fmtMarketCap(statsBySymbol[s]?.marketCap ?? null),
+        },
+        {
+          label: 'P/E',
+          rank: 'lower' as const,
+          value: (s: string) => statsBySymbol[s]?.pe ?? null,
+          fmt: (s: string) => fmtRatio(statsBySymbol[s]?.pe ?? null),
+        },
+        {
+          label: 'Forward P/E',
+          rank: 'lower' as const,
+          value: (s: string) => statsBySymbol[s]?.forwardPE ?? null,
+          fmt: (s: string) => fmtRatio(statsBySymbol[s]?.forwardPE ?? null),
+        },
+        {
+          label: 'P/B',
+          rank: 'lower' as const,
+          value: (s: string) => statsBySymbol[s]?.pb ?? null,
+          fmt: (s: string) => fmtRatio(statsBySymbol[s]?.pb ?? null),
+        },
+        {
+          label: 'Beta',
+          rank: 'none' as const,
+          value: (_s: string) => null as number | null,
+          fmt: (s: string) => fmtRatio(statsBySymbol[s]?.beta ?? null),
+        },
+        {
+          label: 'Div Yield',
+          rank: 'higher' as const,
+          value: (s: string) => statsBySymbol[s]?.dividendYield ?? null,
+          fmt: (s: string) => fmtPct(statsBySymbol[s]?.dividendYield ?? null),
+        },
+        {
+          label: '52W Change',
+          rank: 'higher' as const,
+          value: (s: string) => statsBySymbol[s]?.fiftyTwoWeekChange ?? null,
+          fmt: (s: string) => fmtPct(statsBySymbol[s]?.fiftyTwoWeekChange ?? null),
+        },
+        {
+          label: 'Sector',
+          rank: 'none' as const,
+          value: (_s: string) => null as number | null,
+          fmt: (s: string) => statsBySymbol[s]?.sector || '—',
+        },
+      ] as const,
     [statsBySymbol],
   );
+
+  const activeBenchmark = useMemo(
+    () => BENCHMARK_OPTIONS.find((o) => o.mode === benchmarkMode && o.mode !== 'off'),
+    [benchmarkMode],
+  );
+
+  const showNormalizedChart =
+    symbols.length >= 2 || (symbols.length >= 1 && activeBenchmark != null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.toUpperCase();
@@ -323,37 +473,63 @@ export function StockComparePage() {
     }
   };
 
-  const tooltipStyles = {
-    contentStyle: {
-      backgroundColor: 'rgba(17, 24, 39, 0.95)',
-      border: '1px solid rgb(55, 65, 81)',
-      borderRadius: '8px',
-    },
-    labelStyle: { color: '#e5e7eb' },
-    itemStyle: { color: '#e5e7eb' },
-  };
+  const tooltipStyles = useMemo(
+    () =>
+      isDark
+        ? {
+            contentStyle: {
+              backgroundColor: 'rgba(17, 24, 39, 0.95)',
+              border: '1px solid rgb(55, 65, 81)',
+              borderRadius: '8px',
+            },
+            labelStyle: { color: '#e5e7eb' },
+            itemStyle: { color: '#e5e7eb' },
+          }
+        : {
+            contentStyle: {
+              backgroundColor: 'rgba(255, 255, 255, 0.98)',
+              border: '1px solid rgb(229, 231, 235)',
+              borderRadius: '8px',
+            },
+            labelStyle: { color: '#111827' },
+            itemStyle: { color: '#111827' },
+          },
+    [isDark],
+  );
 
-  const axisStroke = '#9ca3af';
-  const gridStroke = '#374151';
+  const axisStroke = isDark ? '#9ca3af' : '#6b7280';
+  const gridStroke = isDark ? '#374151' : '#e5e7eb';
+  const legendColor = isDark ? '#9ca3af' : '#6b7280';
 
   return (
     <div className="w-full max-w-6xl flex flex-col gap-6 pb-10">
-      <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-xl mx-auto">
-        Add up to four stocks to compare normalized price performance and key statistics side by side.
-      </p>
+      {symbols.length > 0 && (
+        <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-xl mx-auto">
+          Normalized % performance from the start of the range, optional index overlay, and a side-by-side fundamentals grid.
+        </p>
+      )}
+
+      {symbols.length === 0 && (
+        <div className="w-full rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/40 px-6 py-8 text-center">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Compare up to 4 stocks</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 max-w-md mx-auto">
+            Search below to add NSE symbols. See normalized returns, optionally overlay Nifty 50 or Sensex, and rank key valuation metrics across your picks.
+          </p>
+        </div>
+      )}
 
       <div ref={wrapperRef} className="relative w-full max-w-lg mx-auto">
         <div className="flex flex-wrap gap-2 mb-3 min-h-[36px]">
           {symbols.map((sym, i) => (
             <span
               key={sym}
-              className="inline-flex items-center gap-1.5 pl-3 pr-1 py-1 rounded-full text-sm font-semibold bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800"
+              className="inline-flex items-center gap-1.5 pl-3 pr-1 py-1 rounded-full text-sm font-semibold bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800"
             >
               <span style={{ color: CHART_COLORS[i % CHART_COLORS.length] }}>{sym}</span>
               <button
                 type="button"
                 onClick={() => removeSymbol(sym)}
-                className="p-1 rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-600 dark:text-blue-300 transition-colors"
+                className="p-1 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 transition-colors"
                 aria-label={`Remove ${sym}`}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -376,21 +552,21 @@ export function StockComparePage() {
             onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
             placeholder={symbols.length >= 4 ? 'Maximum 4 stocks' : 'Search to add stock…'}
             disabled={symbols.length >= 4}
-            className="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-base
+            className="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-base
                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
                        placeholder:text-gray-400 dark:placeholder:text-gray-500 disabled:opacity-60"
           />
           <button
             type="submit"
             disabled={symbols.length >= 4 || !input.trim()}
-            className="px-5 py-3 rounded-lg bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
+            className="px-5 py-3 rounded-lg bg-blue-600 text-white font-semibold text-sm hover:bg-blue-500 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
           >
             Add
           </button>
         </form>
 
         {showDropdown && symbols.length < 4 && (
-          <ul className="absolute z-20 left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-56 overflow-y-auto">
+          <ul className="absolute z-20 left-0 right-0 mt-1 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg max-h-56 overflow-y-auto">
             {suggestions.length === 0 ? (
               <li className="px-4 py-3 text-sm text-gray-400 dark:text-gray-500 italic">No matches</li>
             ) : (
@@ -398,7 +574,7 @@ export function StockComparePage() {
                 <li
                   key={s.symbol}
                   className={`px-4 py-2.5 cursor-pointer flex justify-between items-center text-sm
-                    ${idx === activeIdx ? 'bg-blue-50 dark:bg-blue-900/30' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                    ${idx === activeIdx ? 'bg-blue-50 dark:bg-blue-900/30' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}
                   onMouseDown={() => {
                     if (!symbols.includes(s.symbol)) addSymbol(s.symbol);
                   }}
@@ -406,7 +582,7 @@ export function StockComparePage() {
                 >
                   <div>
                     <span className="font-semibold text-gray-800 dark:text-gray-200">{s.symbol}</span>
-                    <span className="ml-2 text-gray-500 dark:text-gray-400 text-xs">{s.shortname}</span>
+                    <span className="ml-2 text-gray-400 dark:text-gray-500 text-xs">{s.shortname}</span>
                   </div>
                   <span className="text-xs text-gray-400 dark:text-gray-500">{s.exchange === 'NSI' ? 'NSE' : 'BSE'}</span>
                 </li>
@@ -416,25 +592,46 @@ export function StockComparePage() {
         )}
       </div>
 
-      {symbols.length >= 2 && (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-4 md:p-6">
+      {showNormalizedChart && (
+        <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-700 p-4 md:p-6">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Normalized % change</h3>
-            <div className="flex gap-1 bg-gray-100 dark:bg-gray-700/80 rounded-lg p-1">
-              {RANGE_OPTIONS.map(({ key, label }) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setRange(key)}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
-                    range === key
-                      ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-300 shadow-sm'
-                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Index</span>
+                <div className="flex gap-0.5 bg-white dark:bg-gray-900 rounded-lg p-0.5 border border-gray-200 dark:border-gray-700">
+                  {BENCHMARK_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.mode}
+                      type="button"
+                      onClick={() => setBenchmarkMode(opt.mode)}
+                      className={`px-2.5 py-1.5 text-[11px] font-semibold rounded-md transition-colors ${
+                        benchmarkMode === opt.mode
+                          ? 'bg-gray-200 dark:bg-gray-700 text-blue-600 dark:text-blue-300'
+                          : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                      }`}
+                    >
+                      {opt.mode === 'off' ? 'Off' : opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-1 bg-white dark:bg-gray-900 rounded-lg p-1 border border-gray-200 dark:border-transparent">
+                {RANGE_OPTIONS.map(({ key, label }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setRange(key)}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+                      range === key
+                        ? 'bg-gray-200 dark:bg-gray-700 text-blue-600 dark:text-blue-300'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -462,10 +659,16 @@ export function StockComparePage() {
                   />
                   <Tooltip
                     {...tooltipStyles}
-                    formatter={(value: unknown) => [`${Number(value).toFixed(2)}%`, '']}
+                    formatter={(value: unknown, name: unknown) => {
+                      const pct = `${Number(value).toFixed(2)}%`;
+                      const key = String(name);
+                      if (key === 'NIFTY_50') return [pct, 'Nifty 50'];
+                      if (key === 'SENSEX_IDX') return [pct, 'Sensex'];
+                      return [pct, key];
+                    }}
                     labelFormatter={(label) => String(label)}
                   />
-                  <Legend wrapperStyle={{ color: '#9ca3af' }} />
+                  <Legend wrapperStyle={{ color: legendColor }} />
                   {symbols.map((sym, i) => (
                     <Line
                       key={sym}
@@ -477,6 +680,17 @@ export function StockComparePage() {
                       name={statsBySymbol[sym]?.shortName ?? sym}
                     />
                   ))}
+                  {activeBenchmark && (
+                    <Line
+                      type="monotone"
+                      dataKey={activeBenchmark.dataKey}
+                      stroke={BENCHMARK_STRIKE}
+                      strokeWidth={2}
+                      strokeDasharray="5 4"
+                      dot={false}
+                      name={activeBenchmark.label}
+                    />
+                  )}
                 </LineChart>
               </ResponsiveContainer>
             )}
@@ -485,8 +699,8 @@ export function StockComparePage() {
       )}
 
       {symbols.length >= 2 && (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/40">
+        <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-700 overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-300 dark:border-gray-700 bg-gray-100/90 dark:bg-gray-800/80">
             <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Comparison</h3>
             {statsLoading && (
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Updating statistics…</p>
@@ -494,51 +708,63 @@ export function StockComparePage() {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[640px]">
-              <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+              <thead className="bg-gray-100/80 dark:bg-gray-800/50 border-b border-gray-300 dark:border-gray-700">
                 <tr>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                  <th className="text-left px-4 py-3 font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">
                     Metric
                   </th>
                   {symbols.map((sym, i) => (
                     <th
                       key={sym}
-                      className="text-right px-4 py-3 font-semibold whitespace-nowrap text-gray-800 dark:text-gray-100"
+                      className="text-right px-4 py-3 font-semibold whitespace-nowrap text-gray-900 dark:text-gray-100"
                       style={{ borderBottom: `2px solid ${CHART_COLORS[i % CHART_COLORS.length]}` }}
                     >
-                      <span className="block text-xs font-normal text-gray-500 dark:text-gray-400">{sym}</span>
+                      <span className="block text-xs font-normal text-gray-400 dark:text-gray-500">{sym}</span>
                       <span className="font-semibold">{statsBySymbol[sym]?.shortName ?? sym}</span>
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {comparisonRows.map((row) => (
-                  <tr
-                    key={row.label}
-                    className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/40"
-                  >
-                    <td className="px-4 py-2.5 font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                      {row.label}
-                    </td>
-                    {symbols.map((sym) => (
-                      <td
-                        key={`${row.label}-${sym}`}
-                        className="px-4 py-2.5 text-right font-mono text-gray-800 dark:text-gray-200"
-                      >
-                        {row.fmt(sym)}
+                {comparisonRows.map((row) => {
+                  const highlights = computeRowHighlights(symbols, row.rank, row.value);
+                  return (
+                    <tr
+                      key={row.label}
+                      className="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800/40"
+                    >
+                      <td className="px-4 py-2.5 font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                        {row.label}
                       </td>
-                    ))}
-                  </tr>
-                ))}
+                      {symbols.map((sym) => {
+                        const h = highlights[sym];
+                        const cellBg =
+                          h === 'best'
+                            ? 'bg-emerald-100/80 dark:bg-emerald-500/15'
+                            : h === 'worst'
+                              ? 'bg-rose-100/80 dark:bg-rose-500/15'
+                              : '';
+                        return (
+                          <td
+                            key={`${row.label}-${sym}`}
+                            className={`px-4 py-2.5 text-right font-mono text-gray-800 dark:text-gray-200 ${cellBg}`}
+                          >
+                            {row.fmt(sym)}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         </div>
       )}
 
-      {symbols.length === 1 && (
-        <div className="text-center text-sm text-gray-500 dark:text-gray-400 py-8 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
-          Add at least one more stock to see the comparison chart and table.
+      {symbols.length === 1 && !activeBenchmark && (
+        <div className="text-center text-sm text-gray-500 dark:text-gray-400 py-8 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
+          Add another stock for the comparison table, or turn on an index overlay above to chart vs Nifty / Sensex.
         </div>
       )}
     </div>

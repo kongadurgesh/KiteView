@@ -182,14 +182,14 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-8 flex items-center justify-center">
-        <div className="size-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+      <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-700 p-8 flex items-center justify-center">
+        <div className="size-8 border-4 border-blue-800/50 border-t-blue-600 rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6 space-y-6">
+    <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-700 p-6 space-y-6">
       <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider">
         Risk Analytics
       </h3>
@@ -199,7 +199,7 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
         <MetricCard
           label="Diversification" value={`${divScore}`} unit="/100"
           interpretation={divScore >= 70 ? 'Good' : divScore >= 40 ? 'Moderate' : 'Low'}
-          color={divScore >= 70 ? 'text-green-600' : divScore >= 40 ? 'text-amber-600' : 'text-red-600'}
+          color={divScore >= 70 ? 'text-emerald-600 dark:text-emerald-400' : divScore >= 40 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}
           tip={divScore >= 70
             ? 'Your portfolio is well diversified across holdings.'
             : divScore >= 40
@@ -209,7 +209,7 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
         <MetricCard
           label="Beta" value={`${beta}`} unit="vs Nifty"
           interpretation={beta < 0.8 ? 'Defensive' : beta > 1.2 ? 'Aggressive' : 'Balanced'}
-          color={beta <= 1 ? 'text-green-600' : 'text-amber-600'}
+          color={beta <= 1 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}
           tip={beta > 1.2
             ? 'High beta means your portfolio swings more than the market. Add defensive stocks (FMCG, Pharma, Utilities) to lower it.'
             : beta < 0.8
@@ -219,7 +219,7 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
         <MetricCard
           label="Volatility" value={`${volatility}%`} unit="annualized"
           interpretation={volatility < 15 ? 'Low' : volatility < 30 ? 'Medium' : 'High'}
-          color={volatility < 15 ? 'text-green-600' : volatility < 30 ? 'text-amber-600' : 'text-red-600'}
+          color={volatility < 15 ? 'text-emerald-600 dark:text-emerald-400' : volatility < 30 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}
           tip={volatility >= 30
             ? 'High volatility — your portfolio value fluctuates sharply. Add large-cap or debt-like instruments to stabilize.'
             : volatility >= 15
@@ -229,7 +229,7 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
         <MetricCard
           label="Sharpe Ratio" value={`${sharpe}`} unit="risk-adj"
           interpretation={sharpe > 1 ? 'Good' : sharpe > 0 ? 'OK' : 'Poor'}
-          color={sharpe > 1 ? 'text-green-600' : sharpe > 0 ? 'text-amber-600' : 'text-red-600'}
+          color={sharpe > 1 ? 'text-emerald-600 dark:text-emerald-400' : sharpe > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}
           tip={sharpe <= 0
             ? 'Returns are below the risk-free rate. Review underperformers and consider replacing them with stronger picks.'
             : sharpe <= 1
@@ -239,7 +239,7 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
         <MetricCard
           label="Max Drawdown" value={`-${maxDd}%`} unit="peak to trough"
           interpretation={maxDd < 10 ? 'Mild' : maxDd < 25 ? 'Moderate' : 'Severe'}
-          color={maxDd < 10 ? 'text-green-600' : maxDd < 25 ? 'text-amber-600' : 'text-red-600'}
+          color={maxDd < 10 ? 'text-emerald-600 dark:text-emerald-400' : maxDd < 25 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}
           tip={maxDd >= 25
             ? 'Severe drawdown — consider adding stop losses, hedging, or shifting some allocation to defensive sectors.'
             : maxDd >= 10
@@ -277,9 +277,9 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
                     formatter={(value) => `${(Number(value) * 100).toFixed(1)}%`}
                     contentStyle={{
                       borderRadius: '8px',
-                      border: `1px solid ${document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'}`,
-                      backgroundColor: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff',
-                      color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#111827',
+                      border: '1px solid #374151',
+                      backgroundColor: '#1f2937',
+                      color: '#e5e7eb',
                       fontSize: 12,
                     }}
                   />
@@ -292,7 +292,7 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
                 <button
                   key={s.sector}
                   onClick={() => setSelectedSector(s.sector)}
-                  className="inline-flex items-center gap-1 text-[11px] text-gray-600 dark:text-gray-400 hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400 hover:underline"
                 >
                   <span className="size-2 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
                   {s.sector} ({(s.weight * 100).toFixed(1)}%)
@@ -326,9 +326,9 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
                   formatter={(value) => `${(Number(value) * 100).toFixed(1)}%`}
                   contentStyle={{
                     borderRadius: '8px',
-                    border: `1px solid ${document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'}`,
-                    backgroundColor: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff',
-                    color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#111827',
+                    border: '1px solid #374151',
+                    backgroundColor: '#1f2937',
+                    color: '#e5e7eb',
                     fontSize: 12,
                   }}
                 />
@@ -336,7 +336,7 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
             </ResponsiveContainer>
             <div className="flex flex-wrap gap-2 mt-2 justify-center">
               {stockAllocation.map((s, i) => (
-                <span key={s.symbol} className="inline-flex items-center gap-1 text-[11px] text-gray-600 dark:text-gray-400">
+                <span key={s.symbol} className="inline-flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
                   <span className="size-2 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
                   {s.symbol.replace('.NS', '')} ({(s.weight * 100).toFixed(1)}%)
                 </span>
@@ -358,13 +358,13 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
           }}
         >
           <div
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-sm mx-4 p-5"
+            className="bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-700 w-full max-w-sm mx-4 p-5"
             role="document"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">{selectedSector}</h4>
-              <button onClick={() => setSelectedSector(null)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none">&times;</button>
+              <button onClick={() => setSelectedSector(null)} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-xl leading-none">&times;</button>
             </div>
             <table className="w-full text-sm">
               <thead>
@@ -375,7 +375,7 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
               </thead>
               <tbody>
                 {sectorStocks[selectedSector].map((stock) => (
-                  <tr key={stock.symbol} className="border-t border-gray-100 dark:border-gray-700">
+                  <tr key={stock.symbol} className="border-t border-gray-300 dark:border-gray-700">
                     <td className="py-2">
                       <p className="font-medium text-gray-800 dark:text-gray-200 truncate max-w-[200px]">{stock.name}</p>
                       <p className="text-[10px] text-gray-400 dark:text-gray-500">{stock.symbol.replace('.NS', '')}</p>
@@ -387,8 +387,8 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
                 ))}
               </tbody>
               <tfoot>
-                <tr className="border-t border-gray-200 dark:border-gray-600">
-                  <td className="pt-2 text-xs font-semibold text-gray-600 dark:text-gray-400">Total</td>
+                <tr className="border-t border-gray-300 dark:border-gray-600">
+                  <td className="pt-2 text-xs font-semibold text-gray-500 dark:text-gray-400">Total</td>
                   <td className="pt-2 text-right font-mono font-bold text-gray-800 dark:text-gray-200">
                     {(sectorStocks[selectedSector].reduce((s, st) => s + st.weight, 0) * 100).toFixed(1)}%
                   </td>
@@ -409,7 +409,7 @@ function MetricCard({ label, value, unit, interpretation, color, tip }: {
 
   return (
     <div className="flex flex-col">
-      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl px-3 py-3 text-center relative">
+      <div className="bg-gray-100 dark:bg-gray-700/50 rounded-xl px-3 py-3 text-center relative">
         <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">{label}</p>
         <p className={`text-xl font-bold font-mono ${color}`}>{value}</p>
         <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">{unit}</p>
@@ -421,7 +421,7 @@ function MetricCard({ label, value, unit, interpretation, color, tip }: {
             aria-label="Suggestion"
           >
             <span className="absolute inset-0 rounded-full bg-amber-400/30 animate-ping" />
-            <span className="relative flex items-center justify-center w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-900/40 border border-amber-300 dark:border-amber-700 text-amber-500 group-hover:bg-amber-400 group-hover:text-white group-hover:border-amber-400 group-hover:shadow-[0_0_12px_rgba(251,191,36,0.8)] transition-all duration-200">
+            <span className="relative flex items-center justify-center w-6 h-6 rounded-full bg-amber-900/40 border border-amber-700 text-amber-500 group-hover:bg-amber-400 group-hover:text-white group-hover:border-amber-400 group-hover:shadow-[0_0_12px_rgba(251,191,36,0.8)] transition-all duration-200">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z" />
               </svg>
@@ -430,8 +430,8 @@ function MetricCard({ label, value, unit, interpretation, color, tip }: {
         )}
       </div>
       {showTip && tip && (
-        <div className="mt-1.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg px-2.5 py-2 text-left">
-          <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">{tip}</p>
+        <div className="mt-1.5 bg-amber-50 dark:bg-amber-500/10 border border-amber-800 rounded-lg px-2.5 py-2 text-left">
+          <p className="text-[11px] text-amber-600 dark:text-amber-400 leading-relaxed">{tip}</p>
         </div>
       )}
     </div>
