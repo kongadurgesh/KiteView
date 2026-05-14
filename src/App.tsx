@@ -7,6 +7,7 @@ import { PortfolioPage } from './components/PortfolioPage';
 import { ScreenerPage } from './components/ScreenerPage';
 import { HeatmapPage } from './components/HeatmapPage';
 import { StockComparePage } from './components/StockComparePage';
+import { AboutPage } from './components/AboutPage';
 import { fetchStockData, fetchStockMeta, fetchAllTimeHigh } from './utils/fetchStockData';
 import { detectPattern } from './utils/patternDetector';
 import { initTheme, cycleTheme, getTheme } from './utils/theme';
@@ -20,6 +21,7 @@ function App() {
 
   const [activeTab, setActiveTab] = useState<Tab>('screener');
   const [compareMode, setCompareMode] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -103,107 +105,123 @@ function App() {
         </button>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="flex bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-1 mb-8">
-        {([['screener', 'Screener'], ['heatmap', 'Heatmap'], ['lookup', 'Lookup'], ['portfolio', 'Portfolio']] as const).map(([key, label]) => (
-          <button
-            key={key}
-            onClick={() => setActiveTab(key)}
-            className={`px-6 py-2 rounded-lg text-sm font-semibold transition-colors ${
-              activeTab === key
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      {showAbout ? (
+        <AboutPage onBack={() => setShowAbout(false)} />
+      ) : (
+        <>
+          {/* Tab Navigation */}
+          <div className="flex bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-1 mb-8">
+            {([['screener', 'Screener'], ['heatmap', 'Heatmap'], ['lookup', 'Lookup'], ['portfolio', 'Portfolio']] as const).map(([key, label]) => (
+              <button
+                key={key}
+                onClick={() => setActiveTab(key)}
+                className={`px-6 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                  activeTab === key
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
 
-      <div style={{ display: activeTab === 'screener' ? undefined : 'none' }} className="w-full flex flex-col items-center">
-        <ScreenerPage
-          onViewStock={(sym) => {
-            setActiveTab('lookup');
-            handleSearch(sym);
-          }}
-        />
-      </div>
+          <div style={{ display: activeTab === 'screener' ? undefined : 'none' }} className="w-full flex flex-col items-center">
+            <ScreenerPage
+              onViewStock={(sym) => {
+                setActiveTab('lookup');
+                handleSearch(sym);
+              }}
+            />
+          </div>
 
-      <div style={{ display: activeTab === 'heatmap' ? undefined : 'none' }} className="w-full flex flex-col items-center">
-        <HeatmapPage
-          onViewStock={(sym) => {
-            setActiveTab('lookup');
-            handleSearch(sym);
-          }}
-        />
-      </div>
+          <div style={{ display: activeTab === 'heatmap' ? undefined : 'none' }} className="w-full flex flex-col items-center">
+            <HeatmapPage
+              onViewStock={(sym) => {
+                setActiveTab('lookup');
+                handleSearch(sym);
+              }}
+            />
+          </div>
 
-      <div style={{ display: activeTab === 'lookup' ? undefined : 'none' }} className="w-full flex flex-col items-center">
-        <div className="flex items-center gap-3 w-full max-w-lg mb-4">
-          <button
-            onClick={() => setCompareMode(false)}
-            className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${!compareMode ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
-          >
-            Scan
-          </button>
-          <button
-            onClick={() => setCompareMode(true)}
-            className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${compareMode ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
-          >
-            Compare
-          </button>
-        </div>
+          <div style={{ display: activeTab === 'lookup' ? undefined : 'none' }} className="w-full flex flex-col items-center">
+            <div className="flex items-center gap-3 w-full max-w-lg mb-4">
+              <button
+                onClick={() => setCompareMode(false)}
+                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${!compareMode ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
+              >
+                Scan
+              </button>
+              <button
+                onClick={() => setCompareMode(true)}
+                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${compareMode ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
+              >
+                Compare
+              </button>
+            </div>
 
-        {compareMode ? (
-          <StockComparePage />
-        ) : (
-          <>
-            <SearchBar onSearch={handleSearch} isLoading={isLoading} />
+            {compareMode ? (
+              <StockComparePage />
+            ) : (
+              <>
+                <SearchBar onSearch={handleSearch} isLoading={isLoading} />
 
-            {isLoading && (
-              <div className="mt-12 flex flex-col items-center gap-3">
-                <div className="size-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin" />
-                <p className="text-gray-500 dark:text-gray-400 text-sm">Fetching data & scanning for pattern...</p>
-              </div>
+                {isLoading && (
+                  <div className="mt-12 flex flex-col items-center gap-3">
+                    <div className="size-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin" />
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">Fetching data & scanning for pattern...</p>
+                  </div>
+                )}
+
+                {error && (
+                  <div className="mt-8 max-w-lg w-full rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 p-4">
+                    <p className="text-red-700 dark:text-red-400 text-sm font-medium">Error</p>
+                    <p className="text-red-600 dark:text-red-400 text-sm mt-1">{error}</p>
+                  </div>
+                )}
+
+                {noMatch && !isLoading && (
+                  <div className="mt-8 max-w-lg w-full rounded-lg bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 p-4 text-center">
+                    <p className="text-amber-700 dark:text-amber-400 text-sm font-medium">No Pattern Found</p>
+                    <p className="text-amber-600 dark:text-amber-400 text-sm mt-1">
+                      No Bullish Harami or Bullish Engulfing pattern was detected for <strong>{symbol}</strong> in the last 1 year of data.
+                    </p>
+                  </div>
+                )}
+
+                {match && !isLoading && (
+                  <ResultCard
+                    match={match}
+                    stockName={stockName}
+                    symbol={symbol}
+                    currentPrice={currentPrice}
+                    fiftyTwoWeekHigh={fiftyTwoWeekHigh}
+                    fiftyTwoWeekLow={fiftyTwoWeekLow}
+                    allTimeHigh={allTimeHigh}
+                    marketCapCr={marketCapCr}
+                    sector={sector}
+                    industry={industry}
+                  />
+                )}
+              </>
             )}
+          </div>
 
-            {error && (
-              <div className="mt-8 max-w-lg w-full rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 p-4">
-                <p className="text-red-700 dark:text-red-400 text-sm font-medium">Error</p>
-                <p className="text-red-600 dark:text-red-400 text-sm mt-1">{error}</p>
-              </div>
-            )}
+          <div style={{ display: activeTab === 'portfolio' ? undefined : 'none' }} className="w-full flex flex-col items-center">
+            <PortfolioPage />
+          </div>
+        </>
+      )}
 
-            {noMatch && !isLoading && (
-              <div className="mt-8 max-w-lg w-full rounded-lg bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 p-4 text-center">
-                <p className="text-amber-700 dark:text-amber-400 text-sm font-medium">No Pattern Found</p>
-                <p className="text-amber-600 dark:text-amber-400 text-sm mt-1">
-                  No Bullish Harami or Bullish Engulfing pattern was detected for <strong>{symbol}</strong> in the last 1 year of data.
-                </p>
-              </div>
-            )}
-
-            {match && !isLoading && (
-              <ResultCard
-                match={match}
-                stockName={stockName}
-                symbol={symbol}
-                currentPrice={currentPrice}
-                fiftyTwoWeekHigh={fiftyTwoWeekHigh}
-                fiftyTwoWeekLow={fiftyTwoWeekLow}
-                allTimeHigh={allTimeHigh}
-                marketCapCr={marketCapCr}
-                sector={sector}
-                industry={industry}
-              />
-            )}
-          </>
-        )}
-      </div>
-
-      <div style={{ display: activeTab === 'portfolio' ? undefined : 'none' }} className="w-full flex flex-col items-center">
-        <PortfolioPage />
-      </div>
+      {/* Footer */}
+      <footer className="mt-auto pt-10 pb-4 text-center">
+        <button
+          onClick={() => setShowAbout(true)}
+          className="text-xs text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+        >
+          About the Manager
+        </button>
+      </footer>
 
       <Analytics />
       <SpeedInsights />
