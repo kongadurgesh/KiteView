@@ -316,7 +316,7 @@ export function HeatmapPage({ onViewStock }: Props) {
       {/* Loading skeleton */}
       {loading && displayQuotes.length === 0 && (
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-16 flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin" />
+          <div className="size-10 border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin" />
           <p className="text-gray-400 dark:text-gray-500 text-sm">Fetching market data...</p>
         </div>
       )}

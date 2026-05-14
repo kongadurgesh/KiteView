@@ -121,8 +121,9 @@ export function AddTransactionModal({ onAdd, onClose, maxSellQty = {} }: AddTran
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Symbol */}
           <div ref={wrapperRef} className="relative">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Symbol</label>
+            <label htmlFor="txn-symbol" className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Symbol</label>
             <input
+              id="txn-symbol"
               type="text"
               value={symbolInput}
               onChange={handleSymbolChange}
@@ -151,7 +152,7 @@ export function AddTransactionModal({ onAdd, onClose, maxSellQty = {} }: AddTran
 
           {/* BUY / SELL toggle */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Type</label>
+            <span className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Type</span>
             <div className="flex gap-2">
               {(['BUY', 'SELL'] as const).map((t) => (
                 <button
@@ -175,8 +176,9 @@ export function AddTransactionModal({ onAdd, onClose, maxSellQty = {} }: AddTran
           {/* Qty + Price */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Quantity</label>
+              <label htmlFor="txn-qty" className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Quantity</label>
               <input
+                id="txn-qty"
                 type="number"
                 min="1"
                 value={qty}
@@ -185,8 +187,9 @@ export function AddTransactionModal({ onAdd, onClose, maxSellQty = {} }: AddTran
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Price / Share</label>
+              <label htmlFor="txn-price" className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Price / Share</label>
               <input
+                id="txn-price"
                 type="number"
                 min="0.01"
                 step="0.01"
@@ -199,8 +202,9 @@ export function AddTransactionModal({ onAdd, onClose, maxSellQty = {} }: AddTran
 
           {/* Date */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Date</label>
+            <label htmlFor="txn-date" className="block text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Date</label>
             <input
+              id="txn-date"
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}

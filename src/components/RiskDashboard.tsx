@@ -183,7 +183,7 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
   if (loading) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-8 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+        <div className="size-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
       </div>
     );
   }
@@ -294,7 +294,7 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
                   onClick={() => setSelectedSector(s.sector)}
                   className="inline-flex items-center gap-1 text-[11px] text-gray-600 dark:text-gray-400 hover:underline"
                 >
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                  <span className="size-2 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
                   {s.sector} ({(s.weight * 100).toFixed(1)}%)
                 </button>
               ))}
@@ -337,7 +337,7 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
             <div className="flex flex-wrap gap-2 mt-2 justify-center">
               {stockAllocation.map((s, i) => (
                 <span key={s.symbol} className="inline-flex items-center gap-1 text-[11px] text-gray-600 dark:text-gray-400">
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                  <span className="size-2 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
                   {s.symbol.replace('.NS', '')} ({(s.weight * 100).toFixed(1)}%)
                 </span>
               ))}
@@ -348,9 +348,18 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
 
       {/* Sector drill-down modal */}
       {selectedSector && sectorStocks[selectedSector] && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setSelectedSector(null)}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setSelectedSector(null)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setSelectedSector(null);
+          }}
+        >
           <div
             className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-sm mx-4 p-5"
+            role="document"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">

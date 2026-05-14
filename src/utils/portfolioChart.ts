@@ -80,12 +80,3 @@ export function computeDailyPortfolioValue(
 
   return series;
 }
-
-export function normalizeToPercent(
-  values: number[],
-): number[] {
-  if (values.length === 0) return [];
-  const base = values[0];
-  if (base === 0) return values.map(() => 0);
-  return values.map((v) => parseFloat((((v - base) / base) * 100).toFixed(2)));
-}

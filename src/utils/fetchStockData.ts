@@ -98,27 +98,6 @@ export async function fetchStockMeta(symbol: string): Promise<StockMeta> {
   }
 }
 
-export async function fetchBatchQuotes(symbols: string[]): Promise<Record<string, number>> {
-  if (symbols.length === 0) return {};
-  try {
-    const joined = symbols.join(',');
-    const url = `${PROXY_BASE}/api/quote/${encodeURIComponent(joined)}`;
-    const res = await fetch(url);
-    if (!res.ok) return {};
-    const data = await res.json();
-    const results = data?.quoteResponse?.result ?? [];
-    const prices: Record<string, number> = {};
-    for (const r of results) {
-      if (r.symbol && r.regularMarketPrice != null) {
-        prices[r.symbol] = r.regularMarketPrice;
-      }
-    }
-    return prices;
-  } catch {
-    return {};
-  }
-}
-
 export interface LiveQuoteDetailed {
   price: number;
   previousClose: number;
