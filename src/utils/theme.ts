@@ -1,9 +1,9 @@
-type ThemePref = 'light' | 'dark' | 'system';
+type ThemePref = 'light' | 'dark';
 
 const STORAGE_KEY = 'kiteview-theme';
 
 export function getTheme(): ThemePref {
-  return (localStorage.getItem(STORAGE_KEY) as ThemePref) ?? 'system';
+  return (localStorage.getItem(STORAGE_KEY) as ThemePref) ?? 'dark';
 }
 
 export function setTheme(pref: ThemePref): void {
@@ -12,24 +12,15 @@ export function setTheme(pref: ThemePref): void {
 }
 
 function applyTheme(pref: ThemePref): void {
-  const isDark =
-    pref === 'dark' ||
-    (pref === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-  document.documentElement.classList.toggle('dark', isDark);
+  document.documentElement.classList.toggle('dark', pref === 'dark');
 }
 
 export function initTheme(): void {
   applyTheme(getTheme());
-  // Listen for system changes when set to 'system'
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-    if (getTheme() === 'system') applyTheme('system');
-  });
 }
 
-export function cycleTheme(): ThemePref {
-  const order: ThemePref[] = ['system', 'light', 'dark'];
-  const current = getTheme();
-  const next = order[(order.indexOf(current) + 1) % order.length];
+export function toggleTheme(): ThemePref {
+  const next = getTheme() === 'dark' ? 'light' : 'dark';
   setTheme(next);
   return next;
 }

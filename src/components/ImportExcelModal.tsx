@@ -142,8 +142,8 @@ export function ImportExcelModal({ onImport, onClose }: ImportExcelModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-2xl mx-4 p-6 max-h-[85vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-2xl mx-4 p-6 max-h-[85vh] flex flex-col">
         <div className="flex items-center justify-between mb-5">
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Import from Excel</h3>
           <button onClick={onClose} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none">&times;</button>
@@ -159,7 +159,7 @@ export function ImportExcelModal({ onImport, onClose }: ImportExcelModalProps) {
               type="file"
               accept=".xlsx,.xls,.csv"
               onChange={handleFile}
-              className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-blue-900/30 file:text-blue-700 dark:file:text-blue-400 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/50 cursor-pointer"
+              className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-900/30 file:text-blue-400 hover:file:bg-blue-900/50 cursor-pointer"
             />
             {error && <p className="text-sm text-red-600 dark:text-red-400 font-medium">{error}</p>}
           </div>
@@ -170,9 +170,9 @@ export function ImportExcelModal({ onImport, onClose }: ImportExcelModalProps) {
                 {rows.length} row{rows.length > 1 ? 's' : ''} found
                 {resolved && (
                   <span>
-                    {' '}&mdash; <span className="text-green-600 dark:text-green-400 font-semibold">{resolvedRows.length} resolved</span>
+                    {' '}&mdash; <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{resolvedRows.length} resolved</span>
                     {failedRows.length > 0 && (
-                      <span className="text-red-500 dark:text-red-400 font-semibold">, {failedRows.length} failed</span>
+                      <span className="text-red-600 dark:text-red-400 font-semibold">, {failedRows.length} failed</span>
                     )}
                   </span>
                 )}
@@ -181,7 +181,7 @@ export function ImportExcelModal({ onImport, onClose }: ImportExcelModalProps) {
                 <button
                   onClick={handleResolve}
                   disabled={resolving}
-                  className="px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                  className="px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50 transition-colors"
                 >
                   {resolving ? 'Resolving...' : 'Resolve ISINs'}
                 </button>
@@ -189,16 +189,16 @@ export function ImportExcelModal({ onImport, onClose }: ImportExcelModalProps) {
               {resolved && resolvedRows.length > 0 && (
                 <button
                   onClick={handleImport}
-                  className="px-4 py-2 text-sm font-semibold rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors"
+                  className="px-4 py-2 text-sm font-semibold rounded-lg bg-green-600 text-white hover:bg-green-500 transition-colors"
                 >
                   Import {resolvedRows.length} Holdings
                 </button>
               )}
             </div>
 
-            <div className="overflow-auto flex-1 border border-gray-200 dark:border-gray-700 rounded-xl">
+            <div className="overflow-auto flex-1 border border-gray-200 dark:border-gray-800 rounded-xl">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 dark:bg-gray-700/50 sticky top-0">
+                <thead className="bg-gray-100 dark:bg-gray-800 sticky top-0">
                   <tr className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                     <th className="px-3 py-2 text-left font-medium">#</th>
                     <th className="px-3 py-2 text-left font-medium">ISIN</th>
@@ -211,7 +211,7 @@ export function ImportExcelModal({ onImport, onClose }: ImportExcelModalProps) {
                 </thead>
                 <tbody>
                   {rows.map((r, i) => (
-                    <tr key={i} className="border-t border-gray-50 dark:border-gray-700">
+                    <tr key={i} className="border-t border-gray-200 dark:border-gray-800">
                       <td className="px-3 py-2 text-gray-400 dark:text-gray-500">{i + 1}</td>
                       <td className="px-3 py-2 font-mono text-gray-700 dark:text-gray-300 text-xs">{r.isin}</td>
                       <td className="px-3 py-2 text-right font-mono text-gray-700 dark:text-gray-300">{r.qty}</td>
@@ -235,10 +235,10 @@ export function ImportExcelModal({ onImport, onClose }: ImportExcelModalProps) {
 
 function StatusBadge({ status }: { status: ImportRow['status'] }) {
   const styles = {
-    pending: 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400',
-    resolving: 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-    resolved: 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400',
-    failed: 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400',
+    pending: 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400',
+    resolving: 'bg-blue-900/30 text-blue-400',
+    resolved: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+    failed: 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400',
   };
   const labels = { pending: 'Pending', resolving: 'Resolving...', resolved: 'Resolved', failed: 'Failed' };
   return (

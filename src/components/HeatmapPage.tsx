@@ -221,7 +221,7 @@ export function HeatmapPage({ onViewStock }: Props) {
   return (
     <div className="w-full max-w-7xl mt-6 space-y-4">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-5">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
         <div className="flex flex-col gap-4">
           <div className="flex items-start justify-between">
             <div>
@@ -233,7 +233,7 @@ export function HeatmapPage({ onViewStock }: Props) {
             <button
               onClick={handleRefresh}
               disabled={loading}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors shrink-0"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50 transition-colors shrink-0"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -249,7 +249,7 @@ export function HeatmapPage({ onViewStock }: Props) {
               <select
                 value={selectedIndex}
                 onChange={(e) => setSelectedIndex(e.target.value)}
-                className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 text-sm font-medium text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {INDICES.map((idx) => (
                   <option key={idx.id} value={idx.id}>{idx.label}</option>
@@ -257,7 +257,7 @@ export function HeatmapPage({ onViewStock }: Props) {
               </select>
             </div>
 
-            <div className="h-5 w-px bg-gray-200 dark:bg-gray-700 hidden sm:block" />
+            <div className="h-5 w-px bg-gray-300 dark:bg-gray-700 hidden sm:block" />
 
             {/* Stats */}
             {!loading && displayQuotes.length > 0 && (
@@ -267,7 +267,7 @@ export function HeatmapPage({ onViewStock }: Props) {
                   <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L10 6.414l-3.293 3.293a1 1 0 01-1.414 0z" clipRule="evenodd"/></svg>
                   {gainers}
                 </span>
-                <span className="flex items-center gap-1 text-red-500 dark:text-red-400">
+                <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
                   <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L10 13.586l3.293-3.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
                   {losers}
                 </span>
@@ -293,7 +293,7 @@ export function HeatmapPage({ onViewStock }: Props) {
           {/* Progress bar */}
           {loading && progress.total > 0 && (
             <div className="w-full">
-              <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
+              <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 overflow-hidden">
                 <div
                   className="bg-blue-600 h-1.5 rounded-full transition-all duration-300 ease-out"
                   style={{ width: `${progressPct}%` }}
@@ -308,14 +308,14 @@ export function HeatmapPage({ onViewStock }: Props) {
       </div>
 
       {error && (
-        <div className="rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 p-4">
+        <div className="rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-300 dark:border-red-800 p-4">
           <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
         </div>
       )}
 
       {/* Loading skeleton */}
       {loading && displayQuotes.length === 0 && (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-16 flex flex-col items-center gap-4">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-16 flex flex-col items-center gap-4">
           <div className="size-10 border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin" />
           <p className="text-gray-400 dark:text-gray-500 text-sm">Fetching market data...</p>
         </div>
@@ -323,7 +323,7 @@ export function HeatmapPage({ onViewStock }: Props) {
 
       {/* Heatmap treemap */}
       {displayQuotes.length > 0 && (
-        <div className="bg-gray-900 dark:bg-gray-950 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg overflow-hidden p-1.5">
+        <div className="bg-gray-100 dark:bg-gray-950 rounded-2xl border border-gray-300 dark:border-gray-700 overflow-hidden p-1.5">
           <div className="relative w-full" style={{ paddingBottom: `${(CH / CW) * 100}%` }}>
             <div className="absolute inset-0">
               {rects.map((r) => {
@@ -384,7 +384,7 @@ export function HeatmapPage({ onViewStock }: Props) {
       )}
 
       {!loading && displayQuotes.length === 0 && !error && (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-12 text-center">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-12 text-center">
           <p className="text-gray-400 dark:text-gray-500 text-sm">No data available. Click Refresh to load.</p>
         </div>
       )}

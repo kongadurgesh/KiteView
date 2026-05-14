@@ -12,7 +12,7 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
   const sorted = transactions.toSorted((a, b) => b.createdAt - a.createdAt);
 
   return (
-    <div className="border-t border-gray-100 dark:border-gray-700 mt-2">
+    <div className="border-t border-gray-200 dark:border-gray-800 mt-2">
       <table className="w-full text-sm">
         <thead>
           <tr className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider">
@@ -25,14 +25,14 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
         </thead>
         <tbody>
           {sorted.map((t) => (
-            <tr key={t.id} className="border-t border-gray-50 dark:border-gray-700">
-              <td className="px-4 py-2 text-gray-600 dark:text-gray-400">{t.date}</td>
+            <tr key={t.id} className="border-t border-gray-200 dark:border-gray-800">
+              <td className="px-4 py-2 text-gray-500 dark:text-gray-400">{t.date}</td>
               <td className="px-4 py-2">
                 <span
                   className={`text-xs font-bold uppercase px-2 py-0.5 rounded ${
                     t.type === 'BUY'
-                      ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                      : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                      ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                      : 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400'
                   }`}
                 >
                   {t.type}
