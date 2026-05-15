@@ -1,21 +1,24 @@
 import { Portfolio } from '../types';
-
-const PROXY_BASE = import.meta.env.DEV ? 'http://localhost:3006' : '';
+import { fetchChartBatch } from './apiBatch';
 
 export async function fetchHistoricalPrices(
   symbols: string[],
   range: string = '1y',
 ): Promise<Record<string, Record<string, number>>> {
   const result: Record<string, Record<string, number>> = {};
+  if (symbols.length === 0) return result;
 
-  const fetches = symbols.map(async (sym) => {
+  const charts = await fetchChartBatch(symbols, range, '1d');
+
+  for (const sym of symbols) {
     try {
-      const url = `${PROXY_BASE}/api/chart/${encodeURIComponent(sym)}?range=${range}&interval=1d`;
-      const res = await fetch(url);
-      if (!res.ok) return;
-      const data = await res.json();
-      const chart = data?.chart?.result?.[0];
-      if (!chart) return;
+      const data = charts[sym];
+      if (!data) continue;
+      const chart = (data as { chart?: { result?: unknown[] } })?.chart?.result?.[0] as {
+        timestamp?: number[];
+        indicators?: { quote?: Array<{ close?: (number | null)[]; volume?: (number | null)[] }> };
+      } | undefined;
+      if (!chart) continue;
 
       const timestamps: number[] = chart.timestamp ?? [];
       const closes: (number | null)[] = chart.indicators?.quote?.[0]?.close ?? [];
@@ -33,9 +36,8 @@ export async function fetchHistoricalPrices(
     } catch {
       // skip failed symbols silently
     }
-  });
+  }
 
-  await Promise.all(fetches);
   return result;
 }
 

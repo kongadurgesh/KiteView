@@ -1,14 +1,22 @@
 import { Candle, StockInfo } from '../types';
+import { fetchChartBatch, fetchLookupBundle } from './apiBatch';
 
 const PROXY_BASE = import.meta.env.DEV ? 'http://localhost:3006' : '';
 
-export async function fetchStockData(symbol: string): Promise<StockInfo> {
-  const chartUrl = `${PROXY_BASE}/api/chart/${encodeURIComponent(symbol)}?range=1y&interval=1d`;
-  const chartRes = await fetch(chartUrl);
-  if (!chartRes.ok) throw new Error(`Failed to fetch chart data (HTTP ${chartRes.status})`);
-  const chartData = await chartRes.json();
+function parseStockInfoFromChart(chartData: unknown, symbol: string): StockInfo {
+  const result = (chartData as { chart?: { result?: unknown[] } })?.chart?.result?.[0] as {
+    timestamp?: number[];
+    indicators?: { quote?: Array<{ open?: (number | null)[]; high?: (number | null)[]; low?: (number | null)[]; close?: (number | null)[]; volume?: (number | null)[] }> };
+    meta?: {
+      shortName?: string;
+      symbol?: string;
+      regularMarketPrice?: number;
+      sharesOutstanding?: number;
+      fiftyTwoWeekHigh?: number;
+      fiftyTwoWeekLow?: number;
+    };
+  } | undefined;
 
-  const result = chartData?.chart?.result?.[0];
   if (!result) throw new Error('No data returned for this symbol. Check the ticker and try again.');
 
   const timestamps: number[] = result.timestamp ?? [];
@@ -48,18 +56,21 @@ export async function fetchStockData(symbol: string): Promise<StockInfo> {
   }
 
   return {
-    symbol, shortName, marketCap: marketCapCr, currentPrice: regularMarketPrice,
-    fiftyTwoWeekHigh, fiftyTwoWeekLow, candles,
+    symbol,
+    shortName,
+    marketCap: marketCapCr,
+    currentPrice: regularMarketPrice,
+    fiftyTwoWeekHigh,
+    fiftyTwoWeekLow,
+    candles,
   };
 }
 
-export async function fetchAllTimeHigh(symbol: string): Promise<number> {
+function parseAthFromChart(chartData: unknown): number {
   try {
-    const url = `${PROXY_BASE}/api/chart/${encodeURIComponent(symbol)}?range=max&interval=1mo`;
-    const res = await fetch(url);
-    if (!res.ok) return 0;
-    const data = await res.json();
-    const highs: number[] = data?.chart?.result?.[0]?.indicators?.quote?.[0]?.high ?? [];
+    const highs: (number | null)[] =
+      (chartData as { chart?: { result?: Array<{ indicators?: { quote?: Array<{ high?: (number | null)[] }> } }> } })
+        ?.chart?.result?.[0]?.indicators?.quote?.[0]?.high ?? [];
     let ath = 0;
     for (const h of highs) {
       if (h != null && h > ath) ath = h;
@@ -76,23 +87,55 @@ export interface StockMeta {
   industry: string;
 }
 
+function parseMetaFromBundle(
+  quoteData: unknown,
+  profile: { sector: string; industry: string },
+): StockMeta {
+  const r = (quoteData as { quoteResponse?: { result?: Array<{ marketCap?: number; sector?: string; industry?: string }> } })
+    ?.quoteResponse?.result?.[0];
+  const mc = r?.marketCap;
+  return {
+    marketCapCr: mc ? mc / 1e7 : 0,
+    sector: profile.sector || r?.sector || '',
+    industry: profile.industry || r?.industry || '',
+  };
+}
+
+export interface LookupData {
+  stockInfo: StockInfo;
+  allTimeHigh: number;
+  meta: StockMeta;
+}
+
+/** Single request: chart (1y + max), quote, and profile for pattern lookup. */
+export async function fetchLookupData(symbol: string): Promise<LookupData> {
+  const bundle = await fetchLookupBundle(symbol);
+  const stockInfo = parseStockInfoFromChart(bundle.chart1y, symbol);
+  const allTimeHigh = parseAthFromChart(bundle.chartMax);
+  const meta = parseMetaFromBundle(bundle.quote, bundle.profile);
+  return { stockInfo, allTimeHigh, meta };
+}
+
+export async function fetchStockData(symbol: string): Promise<StockInfo> {
+  const charts = await fetchChartBatch([symbol], '1y', '1d');
+  const chartData = charts[symbol];
+  if (!chartData) throw new Error(`Failed to fetch chart data for ${symbol}`);
+  return parseStockInfoFromChart(chartData, symbol);
+}
+
+export async function fetchAllTimeHigh(symbol: string): Promise<number> {
+  try {
+    const charts = await fetchChartBatch([symbol], 'max', '1mo');
+    return parseAthFromChart(charts[symbol]);
+  } catch {
+    return 0;
+  }
+}
+
 export async function fetchStockMeta(symbol: string): Promise<StockMeta> {
   try {
-    const [quoteRes, profileRes] = await Promise.all([
-      fetch(`${PROXY_BASE}/api/quote/${encodeURIComponent(symbol)}`),
-      fetch(`${PROXY_BASE}/api/profile/${encodeURIComponent(symbol)}`),
-    ]);
-
-    const quoteData = quoteRes.ok ? await quoteRes.json() : null;
-    const profileData = profileRes.ok ? await profileRes.json() : null;
-
-    const r = quoteData?.quoteResponse?.result?.[0];
-    const mc = r?.marketCap;
-    return {
-      marketCapCr: mc ? mc / 1e7 : 0,
-      sector: profileData?.sector || r?.sector || '',
-      industry: profileData?.industry || r?.industry || '',
-    };
+    const bundle = await fetchLookupBundle(symbol);
+    return parseMetaFromBundle(bundle.quote, bundle.profile);
   } catch {
     return { marketCapCr: 0, sector: '', industry: '' };
   }

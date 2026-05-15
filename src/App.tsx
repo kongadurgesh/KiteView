@@ -11,7 +11,7 @@ import { HeatmapPage } from './components/HeatmapPage';
 import { StockComparePage } from './components/StockComparePage';
 import { AboutPage } from './components/AboutPage';
 import { OverviewPage } from './components/OverviewPage';
-import { fetchStockData, fetchStockMeta, fetchAllTimeHigh } from './utils/fetchStockData';
+import { fetchLookupData } from './utils/fetchStockData';
 import { detectPattern } from './utils/patternDetector';
 import { initTheme, getTheme, toggleTheme } from './utils/theme';
 import { PatternMatch } from './types';
@@ -52,11 +52,7 @@ function App() {
     setSymbol(sym);
 
     try {
-      const [stockInfo, ath, meta] = await Promise.all([
-        fetchStockData(sym),
-        fetchAllTimeHigh(sym),
-        fetchStockMeta(sym),
-      ]);
+      const { stockInfo, allTimeHigh: ath, meta } = await fetchLookupData(sym);
       setStockName(stockInfo.shortName);
       setCurrentPrice(stockInfo.currentPrice);
       setFiftyTwoWeekHigh(stockInfo.fiftyTwoWeekHigh);

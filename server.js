@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import { fetchYahooChart, getYahooCrumb, runConcurrent, UA } from './api/lib/yahooCrumb.js';
 
 const app = express();
 const PORT = 3006;
@@ -23,33 +24,6 @@ app.get('/api/chart/:symbol', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch from Yahoo Finance', details: err.message });
   }
 });
-
-let cachedCrumb = null;
-let cachedCookie = null;
-let crumbExpiry = 0;
-
-async function getYahooCrumb() {
-  if (cachedCrumb && cachedCookie && Date.now() < crumbExpiry) {
-    return { crumb: cachedCrumb, cookie: cachedCookie };
-  }
-  const ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-  const cookieRes = await fetch('https://fc.yahoo.com/', {
-    headers: { 'User-Agent': ua },
-    redirect: 'manual',
-  });
-  const setCookie = cookieRes.headers.get('set-cookie') || '';
-  const cookie = setCookie.split(';')[0];
-
-  const crumbRes = await fetch('https://query2.finance.yahoo.com/v1/test/getcrumb', {
-    headers: { 'User-Agent': ua, Cookie: cookie },
-  });
-  const crumb = await crumbRes.text();
-
-  cachedCrumb = crumb;
-  cachedCookie = cookie;
-  crumbExpiry = Date.now() + 10 * 60 * 1000;
-  return { crumb, cookie };
-}
 
 app.get('/api/quote/:symbol', async (req, res) => {
   const { symbol } = req.params;
@@ -474,6 +448,120 @@ app.get('/api/dividends/:symbol', async (req, res) => {
     });
   } catch {
     res.json({ dividendRate: 0, dividendYield: 0, trailingAnnualDividendRate: 0, exDividendDate: null });
+  }
+});
+
+const BATCH_CONCURRENCY = 20;
+
+app.post('/api/chart-batch', async (req, res) => {
+  const { symbols = [], range = '1y', interval = '1d' } = req.body ?? {};
+  if (!Array.isArray(symbols) || symbols.length === 0) {
+    return res.json({ charts: {} });
+  }
+  try {
+    const charts = await runConcurrent(symbols, BATCH_CONCURRENCY, (sym) =>
+      fetchYahooChart(sym, range, interval),
+    );
+    res.json({ charts });
+  } catch (err) {
+    res.status(500).json({ error: 'Chart batch failed', details: err.message });
+  }
+});
+
+function parseStats(symbol, data) {
+  const result = data?.quoteSummary?.result?.[0] ?? {};
+  const ks = result.defaultKeyStatistics ?? {};
+  const sd = result.summaryDetail ?? {};
+  const pr = result.price ?? {};
+  return {
+    pe: sd.trailingPE?.raw ?? null,
+    forwardPE: sd.forwardPE?.raw ?? null,
+    pb: ks.priceToBook?.raw ?? null,
+    beta: ks.beta?.raw ?? null,
+    dividendYield: sd.dividendYield?.raw ?? null,
+    fiftyTwoWeekChange: ks.fiftyTwoWeekChange?.raw ?? null,
+    marketCap: pr.marketCap?.raw ?? null,
+    shortName: pr.shortName ?? symbol,
+    regularMarketPrice: pr.regularMarketPrice?.raw ?? null,
+    sector: pr.sector ?? '',
+  };
+}
+
+app.post('/api/stats-batch', async (req, res) => {
+  const { symbols = [] } = req.body ?? {};
+  if (!Array.isArray(symbols) || symbols.length === 0) {
+    return res.json({ stats: {} });
+  }
+  try {
+    const { crumb, cookie } = await getYahooCrumb();
+    const stats = await runConcurrent(symbols, 12, async (sym) => {
+      const url = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(sym)}?modules=defaultKeyStatistics,summaryDetail,price&crumb=${encodeURIComponent(crumb)}`;
+      const response = await fetch(url, { headers: { 'User-Agent': UA, Cookie: cookie } });
+      if (!response.ok) return parseStats(sym, {});
+      const data = await response.json();
+      return parseStats(sym, data);
+    });
+    res.json({ stats });
+  } catch (err) {
+    res.status(500).json({ error: 'Stats batch failed', details: err.message });
+  }
+});
+
+app.post('/api/dividends-batch', async (req, res) => {
+  const { symbols = [] } = req.body ?? {};
+  if (!Array.isArray(symbols) || symbols.length === 0) {
+    return res.json({ dividends: {} });
+  }
+  try {
+    const { crumb, cookie } = await getYahooCrumb();
+    const dividends = await runConcurrent(symbols, 12, async (sym) => {
+      const url = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(sym)}?modules=summaryDetail,calendarEvents&crumb=${encodeURIComponent(crumb)}`;
+      const response = await fetch(url, { headers: { 'User-Agent': UA, Cookie: cookie } });
+      if (!response.ok) {
+        return { dividendRate: 0, dividendYield: 0, trailingAnnualDividendRate: 0, exDividendDate: null };
+      }
+      const data = await response.json();
+      const result = data?.quoteSummary?.result?.[0] ?? {};
+      const sd = result.summaryDetail ?? {};
+      const ce = result.calendarEvents ?? {};
+      return {
+        dividendRate: sd.dividendRate?.raw ?? 0,
+        dividendYield: sd.dividendYield?.raw ?? 0,
+        trailingAnnualDividendRate: sd.trailingAnnualDividendRate?.raw ?? 0,
+        exDividendDate: ce.exDividendDate?.fmt ?? null,
+      };
+    });
+    res.json({ dividends });
+  } catch (err) {
+    res.status(500).json({ error: 'Dividends batch failed', details: err.message });
+  }
+});
+
+app.get('/api/lookup-bundle', async (req, res) => {
+  const symbol = req.query.symbol;
+  if (!symbol) return res.status(400).json({ error: 'symbol is required' });
+  try {
+    const { crumb, cookie } = await getYahooCrumb();
+    const [chart1y, chartMax, quoteRes, profileRes] = await Promise.all([
+      fetchYahooChart(symbol, '1y', '1d'),
+      fetchYahooChart(symbol, 'max', '1mo'),
+      fetch(
+        `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(symbol)}&crumb=${encodeURIComponent(crumb)}`,
+        { headers: { 'User-Agent': UA, Cookie: cookie } },
+      ).then((r) => (r.ok ? r.json() : null)),
+      fetch(
+        `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=assetProfile&crumb=${encodeURIComponent(crumb)}`,
+        { headers: { 'User-Agent': UA, Cookie: cookie } },
+      ).then(async (r) => {
+        if (!r.ok) return { sector: '', industry: '' };
+        const data = await r.json();
+        const profile = data?.quoteSummary?.result?.[0]?.assetProfile ?? {};
+        return { sector: profile.sector ?? '', industry: profile.industry ?? '' };
+      }),
+    ]);
+    res.json({ chart1y, chartMax, quote: quoteRes, profile: profileRes });
+  } catch (err) {
+    res.status(500).json({ error: 'Lookup bundle failed', details: err.message });
   }
 });
 

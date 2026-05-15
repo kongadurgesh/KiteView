@@ -34,20 +34,24 @@ export function MarketTicker({ sidebarExpanded }: MarketTickerProps) {
 
     async function fetchQuotes() {
       try {
-        const results = await Promise.all(
-          INDICES.map(async (idx) => {
-            const res = await fetch(`${PROXY_BASE}/api/quote/${encodeURIComponent(idx.symbol)}`);
-            const data = await res.json();
-            const q = data?.quoteResponse?.result?.[0] ?? data;
-            return {
-              label: idx.label,
-              symbol: idx.symbol,
-              price: q.regularMarketPrice ?? 0,
-              change: q.regularMarketChange ?? 0,
-              changePct: q.regularMarketChangePercent ?? 0,
-            } as IndexQuote;
-          })
-        );
+        const symbols = INDICES.map((idx) => idx.symbol).join(',');
+        const res = await fetch(`${PROXY_BASE}/api/quote/${encodeURIComponent(symbols)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const bySymbol: Record<string, { regularMarketPrice?: number; regularMarketChange?: number; regularMarketChangePercent?: number }> = {};
+        for (const q of data?.quoteResponse?.result ?? []) {
+          if (q?.symbol) bySymbol[q.symbol] = q;
+        }
+        const results = INDICES.map((idx) => {
+          const q = bySymbol[idx.symbol] ?? {};
+          return {
+            label: idx.label,
+            symbol: idx.symbol,
+            price: q.regularMarketPrice ?? 0,
+            change: q.regularMarketChange ?? 0,
+            changePct: q.regularMarketChangePercent ?? 0,
+          } as IndexQuote;
+        });
         if (!cancelled) setQuotes(results);
       } catch {
         // silently fail -- ticker is non-critical
