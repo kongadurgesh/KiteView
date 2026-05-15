@@ -1,11 +1,11 @@
 import { useState } from 'react';
+import { NavLink } from 'react-router-dom';
+import { pageToPath } from '../../app/routes';
 import type { Page } from './types';
 
 export type { Page } from './types';
 
 interface SidebarProps {
-  active: Page;
-  onChange: (page: Page) => void;
   isDark: boolean;
   onToggleTheme: () => void;
   onExpandChange?: (expanded: boolean) => void;
@@ -71,8 +71,6 @@ const NAV_ITEMS: { id: Page; label: string; icon: JSX.Element }[] = [
 ];
 
 export function Sidebar({
-  active,
-  onChange,
   isDark,
   onToggleTheme,
   onExpandChange,
@@ -88,10 +86,12 @@ export function Sidebar({
     onExpandChange?.(val);
   };
 
-  const handleNav = (page: Page) => {
-    onChange(page);
-    onMobileClose?.();
-  };
+  const navClass = (isActive: boolean) =>
+    `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+      isActive
+        ? 'bg-blue-50 dark:bg-blue-600/15 text-blue-600 dark:text-blue-400 border-l-2 border-blue-600 dark:border-blue-400 -ml-0.5 pl-[10px]'
+        : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
+    }`;
 
   return (
     <>
@@ -123,43 +123,33 @@ export function Sidebar({
         </div>
 
         <nav className="flex-1 py-3 flex flex-col gap-1 px-2 overflow-y-auto">
-          {NAV_ITEMS.map((item) => {
-            const isActive = active === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => handleNav(item.id)}
-                title={showLabels ? undefined : item.label}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-                  isActive
-                    ? 'bg-blue-50 dark:bg-blue-600/15 text-blue-600 dark:text-blue-400 border-l-2 border-blue-600 dark:border-blue-400 -ml-0.5 pl-[10px]'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
-                }`}
-              >
-                {item.icon}
-                {showLabels && <span>{item.label}</span>}
-              </button>
-            );
-          })}
+          {NAV_ITEMS.map((item) => (
+            <NavLink
+              key={item.id}
+              to={pageToPath(item.id)}
+              end={item.id === 'overview'}
+              onClick={onMobileClose}
+              title={showLabels ? undefined : item.label}
+              className={({ isActive }) => navClass(isActive)}
+            >
+              {item.icon}
+              {showLabels && <span>{item.label}</span>}
+            </NavLink>
+          ))}
         </nav>
 
         <div className="border-t border-gray-200 dark:border-gray-800 py-3 px-2 flex flex-col gap-1 shrink-0">
-          <button
-            type="button"
-            onClick={() => handleNav('about')}
+          <NavLink
+            to={pageToPath('about')}
+            onClick={onMobileClose}
             title={showLabels ? undefined : 'About'}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap w-full ${
-              active === 'about'
-                ? 'bg-blue-50 dark:bg-blue-600/15 text-blue-600 dark:text-blue-400'
-                : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
-            }`}
+            className={({ isActive }) => `${navClass(isActive)} w-full`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
             </svg>
             {showLabels && <span>About</span>}
-          </button>
+          </NavLink>
 
           <button
             type="button"

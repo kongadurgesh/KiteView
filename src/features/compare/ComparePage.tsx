@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   ResponsiveContainer,
   LineChart,
@@ -24,11 +25,6 @@ const BENCHMARK_OPTIONS: { mode: BenchmarkMode; label: string; sym: string; data
 ];
 
 const CHART_COLORS = ['#2563eb', '#f59e0b', '#10b981', '#f43f5e'];
-
-interface StockComparePageProps {
-  seedSymbol?: string | null;
-  onSeedConsumed?: () => void;
-}
 
 type RangeKey = '1mo' | '3mo' | '6mo' | '1y';
 
@@ -193,7 +189,8 @@ function getDarkModeSnapshot() {
   return document.documentElement.classList.contains('dark');
 }
 
-export function StockComparePage({ seedSymbol, onSeedConsumed }: StockComparePageProps) {
+export function StockComparePage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [symbols, setSymbols] = useState<string[]>([]);
   const [input, setInput] = useState('');
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -219,16 +216,18 @@ export function StockComparePage({ seedSymbol, onSeedConsumed }: StockComparePag
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const symbolParam = searchParams.get('symbol');
+
   useEffect(() => {
-    if (!seedSymbol?.trim()) return;
-    const raw = seedSymbol.trim();
+    if (!symbolParam?.trim()) return;
+    const raw = symbolParam.trim();
     const finalSym = raw.includes('.') ? raw : `${raw}.NS`;
     setSymbols((prev) => {
       if (prev.includes(finalSym) || prev.length >= 4) return prev;
       return [finalSym, ...prev];
     });
-    onSeedConsumed?.();
-  }, [seedSymbol, onSeedConsumed]);
+    setSearchParams({}, { replace: true });
+  }, [symbolParam, setSearchParams]);
 
   const fetchSuggestions = useCallback((query: string) => {
     if (query.length < 2) {

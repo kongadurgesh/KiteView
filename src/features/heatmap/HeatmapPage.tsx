@@ -1,11 +1,8 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useMatch } from 'react-router-dom';
+import { useAppNavigation } from '../../app/navigation';
 import { fetchScreenerList, ScreenerStock } from '../../utils/screener';
 import { fetchHeatmapBatch, HeatmapTimeframe, QuoteFull } from '../../utils/fetchStockData';
-
-interface Props {
-  onViewStock?: (symbol: string) => void;
-  isActive?: boolean;
-}
 
 interface IndexOption {
   id: string;
@@ -138,7 +135,9 @@ function squarify(items: QuoteFull[], width: number, height: number): TreemapRec
   return rects;
 }
 
-export function HeatmapPage({ onViewStock, isActive = false }: Props) {
+export function HeatmapPage() {
+  const { viewStock } = useAppNavigation();
+  const isActive = useMatch({ path: '/heatmap', end: true }) != null;
   const [allStocks, setAllStocks] = useState<ScreenerStock[]>([]);
   const [selectedIndex, setSelectedIndex] = useState('nifty50');
   const [timeframe, setTimeframe] = useState<HeatmapTimeframe>('1d');
@@ -412,7 +411,7 @@ export function HeatmapPage({ onViewStock, isActive = false }: Props) {
                       color: textColor,
                       textShadow: `0 1px 2px ${shadowColor}`,
                     }}
-                    onClick={() => onViewStock?.(r.quote.symbol)}
+                    onClick={() => viewStock(r.quote.symbol)}
                     title={`${r.quote.shortName}\n${r.quote.symbol}\n${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}%\n₹${r.quote.regularMarketPrice.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`}
                   >
                     {showSymbol && (

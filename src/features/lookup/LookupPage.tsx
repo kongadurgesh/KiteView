@@ -1,4 +1,6 @@
 import { useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useAppNavigation } from '../../app/navigation';
 import { PageLayout } from '../../components/layout/PageLayout';
 import { Alert, Button, Card, LoadingBlock } from '../../components/ui';
 import { fmtInr } from '../../lib/format';
@@ -6,21 +8,17 @@ import { ResultCard } from './ResultCard';
 import { SearchField } from '../../components/ui/SearchField';
 import { useLookup } from './useLookup';
 
-interface LookupPageProps {
-  onCompare: (symbol: string) => void;
-  seedSymbol?: string | null;
-  onSeedConsumed?: () => void;
-}
-
-export function LookupPage({ onCompare, seedSymbol, onSeedConsumed }: LookupPageProps) {
+export function LookupPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { compareStock } = useAppNavigation();
   const lookup = useLookup();
+  const symbolParam = searchParams.get('symbol');
 
   useEffect(() => {
-    if (seedSymbol) {
-      lookup.search(seedSymbol);
-      onSeedConsumed?.();
-    }
-  }, [seedSymbol]);
+    if (!symbolParam?.trim()) return;
+    lookup.search(symbolParam.trim());
+    setSearchParams({}, { replace: true });
+  }, [symbolParam]);
 
   return (
     <PageLayout
@@ -44,7 +42,7 @@ export function LookupPage({ onCompare, seedSymbol, onSeedConsumed }: LookupPage
               <Button variant="secondary" size="sm" disabled={!lookup.canRescan} onClick={() => lookup.search(lookup.symbol)}>
                 Rescan
               </Button>
-              <Button size="sm" disabled={!lookup.symbol} onClick={() => onCompare(lookup.symbol)}>
+              <Button size="sm" disabled={!lookup.symbol} onClick={() => compareStock(lookup.symbol)}>
                 Compare
               </Button>
             </div>

@@ -295,10 +295,10 @@ export function PortfolioPage() {
                       pos={pos}
                       cmp={cmp}
                       currentValue={currentValue}
-                      unrealized={unrealized}
-                      unrealizedPct={unrealizedPct}
                       todayPnl={rowTodayPnl}
                       todayPnlPct={rowTodayPnlPct}
+                      unrealized={unrealized}
+                      unrealizedPct={unrealizedPct}
                       isClosed={isClosed}
                       isExpanded={isExpanded}
                       loadingPrices={loadingPrices}
