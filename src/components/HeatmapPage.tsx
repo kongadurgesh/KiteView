@@ -257,7 +257,7 @@ export function HeatmapPage({ onViewStock, isActive = false }: Props) {
     <div className="w-full max-w-7xl mt-6 space-y-4">
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
         <div className="flex flex-col gap-4">
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
             <div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Market Heatmap</h2>
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">

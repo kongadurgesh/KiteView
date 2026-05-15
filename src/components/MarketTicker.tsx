@@ -26,7 +26,7 @@ interface MarketTickerProps {
 }
 
 export function MarketTicker({ sidebarExpanded }: MarketTickerProps) {
-  const extraLeft = sidebarExpanded ? '8.5rem' : '0px';
+  const sidebarOffset = sidebarExpanded ? '8.5rem' : '0px';
   const [quotes, setQuotes] = useState<IndexQuote[]>([]);
 
   useEffect(() => {
@@ -59,12 +59,17 @@ export function MarketTicker({ sidebarExpanded }: MarketTickerProps) {
     return () => { cancelled = true; clearInterval(interval); };
   }, []);
 
+  const barClass =
+    'h-10 border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/50 flex items-center overflow-x-auto shrink-0 px-4 sm:px-6 lg:pl-[calc(1.5rem+var(--sidebar-offset))] lg:pr-6 lg:transition-[padding-left] lg:duration-200';
+
+  const barStyle = { ['--sidebar-offset' as string]: sidebarOffset };
+
   if (quotes.length === 0) {
     return (
-      <div className="h-10 border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/50 flex items-center px-6 transition-[padding] duration-200" style={{ paddingLeft: `calc(1.5rem + ${extraLeft})` }}>
-        <div className="flex gap-8">
+      <div className={barClass} style={barStyle}>
+        <div className="flex gap-4 sm:gap-8">
           {INDICES.map((idx) => (
-            <span key={idx.symbol} className="text-xs text-gray-600">{idx.label} --</span>
+            <span key={idx.symbol} className="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">{idx.label} --</span>
           ))}
         </div>
       </div>
@@ -72,8 +77,8 @@ export function MarketTicker({ sidebarExpanded }: MarketTickerProps) {
   }
 
   return (
-    <div className="h-10 border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/50 flex items-center overflow-x-auto shrink-0 transition-[padding] duration-200" style={{ paddingLeft: `calc(1.5rem + ${extraLeft})`, paddingRight: '1.5rem' }}>
-      <div className="flex gap-8">
+    <div className={barClass} style={barStyle}>
+      <div className="flex gap-4 sm:gap-8">
         {quotes.map((q) => {
           const isUp = q.change >= 0;
           return (

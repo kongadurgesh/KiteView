@@ -152,7 +152,7 @@ export function ResultCard({
       </div>
 
       {/* Market Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatChip
           label="52W High"
           value={fmt(fiftyTwoWeekHigh)}

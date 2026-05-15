@@ -208,11 +208,11 @@ export function DividendDashboard({ portfolio, livePrices }: Props) {
                 <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700/40 border-b border-gray-200 dark:border-gray-700">
                   <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">Holdings</h3>
                 </div>
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
                   <table className="w-full text-sm min-w-[720px]">
                     <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
                       <tr>
-                        <th className="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">Stock</th>
+                        <th className="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-300 sticky left-0 z-10 bg-gray-50 dark:bg-gray-700/50 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)]">Stock</th>
                         <th className="text-right px-4 py-3 font-semibold text-gray-600 dark:text-gray-300 whitespace-nowrap">
                           Div/Share (₹)
                         </th>
@@ -231,7 +231,7 @@ export function DividendDashboard({ portfolio, livePrices }: Props) {
                           key={r.symbol}
                           className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/30"
                         >
-                          <td className="px-4 py-2.5">
+                          <td className="px-4 py-2.5 sticky left-0 z-10 bg-white dark:bg-gray-800 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)] dark:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.3)]">
                             <p className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[200px]">
                               {r.stockName}
                             </p>
