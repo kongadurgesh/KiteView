@@ -26,6 +26,7 @@ function App() {
 
   const [activePage, setActivePage] = useState<Page>('overview');
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [compareSeedSymbol, setCompareSeedSymbol] = useState<string | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -108,29 +109,62 @@ function App() {
 
   const canRescan = Boolean(symbol) && !isLoading;
 
+  const pageWrap = 'w-full max-w-7xl mx-auto flex flex-col items-center';
+
+  const handlePageChange = (page: Page) => {
+    setActivePage(page);
+    setMobileMenuOpen(false);
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Sidebar active={activePage} onChange={setActivePage} isDark={isDark} onToggleTheme={handleToggleTheme} onExpandChange={setSidebarExpanded} />
+      <Sidebar
+        active={activePage}
+        onChange={handlePageChange}
+        isDark={isDark}
+        onToggleTheme={handleToggleTheme}
+        onExpandChange={setSidebarExpanded}
+        mobileOpen={mobileMenuOpen}
+        onMobileClose={() => setMobileMenuOpen(false)}
+      />
 
-      <div className="flex-1 ml-16 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen lg:ml-16 min-w-0">
+        <header className="lg:hidden sticky top-0 z-20 flex items-center gap-3 h-12 px-4 border-b border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/90 backdrop-blur shrink-0">
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className="p-2 -ml-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+            aria-label="Open menu"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
+          <span className="font-bold text-gray-900 dark:text-gray-100 tracking-tight">KiteView</span>
+        </header>
+
         <MarketTicker sidebarExpanded={sidebarExpanded} />
 
-        <main className="flex-1 px-6 py-6 flex flex-col items-center overflow-y-auto">
-          <div style={{ display: activePage === 'overview' ? undefined : 'none' }} className="w-full max-w-3xl flex flex-col items-center">
-            <OverviewPage onNavigate={setActivePage} />
+        <main className="flex-1 px-4 py-4 sm:px-6 sm:py-6 flex flex-col items-center overflow-y-auto overflow-x-hidden min-w-0 w-full">
+          <div style={{ display: activePage === 'overview' ? undefined : 'none' }} className={pageWrap}>
+            <OverviewPage onNavigate={handlePageChange} />
           </div>
 
-          {activePage === 'about' && <AboutPage />}
+          {activePage === 'about' && (
+            <div className={pageWrap}>
+              <AboutPage />
+            </div>
+          )}
 
-          <div style={{ display: activePage === 'screener' ? undefined : 'none' }} className="w-full flex flex-col items-center">
+          <div style={{ display: activePage === 'screener' ? undefined : 'none' }} className={pageWrap}>
             <ScreenerPage onViewStock={navigateToLookup} />
           </div>
 
-          <div style={{ display: activePage === 'heatmap' ? undefined : 'none' }} className="w-full flex flex-col items-center">
+          <div style={{ display: activePage === 'heatmap' ? undefined : 'none' }} className={pageWrap}>
             <HeatmapPage onViewStock={navigateToLookup} isActive={activePage === 'heatmap'} />
           </div>
 
-          <div style={{ display: activePage === 'lookup' ? undefined : 'none' }} className="w-full max-w-3xl flex flex-col items-center">
+          <div style={{ display: activePage === 'lookup' ? undefined : 'none' }} className={`${pageWrap} max-w-5xl`}>
             <div className="w-full mb-6 text-center">
               <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Pattern lookup</h1>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-lg mx-auto">
@@ -210,11 +244,11 @@ function App() {
             )}
           </div>
 
-          <div style={{ display: activePage === 'compare' ? undefined : 'none' }} className="w-full flex flex-col items-center">
+          <div style={{ display: activePage === 'compare' ? undefined : 'none' }} className={pageWrap}>
             <StockComparePage seedSymbol={compareSeedSymbol} onSeedConsumed={handleSeedConsumed} />
           </div>
 
-          <div style={{ display: activePage === 'portfolio' ? undefined : 'none' }} className="w-full flex flex-col items-center">
+          <div style={{ display: activePage === 'portfolio' ? undefined : 'none' }} className={pageWrap}>
             <PortfolioPage />
           </div>
         </main>

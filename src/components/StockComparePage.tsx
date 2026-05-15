@@ -635,7 +635,7 @@ export function StockComparePage({ seedSymbol, onSeedConsumed }: StockComparePag
             </div>
           </div>
 
-          <div className="h-[320px] w-full">
+          <div className="h-[240px] sm:h-[320px] w-full">
             {chartLoading ? (
               <div className="h-full flex items-center justify-center text-gray-400 dark:text-gray-500 text-sm">Loading chart…</div>
             ) : chartRows.length === 0 ? (
@@ -706,11 +706,11 @@ export function StockComparePage({ seedSymbol, onSeedConsumed }: StockComparePag
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Updating statistics…</p>
             )}
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
             <table className="w-full text-sm min-w-[640px]">
               <thead className="bg-gray-100/80 dark:bg-gray-800/50 border-b border-gray-300 dark:border-gray-700">
                 <tr>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                  <th className="text-left px-4 py-3 font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap sticky left-0 z-10 bg-gray-100/95 dark:bg-gray-800/95 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)]">
                     Metric
                   </th>
                   {symbols.map((sym, i) => (
@@ -733,7 +733,7 @@ export function StockComparePage({ seedSymbol, onSeedConsumed }: StockComparePag
                       key={row.label}
                       className="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800/40"
                     >
-                      <td className="px-4 py-2.5 font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                      <td className="px-4 py-2.5 font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap sticky left-0 z-10 bg-gray-100 dark:bg-gray-800 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)]">
                         {row.label}
                       </td>
                       {symbols.map((sym) => {

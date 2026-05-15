@@ -261,8 +261,8 @@ export function PortfolioPage() {
         </div>
       ) : (
         <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-700 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+            <table className="w-full text-sm min-w-[640px]">
               <thead className="bg-gray-100 dark:bg-gray-700/50 border-b border-gray-300 dark:border-gray-700">
                 <tr>
                   <SortHeader label="Stock" sortKey="name" current={sortKey} dir={sortDir} onSort={toggleSort} align="left" />
@@ -332,7 +332,7 @@ function PositionTableRow({ pos, cmp, currentValue, unrealized, unrealizedPct, i
         className={`border-b border-gray-300 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${isClosed ? 'opacity-50' : ''}`}
         onClick={onToggle}
       >
-        <td className="p-3 text-left">
+        <td className="p-3 text-left sticky left-0 z-10 bg-gray-100 dark:bg-gray-800 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)] dark:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.3)]">
           <p className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[160px]">{pos.stockName}</p>
           <p className="text-[11px] text-gray-400 dark:text-gray-500">{pos.symbol}</p>
           {isClosed && (
@@ -386,7 +386,7 @@ function SortHeader({ label, sortKey, current, dir, onSort, align = 'right' }: {
   return (
     <th
       className={`p-3 font-medium text-xs uppercase tracking-wider cursor-pointer select-none whitespace-nowrap
-        ${align === 'left' ? 'text-left' : 'text-right'}
+        ${align === 'left' ? 'text-left sticky left-0 z-10 bg-gray-100 dark:bg-gray-700/50 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)]' : 'text-right'}
         ${isActive ? 'text-blue-600' : 'text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400'}`}
       onClick={() => onSort(sortKey)}
     >

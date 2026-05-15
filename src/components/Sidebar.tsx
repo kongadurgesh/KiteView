@@ -8,6 +8,8 @@ interface SidebarProps {
   isDark: boolean;
   onToggleTheme: () => void;
   onExpandChange?: (expanded: boolean) => void;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
 const NAV_ITEMS: { id: Page; label: string; icon: JSX.Element }[] = [
@@ -67,86 +69,117 @@ const NAV_ITEMS: { id: Page; label: string; icon: JSX.Element }[] = [
   },
 ];
 
-export function Sidebar({ active, onChange, isDark, onToggleTheme, onExpandChange }: SidebarProps) {
+export function Sidebar({
+  active,
+  onChange,
+  isDark,
+  onToggleTheme,
+  onExpandChange,
+  mobileOpen = false,
+  onMobileClose,
+}: SidebarProps) {
   const [expanded, setExpanded] = useState(false);
+
+  const showLabels = mobileOpen || expanded;
 
   const handleExpand = (val: boolean) => {
     setExpanded(val);
     onExpandChange?.(val);
   };
 
+  const handleNav = (page: Page) => {
+    onChange(page);
+    onMobileClose?.();
+  };
+
   return (
-    <aside
-      onMouseEnter={() => handleExpand(true)}
-      onMouseLeave={() => handleExpand(false)}
-      className={`fixed top-0 left-0 h-screen z-40 flex flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-200 ${
-        expanded ? 'w-48' : 'w-16'
-      }`}
-    >
-      {/* Logo */}
-      <div className="h-14 flex items-center px-4 border-b border-gray-200 dark:border-gray-800 shrink-0">
-        <span className="text-blue-600 dark:text-blue-400 font-bold text-lg tracking-tight whitespace-nowrap">
-          {expanded ? 'KiteView' : 'KV'}
-        </span>
-      </div>
-
-      {/* Nav items */}
-      <nav className="flex-1 py-3 flex flex-col gap-1 px-2">
-        {NAV_ITEMS.map((item) => {
-          const isActive = active === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => onChange(item.id)}
-              title={expanded ? undefined : item.label}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-                isActive
-                  ? 'bg-blue-50 dark:bg-blue-600/15 text-blue-600 dark:text-blue-400 border-l-2 border-blue-600 dark:border-blue-400 -ml-0.5 pl-[10px]'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
-              }`}
-            >
-              {item.icon}
-              {expanded && <span>{item.label}</span>}
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* Bottom */}
-      <div className="border-t border-gray-200 dark:border-gray-800 py-3 px-2 flex flex-col gap-1">
+    <>
+      {mobileOpen && (
         <button
-          onClick={() => onChange('about')}
-          title={expanded ? undefined : 'About'}
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap w-full ${
-            active === 'about'
-              ? 'bg-blue-50 dark:bg-blue-600/15 text-blue-600 dark:text-blue-400'
-              : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
-          }`}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-          </svg>
-          {expanded && <span>About</span>}
-        </button>
+          type="button"
+          aria-label="Close menu"
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          onClick={onMobileClose}
+        />
+      )}
 
-        {/* Theme toggle */}
-        <button
-          onClick={onToggleTheme}
-          title={expanded ? undefined : (isDark ? 'Light mode' : 'Dark mode')}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap w-full text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
-        >
-          {isDark ? (
+      <aside
+        onMouseEnter={() => handleExpand(true)}
+        onMouseLeave={() => handleExpand(false)}
+        className={`fixed top-0 left-0 h-screen z-40 flex flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-200 w-48
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+          lg:translate-x-0
+          ${expanded ? 'lg:w-48' : 'lg:w-16'}
+        `}
+      >
+        <div className="h-14 flex items-center px-4 border-b border-gray-200 dark:border-gray-800 shrink-0">
+          <span className="text-blue-600 dark:text-blue-400 font-bold text-lg tracking-tight whitespace-nowrap lg:hidden">
+            KiteView
+          </span>
+          <span className="text-blue-600 dark:text-blue-400 font-bold text-lg tracking-tight whitespace-nowrap hidden lg:inline">
+            {showLabels ? 'KiteView' : 'KV'}
+          </span>
+        </div>
+
+        <nav className="flex-1 py-3 flex flex-col gap-1 px-2 overflow-y-auto">
+          {NAV_ITEMS.map((item) => {
+            const isActive = active === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => handleNav(item.id)}
+                title={showLabels ? undefined : item.label}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                  isActive
+                    ? 'bg-blue-50 dark:bg-blue-600/15 text-blue-600 dark:text-blue-400 border-l-2 border-blue-600 dark:border-blue-400 -ml-0.5 pl-[10px]'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
+                }`}
+              >
+                {item.icon}
+                {showLabels && <span>{item.label}</span>}
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="border-t border-gray-200 dark:border-gray-800 py-3 px-2 flex flex-col gap-1 shrink-0">
+          <button
+            type="button"
+            onClick={() => handleNav('about')}
+            title={showLabels ? undefined : 'About'}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap w-full ${
+              active === 'about'
+                ? 'bg-blue-50 dark:bg-blue-600/15 text-blue-600 dark:text-blue-400'
+                : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
+            }`}
+          >
             <svg xmlns="http://www.w3.org/2000/svg" className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
             </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-            </svg>
-          )}
-          {expanded && <span>{isDark ? 'Light mode' : 'Dark mode'}</span>}
-        </button>
-      </div>
-    </aside>
+            {showLabels && <span>About</span>}
+          </button>
+
+          <button
+            type="button"
+            onClick={onToggleTheme}
+            title={showLabels ? undefined : (isDark ? 'Light mode' : 'Dark mode')}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap w-full text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
+          >
+            {isDark ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+              </svg>
+            )}
+            {showLabels && <span>{isDark ? 'Light mode' : 'Dark mode'}</span>}
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }
+

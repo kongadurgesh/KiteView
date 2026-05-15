@@ -239,8 +239,8 @@ export function ScreenerPage({ onViewStock }: Props) {
               {showBuyPrices ? 'Hide Buy Prices' : 'Show Buy Prices'}
             </button>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+            <table className="w-full text-sm min-w-[720px]">
               <thead className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-800">
                 <tr>
                   <SortHeader label="Stock" k="name" current={sortKey} dir={sortDir} onSort={toggleSort} align="left" />
@@ -267,7 +267,7 @@ export function ScreenerPage({ onViewStock }: Props) {
                     className="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
                     onClick={() => onViewStock?.(r.symbol)}
                   >
-                    <td className="p-3 text-left">
+                    <td className="p-3 text-left sticky left-0 z-10 bg-white dark:bg-gray-900 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)] dark:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.3)]">
                       <p className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[180px]">{r.shortName}</p>
                       <p className="text-[11px] text-gray-400 dark:text-gray-500">{r.symbol}</p>
                     </td>
@@ -342,7 +342,7 @@ function SortHeader({ label, k, current, dir, onSort, align = 'right' }: {
   return (
     <th
       className={`p-3 font-medium text-xs uppercase tracking-wider cursor-pointer select-none whitespace-nowrap
-        ${align === 'left' ? 'text-left' : 'text-right'}
+        ${align === 'left' ? 'text-left sticky left-0 z-10 bg-gray-100 dark:bg-gray-800 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)] dark:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.3)]' : 'text-right'}
         ${isActive ? 'text-blue-600' : 'text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400'}`}
       onClick={() => onSort(k)}
     >
