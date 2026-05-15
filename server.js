@@ -454,8 +454,14 @@ app.get('/api/search', async (req, res) => {
   }
 });
 
-app.get('/api/stats/:symbol', async (req, res) => {
-  const { symbol } = req.params;
+async function fetchChartPayload(symbol, range, interval) {
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=${range}&interval=${interval}&includePrePost=false`;
+  const response = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  if (!response.ok) return null;
+  return response.json();
+}
+
+async function fetchStatsPayload(symbol) {
   try {
     const { crumb, cookie } = await getYahooCrumb();
     const url = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=defaultKeyStatistics,summaryDetail,price&crumb=${encodeURIComponent(crumb)}`;
@@ -467,7 +473,7 @@ app.get('/api/stats/:symbol', async (req, res) => {
     const ks = result.defaultKeyStatistics ?? {};
     const sd = result.summaryDetail ?? {};
     const pr = result.price ?? {};
-    res.json({
+    return {
       pe: sd.trailingPE?.raw ?? null,
       forwardPE: sd.forwardPE?.raw ?? null,
       pb: ks.priceToBook?.raw ?? null,
@@ -477,10 +483,108 @@ app.get('/api/stats/:symbol', async (req, res) => {
       shortName: pr.shortName ?? symbol,
       regularMarketPrice: pr.regularMarketPrice?.raw ?? null,
       sector: pr.sector ?? '',
-    });
+    };
   } catch {
-    res.json({ pe: null, pb: null, beta: null, forwardPE: null, fiftyTwoWeekChange: null, marketCap: null, shortName: symbol, regularMarketPrice: null, sector: '' });
+    return {
+      pe: null,
+      pb: null,
+      beta: null,
+      forwardPE: null,
+      fiftyTwoWeekChange: null,
+      marketCap: null,
+      shortName: symbol,
+      regularMarketPrice: null,
+      sector: '',
+    };
   }
+}
+
+app.post('/api/chart-batch', async (req, res) => {
+  const { symbols, range = '1y', interval = '1d' } = req.body ?? {};
+  if (!Array.isArray(symbols) || symbols.length === 0) {
+    return res.json({ charts: {} });
+  }
+  const CONCURRENCY = 30;
+  const charts = {};
+  for (let i = 0; i < symbols.length; i += CONCURRENCY) {
+    const batch = symbols.slice(i, i + CONCURRENCY);
+    const results = await Promise.allSettled(
+      batch.map(async (sym) => {
+        const data = await fetchChartPayload(sym, range, interval);
+        return { sym, data };
+      }),
+    );
+    for (const r of results) {
+      if (r.status === 'fulfilled' && r.value.data) {
+        charts[r.value.sym] = r.value.data;
+      }
+    }
+  }
+  res.json({ charts });
+});
+
+app.post('/api/stats-batch', async (req, res) => {
+  const { symbols } = req.body ?? {};
+  if (!Array.isArray(symbols) || symbols.length === 0) {
+    return res.json({ stats: {} });
+  }
+  const CONCURRENCY = 30;
+  const stats = {};
+  for (let i = 0; i < symbols.length; i += CONCURRENCY) {
+    const batch = symbols.slice(i, i + CONCURRENCY);
+    const results = await Promise.allSettled(
+      batch.map(async (sym) => ({ sym, data: await fetchStatsPayload(sym) })),
+    );
+    for (const r of results) {
+      if (r.status === 'fulfilled') {
+        stats[r.value.sym] = r.value.data;
+      }
+    }
+  }
+  res.json({ stats });
+});
+
+app.get('/api/lookup-bundle', async (req, res) => {
+  const symbol = req.query.symbol;
+  if (!symbol) {
+    return res.status(400).json({ error: 'symbol query parameter is required' });
+  }
+  try {
+    const { crumb, cookie } = await getYahooCrumb();
+    const quoteUrl = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(symbol)}&crumb=${encodeURIComponent(crumb)}`;
+    const profileUrl = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=assetProfile&crumb=${encodeURIComponent(crumb)}`;
+
+    const [chart1y, chartMax, quoteRes, profileRes] = await Promise.all([
+      fetchChartPayload(symbol, '1y', '1d'),
+      fetchChartPayload(symbol, 'max', '1d'),
+      fetch(quoteUrl, { headers: { 'User-Agent': 'Mozilla/5.0', Cookie: cookie } }),
+      fetch(profileUrl, { headers: { 'User-Agent': 'Mozilla/5.0', Cookie: cookie } }),
+    ]);
+
+    let quote = null;
+    if (quoteRes.ok) quote = await quoteRes.json();
+
+    let profile = { sector: '', industry: '' };
+    if (profileRes.ok) {
+      const profileData = await profileRes.json();
+      const asset = profileData?.quoteSummary?.result?.[0]?.assetProfile ?? {};
+      profile = { sector: asset.sector ?? '', industry: asset.industry ?? '' };
+    }
+
+    res.json({
+      chart1y: chart1y ?? null,
+      chartMax: chartMax ?? null,
+      quote,
+      profile,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Lookup bundle failed', details: err.message });
+  }
+});
+
+app.get('/api/stats/:symbol', async (req, res) => {
+  const { symbol } = req.params;
+  res.json(await fetchStatsPayload(symbol));
 });
 
 app.listen(PORT, () => {

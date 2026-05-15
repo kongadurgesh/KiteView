@@ -232,6 +232,9 @@ Base URL: `http://localhost:3006` in development; your Vercel deployment URL in 
 | GET | `/api/screener-list` | NSE universe (cap > ₹1,000 Cr) |
 | POST | `/api/screener-scan` | Pattern scan. Body: `{ symbols: string[] }` |
 | POST | `/api/heatmap-batch` | Batch quotes for heatmap. Body: `{ symbols, timeframe }` |
+| POST | `/api/chart-batch` | Batch chart data. Body: `{ symbols, range?, interval? }` → `{ charts }` |
+| POST | `/api/stats-batch` | Batch key stats. Body: `{ symbols }` → `{ stats }` |
+| GET | `/api/lookup-bundle?symbol=` | Chart 1y + max, quote, and profile in one request |
 
 ---
 

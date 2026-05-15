@@ -10,6 +10,9 @@
     { "src": "/api/screener-list", "dest": "/api/screener-list.js" },
     { "src": "/api/screener-scan", "dest": "/api/screener-scan.js" },
     { "src": "/api/heatmap-batch", "dest": "/api/heatmap-batch.js" },
+    { "src": "/api/chart-batch", "dest": "/api/chart-batch.js" },
+    { "src": "/api/stats-batch", "dest": "/api/stats-batch.js" },
+    { "src": "/api/lookup-bundle", "dest": "/api/lookup-bundle.js" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
