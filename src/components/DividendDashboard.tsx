@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Portfolio } from '../types';
 import { getPositions } from '../utils/portfolio';
-import { fetchDividendsBatch } from '../utils/apiBatch';
+
+const PROXY_BASE = import.meta.env.DEV ? 'http://localhost:3006' : '';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -62,18 +63,27 @@ export function DividendDashboard({ portfolio, livePrices }: Props) {
     }
     setLoading(true);
     try {
-      const symbols = activePositions.map((p) => p.symbol);
-      const batch = await fetchDividendsBatch<DividendApiRow>(symbols);
-      const empty: DividendApiRow = {
-        dividendRate: 0,
-        dividendYield: 0,
-        trailingAnnualDividendRate: 0,
-        exDividendDate: null,
-      };
+      const results = await Promise.all(
+        activePositions.map(async (p) => {
+          try {
+            const res = await fetch(`${PROXY_BASE}/api/dividends/${encodeURIComponent(p.symbol)}`);
+            const data = (await res.json()) as DividendApiRow;
+            return [p.symbol, data] as const;
+          } catch {
+            return [
+              p.symbol,
+              {
+                dividendRate: 0,
+                dividendYield: 0,
+                trailingAnnualDividendRate: 0,
+                exDividendDate: null,
+              },
+            ] as const;
+          }
+        }),
+      );
       const next: Record<string, DividendApiRow> = {};
-      for (const sym of symbols) {
-        next[sym] = batch[sym] ?? empty;
-      }
+      for (const [sym, row] of results) next[sym] = row;
       setDividendMap(next);
     } finally {
       setLoading(false);

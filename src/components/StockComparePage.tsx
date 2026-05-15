@@ -9,7 +9,6 @@ import {
   Legend,
   CartesianGrid,
 } from 'recharts';
-import { fetchChartBatch, fetchStatsBatch } from '../utils/apiBatch';
 
 const PROXY_BASE = import.meta.env.DEV ? 'http://localhost:3006' : '';
 
@@ -291,20 +290,26 @@ export function StockComparePage({ seedSymbol, onSeedConsumed }: StockComparePag
     async function loadCharts() {
       setChartLoading(true);
       try {
-        const chartSymbols = benchOpt ? [...symbols, benchOpt.sym] : symbols;
-        const charts = await fetchChartBatch(chartSymbols, range, '1d');
+        const results = await Promise.all(
+          symbols.map(async (sym) => {
+            const res = await fetch(
+              `${PROXY_BASE}/api/chart/${encodeURIComponent(sym)}?range=${range}&interval=1d`,
+            );
+            const data = await res.json();
+            return { sym, series: parseChartPayload(data) };
+          }),
+        );
         if (cancelled) return;
-
         const map: Record<string, { date: string; close: number }[]> = {};
-        for (const sym of symbols) {
-          const data = charts[sym];
-          if (data) map[sym] = parseChartPayload(data);
-        }
+        for (const r of results) map[r.sym] = r.series;
 
         let benchArg: { key: string; points: { date: string; close: number }[] } | null = null;
         if (benchOpt) {
-          const benchData = charts[benchOpt.sym];
-          const pts = benchData ? parseChartPayload(benchData) : [];
+          const res = await fetch(
+            `${PROXY_BASE}/api/chart/${encodeURIComponent(benchOpt.sym)}?range=${range}&interval=1d`,
+          );
+          const data = await res.json();
+          const pts = parseChartPayload(data);
           if (pts.length > 0) benchArg = { key: benchOpt.dataKey, points: pts };
         }
         if (cancelled) return;
@@ -329,24 +334,34 @@ export function StockComparePage({ seedSymbol, onSeedConsumed }: StockComparePag
     async function loadStats() {
       setStatsLoading(true);
       try {
-        const empty: StockStats = {
-          pe: null,
-          forwardPE: null,
-          pb: null,
-          beta: null,
-          dividendYield: null,
-          fiftyTwoWeekChange: null,
-          marketCap: null,
-          shortName: '',
-          regularMarketPrice: null,
-          sector: '',
-        };
-        const batch = await fetchStatsBatch<StockStats>(symbols);
+        const entries = await Promise.all(
+          symbols.map(async (sym) => {
+            try {
+              const res = await fetch(`${PROXY_BASE}/api/stats/${encodeURIComponent(sym)}`);
+              const data = (await res.json()) as StockStats;
+              return [sym, data] as const;
+            } catch {
+              return [
+                sym,
+                {
+                  pe: null,
+                  forwardPE: null,
+                  pb: null,
+                  beta: null,
+                  dividendYield: null,
+                  fiftyTwoWeekChange: null,
+                  marketCap: null,
+                  shortName: sym,
+                  regularMarketPrice: null,
+                  sector: '',
+                } satisfies StockStats,
+              ] as const;
+            }
+          }),
+        );
         if (cancelled) return;
         const next: Record<string, StockStats> = {};
-        for (const sym of symbols) {
-          next[sym] = batch[sym] ?? { ...empty, shortName: sym };
-        }
+        for (const [sym, st] of entries) next[sym] = st;
         setStatsBySymbol(next);
       } finally {
         if (!cancelled) setStatsLoading(false);
