@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { PatternMatch } from "../../types";
+import { fmtMarketCapCr, fmtNumber } from "../../lib/format";
+import { capCategoryBadgeClass, getCapCategory } from "../../lib/marketCap";
 import { QuantityTable } from "./QuantityTable";
 
 interface ResultCardProps {
@@ -15,20 +17,7 @@ interface ResultCardProps {
   industry: string;
 }
 
-function getCapCategory(mcCr: number): { label: string; color: string } {
-  if (mcCr >= 20000) return { label: "Large Cap", color: "text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-500/15" };
-  if (mcCr >= 5000) return { label: "Mid Cap", color: "text-teal-700 dark:text-teal-400 bg-teal-100 dark:bg-teal-500/15" };
-  return { label: "Small Cap", color: "text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800" };
-}
-
-function formatMarketCap(mcCr: number): string {
-  if (mcCr >= 100000) return `${(mcCr / 100000).toFixed(2)} L Cr`;
-  return `${mcCr.toLocaleString("en-IN", { maximumFractionDigits: 0 })} Cr`;
-}
-
-function fmt(n: number): string {
-  return n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+const fmt = fmtNumber;
 
 export function ResultCard({
   match,
@@ -46,7 +35,7 @@ export function ResultCard({
   const priceDiffPct = ((priceDiff / match.buyPrice) * 100).toFixed(2);
   const isAbove = priceDiff >= 0;
   const signal = currentPrice > match.buyPrice ? "WAIT" : "BUY";
-  const capCategory = getCapCategory(marketCapCr);
+  const capCategory = capCategoryBadgeClass(getCapCategory(marketCapCr));
   const [slPct, setSlPct] = useState(10);
   const stopLossPrice = parseFloat((match.buyPrice * (1 - slPct / 100)).toFixed(2));
 
@@ -68,7 +57,7 @@ export function ResultCard({
             {marketCapCr > 0 && (
               <Indicator label="Market Cap">
                 <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${capCategory.color}`}>
-                  {capCategory.label} &middot; {formatMarketCap(marketCapCr)}
+                  {capCategory.label} &middot; {fmtMarketCapCr(marketCapCr)}
                 </span>
               </Indicator>
             )}

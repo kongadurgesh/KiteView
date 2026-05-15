@@ -14,12 +14,19 @@ import {
   computeSectorConcentration,
   SectorWeight,
 } from '../../../utils/riskMetrics';
+import {
+  CAP_CATEGORY_ORDER,
+  CapCategory,
+  capCategoryColor,
+  getCapCategory,
+} from '../../../lib/marketCap';
 
 const PIE_COLORS = ['#2563eb', '#f59e0b', '#10b981', '#f43f5e', '#8b5cf6', '#06b6d4', '#ec4899', '#6366f1', '#84cc16', '#64748b'];
 
 interface Props {
   portfolio: Portfolio;
   livePrices: Record<string, number>;
+  embedded?: boolean;
 }
 
 interface StockAllocation {
@@ -36,7 +43,20 @@ interface SectorStockDetail {
   value: number;
 }
 
-export function RiskDashboard({ portfolio, livePrices }: Props) {
+interface CapWeight {
+  category: CapCategory;
+  weight: number;
+}
+
+interface CapStockDetail {
+  name: string;
+  symbol: string;
+  weight: number;
+  value: number;
+  marketCapCr: number;
+}
+
+export function RiskDashboard({ portfolio, livePrices, embedded }: Props) {
   const [loading, setLoading] = useState(true);
   const [sectorData, setSectorData] = useState<SectorWeight[]>([]);
   const [beta, setBeta] = useState(0);
@@ -47,6 +67,9 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
   const [stockAllocation, setStockAllocation] = useState<StockAllocation[]>([]);
   const [sectorStocks, setSectorStocks] = useState<Record<string, SectorStockDetail[]>>({});
   const [selectedSector, setSelectedSector] = useState<string | null>(null);
+  const [capData, setCapData] = useState<CapWeight[]>([]);
+  const [capStocks, setCapStocks] = useState<Partial<Record<CapCategory, CapStockDetail[]>>>({});
+  const [selectedCap, setSelectedCap] = useState<CapCategory | null>(null);
 
   const positions = getPositions(portfolio);
   const activePositions = positions.filter((p) => p.totalQty > 0);
@@ -73,8 +96,10 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
         if (cancelled) return;
 
         const sectorMap: Record<string, string> = {};
+        const marketCapMap: Record<string, number> = {};
         symbols.forEach((s, i) => {
           sectorMap[s] = metaResults[i].sector || 'Unknown';
+          marketCapMap[s] = metaResults[i].marketCapCr ?? 0;
         });
 
         // Holdings with current value
@@ -105,6 +130,34 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
           bySector[key].sort((a, b) => b.weight - a.weight);
         }
         setSectorStocks(bySector);
+
+        // Market cap allocation
+        const byCap: Partial<Record<CapCategory, CapStockDetail[]>> = {};
+        const capTotals: Partial<Record<CapCategory, number>> = {};
+        for (const h of holdings) {
+          const cat = getCapCategory(marketCapMap[h.symbol] ?? 0);
+          const pos = activePositions.find((p) => p.symbol === h.symbol)!;
+          if (!byCap[cat]) byCap[cat] = [];
+          byCap[cat].push({
+            name: pos.stockName,
+            symbol: h.symbol,
+            weight: totalValue > 0 ? h.value / totalValue : 0,
+            value: h.value,
+            marketCapCr: marketCapMap[h.symbol] ?? 0,
+          });
+          capTotals[cat] = (capTotals[cat] ?? 0) + h.value;
+        }
+        for (const cat of CAP_CATEGORY_ORDER) {
+          byCap[cat]?.sort((a, b) => b.weight - a.weight);
+        }
+        const capWeights: CapWeight[] = CAP_CATEGORY_ORDER.filter(
+          (cat) => (capTotals[cat] ?? 0) > 0,
+        ).map((cat) => ({
+          category: cat,
+          weight: totalValue > 0 ? (capTotals[cat] ?? 0) / totalValue : 0,
+        }));
+        setCapData(capWeights);
+        setCapStocks(byCap);
 
         // Diversification
         const weights = holdings.map((h) => h.value / totalValue);
@@ -182,17 +235,23 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
 
   if (loading) {
     return (
-      <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-700 p-8 flex items-center justify-center">
+      <div className={`flex items-center justify-center ${embedded ? 'py-12' : 'bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-700 p-8'}`}>
         <div className="size-8 border-4 border-blue-800/50 border-t-blue-600 rounded-full animate-spin" />
       </div>
     );
   }
 
+  const shell = embedded
+    ? 'space-y-6'
+    : 'bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-700 p-6 space-y-6';
+
   return (
-    <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-700 p-6 space-y-6">
-      <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider">
-        Risk Analytics
-      </h3>
+    <div className={shell}>
+      {!embedded && (
+        <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider">
+          Risk Analytics
+        </h3>
+      )}
 
       {/* Metric cards */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
@@ -249,7 +308,7 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
       </div>
 
       {/* Charts row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Sector donut */}
         {sectorData.length > 0 && (
           <div>
@@ -266,7 +325,11 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
                     innerRadius={55}
                     outerRadius={90}
                     paddingAngle={2}
-                    onClick={(_, idx) => setSelectedSector(sectorData[idx]?.sector ?? null)}
+                    onClick={(_, idx) => {
+                      setSelectedCap(null);
+                      const sec = sectorData[idx]?.sector ?? null;
+                      setSelectedSector((prev) => (prev === sec ? null : sec));
+                    }}
                     style={{ cursor: 'pointer' }}
                   >
                     {sectorData.map((_, i) => (
@@ -286,19 +349,53 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mb-1">Click a slice to see companies</p>
+            <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mb-1">
+              Click a sector to view holdings
+            </p>
             <div className="flex flex-wrap gap-2 mt-1 justify-center">
               {sectorData.map((s, i) => (
                 <button
                   key={s.sector}
-                  onClick={() => setSelectedSector(s.sector)}
-                  className="inline-flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400 hover:underline"
+                  type="button"
+                  onClick={() => {
+                    setSelectedCap(null);
+                    setSelectedSector((prev) => (prev === s.sector ? null : s.sector));
+                  }}
+                  className={[
+                    'inline-flex items-center gap-1 text-[11px] rounded-full px-2 py-0.5 transition-colors max-w-full',
+                    selectedSector === s.sector
+                      ? 'font-semibold text-gray-900 dark:text-gray-100 bg-gray-200/80 dark:bg-gray-700/80'
+                      : 'text-gray-500 dark:text-gray-400 hover:underline',
+                  ].join(' ')}
                 >
-                  <span className="size-2 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
-                  {s.sector} ({(s.weight * 100).toFixed(1)}%)
+                  <span className="size-2 rounded-full shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                  <span className="truncate">{s.sector}</span> ({(s.weight * 100).toFixed(1)}%)
                 </button>
               ))}
             </div>
+            {selectedSector && sectorStocks[selectedSector] && sectorStocks[selectedSector].length > 0 && (
+              <div className="mt-3 pt-3 border-t border-gray-300 dark:border-gray-700">
+                <p className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center mb-2">
+                  {selectedSector} holdings
+                </p>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {sectorStocks[selectedSector].map((s) => {
+                    const sectorIdx = sectorData.findIndex((d) => d.sector === selectedSector);
+                    const dotColor = PIE_COLORS[sectorIdx >= 0 ? sectorIdx % PIE_COLORS.length : 0];
+                    return (
+                      <span
+                        key={s.symbol}
+                        title={s.name}
+                        className="inline-flex items-center gap-1 text-[11px] text-gray-600 dark:text-gray-300"
+                      >
+                        <span className="size-2 rounded-full shrink-0" style={{ backgroundColor: dotColor }} />
+                        {s.symbol.replace('.NS', '')} ({(s.weight * 100).toFixed(1)}%)
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -344,60 +441,100 @@ export function RiskDashboard({ portfolio, livePrices }: Props) {
             </div>
           </div>
         )}
+
+        {/* Market cap allocation donut */}
+        {capData.length > 0 && (
+          <div>
+            <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
+              Market Cap Allocation
+            </p>
+            <div className="cursor-pointer">
+              <ResponsiveContainer width="100%" height={240}>
+                <PieChart>
+                  <Pie
+                    data={capData}
+                    dataKey="weight"
+                    nameKey="category"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={90}
+                    paddingAngle={2}
+                    onClick={(_, idx) => {
+                      setSelectedSector(null);
+                      const cat = capData[idx]?.category ?? null;
+                      setSelectedCap((prev) => (prev === cat ? null : cat));
+                    }}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {capData.map((c) => (
+                      <Cell key={c.category} fill={capCategoryColor(c.category)} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(value) => `${(Number(value) * 100).toFixed(1)}%`}
+                    contentStyle={{
+                      borderRadius: '8px',
+                      border: '1px solid #374151',
+                      backgroundColor: '#1f2937',
+                      color: '#e5e7eb',
+                      fontSize: 12,
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mb-1">
+              Click a category to view holdings
+            </p>
+            <div className="flex flex-wrap gap-2 mt-1 justify-center">
+              {capData.map((c) => (
+                <button
+                  key={c.category}
+                  type="button"
+                  onClick={() => {
+                    setSelectedSector(null);
+                    setSelectedCap((prev) => (prev === c.category ? null : c.category));
+                  }}
+                  className={[
+                    'inline-flex items-center gap-1 text-[11px] rounded-full px-2 py-0.5 transition-colors',
+                    selectedCap === c.category
+                      ? 'font-semibold text-gray-900 dark:text-gray-100 bg-gray-200/80 dark:bg-gray-700/80'
+                      : 'text-gray-500 dark:text-gray-400 hover:underline',
+                  ].join(' ')}
+                >
+                  <span className="size-2 rounded-full shrink-0" style={{ backgroundColor: capCategoryColor(c.category) }} />
+                  {c.category} ({(c.weight * 100).toFixed(1)}%)
+                </button>
+              ))}
+            </div>
+            {selectedCap && capStocks[selectedCap] && capStocks[selectedCap]!.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-gray-300 dark:border-gray-700">
+                <p className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center mb-2">
+                  {selectedCap} holdings
+                </p>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {capStocks[selectedCap]!.map((s) => (
+                    <span
+                      key={s.symbol}
+                      title={s.name}
+                      className="inline-flex items-center gap-1 text-[11px] text-gray-600 dark:text-gray-300"
+                    >
+                      <span
+                        className="size-2 rounded-full shrink-0"
+                        style={{ backgroundColor: capCategoryColor(selectedCap) }}
+                      />
+                      {s.symbol.replace('.NS', '')} ({(s.weight * 100).toFixed(1)}%)
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Sector drill-down modal */}
-      {selectedSector && sectorStocks[selectedSector] && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-          role="dialog"
-          aria-modal="true"
-          onClick={() => setSelectedSector(null)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') setSelectedSector(null);
-          }}
-        >
-          <div
-            className="bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-700 w-full max-w-sm mx-4 p-5"
-            role="document"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">{selectedSector}</h4>
-              <button onClick={() => setSelectedSector(null)} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-xl leading-none">&times;</button>
-            </div>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-                  <th className="text-left pb-2 font-medium">Company</th>
-                  <th className="text-right pb-2 font-medium">% of Portfolio</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sectorStocks[selectedSector].map((stock) => (
-                  <tr key={stock.symbol} className="border-t border-gray-300 dark:border-gray-700">
-                    <td className="py-2">
-                      <p className="font-medium text-gray-800 dark:text-gray-200 truncate max-w-[200px]">{stock.name}</p>
-                      <p className="text-[10px] text-gray-400 dark:text-gray-500">{stock.symbol.replace('.NS', '')}</p>
-                    </td>
-                    <td className="py-2 text-right font-mono font-semibold text-gray-700 dark:text-gray-300">
-                      {(stock.weight * 100).toFixed(1)}%
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr className="border-t border-gray-300 dark:border-gray-600">
-                  <td className="pt-2 text-xs font-semibold text-gray-500 dark:text-gray-400">Total</td>
-                  <td className="pt-2 text-right font-mono font-bold text-gray-800 dark:text-gray-200">
-                    {(sectorStocks[selectedSector].reduce((s, st) => s + st.weight, 0) * 100).toFixed(1)}%
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }

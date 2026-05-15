@@ -91,7 +91,7 @@ Transaction-based portfolio tracker with analytics.
 - **Live prices**: batch quotes for all holdings
 - **Sortable** positions table
 - **Performance chart**: portfolio vs Nifty 50, Bank Nifty, Midcap 50, Nifty 200 (normalized or absolute; 1M–ALL)
-- **Risk dashboard**: HHI diversification, beta, volatility, Sharpe, max drawdown, sector/stock allocation donuts
+- **Risk dashboard**: HHI diversification, beta, volatility, Sharpe, max drawdown, sector/stock/market-cap allocation donuts (click a cap slice to see holdings)
 - Persisted in `localStorage`
 
 ### 7. About

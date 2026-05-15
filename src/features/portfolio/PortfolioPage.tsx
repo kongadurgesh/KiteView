@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import { Portfolio, Position, Transaction } from '../../types';
 import { loadPortfolio, savePortfolio, addTransaction, getPositions, removePosition, clearPortfolio } from '../../utils/portfolio';
 import { fetchBatchQuotesDetailed } from '../../services/fetchStockData';
@@ -10,7 +10,7 @@ import { PerformanceChart } from './components/PerformanceChart';
 import { RiskDashboard } from './components/RiskDashboard';
 const fmt = fmtNumber;
 
-type SortKey = 'name' | 'qty' | 'avgBuy' | 'cmp' | 'invested' | 'current' | 'pnl' | 'pnlPct';
+type SortKey = 'name' | 'qty' | 'avgBuy' | 'cmp' | 'invested' | 'current' | 'pnl' | 'pnlPct' | 'todayPnl' | 'todayPnlPct';
 type SortDir = 'asc' | 'desc';
 
 interface PositionRow {
@@ -19,17 +19,28 @@ interface PositionRow {
   currentValue: number;
   unrealized: number;
   unrealizedPct: number;
+  todayPnl: number;
+  todayPnlPct: number;
   isClosed: boolean;
 }
 
-function buildRow(pos: Position, livePrices: Record<string, number>): PositionRow {
+function buildRow(
+  pos: Position,
+  livePrices: Record<string, number>,
+  livePrevClose: Record<string, number>,
+): PositionRow {
   const cmp = livePrices[pos.symbol] ?? 0;
+  const prevClose = livePrevClose[pos.symbol];
   const currentValue = cmp * pos.totalQty;
   const unrealized = cmp ? (cmp - pos.avgBuyPrice) * pos.totalQty : 0;
   const unrealizedPct = pos.investedAmount > 0 && cmp
     ? (unrealized / pos.investedAmount) * 100
     : 0;
-  return { pos, cmp, currentValue, unrealized, unrealizedPct, isClosed: pos.totalQty === 0 };
+  const isClosed = pos.totalQty === 0;
+  const todayPnl = !isClosed && cmp && prevClose ? (cmp - prevClose) * pos.totalQty : 0;
+  const prevValue = !isClosed && prevClose ? prevClose * pos.totalQty : 0;
+  const todayPnlPct = prevValue > 0 ? (todayPnl / prevValue) * 100 : 0;
+  return { pos, cmp, currentValue, unrealized, unrealizedPct, todayPnl, todayPnlPct, isClosed };
 }
 
 function getSortValue(row: PositionRow, key: SortKey): number | string {
@@ -42,6 +53,8 @@ function getSortValue(row: PositionRow, key: SortKey): number | string {
     case 'current': return row.currentValue;
     case 'pnl': return row.unrealized;
     case 'pnlPct': return row.unrealizedPct;
+    case 'todayPnl': return row.todayPnl;
+    case 'todayPnlPct': return row.todayPnlPct;
   }
 }
 
@@ -83,7 +96,7 @@ export function PortfolioPage() {
   }, [refreshPrices]);
 
   const rows: PositionRow[] = useMemo(() => {
-    const built = positions.map((p) => buildRow(p, livePrices));
+    const built = positions.map((p) => buildRow(p, livePrices, livePrevClose));
     built.sort((a, b) => {
       const va = getSortValue(a, sortKey);
       const vb = getSortValue(b, sortKey);
@@ -93,7 +106,7 @@ export function PortfolioPage() {
       return sortDir === 'asc' ? cmp : -cmp;
     });
     return built;
-  }, [positions, livePrices, sortKey, sortDir]);
+  }, [positions, livePrices, livePrevClose, sortKey, sortDir]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
@@ -191,11 +204,8 @@ export function PortfolioPage() {
 
   return (
     <div className="w-full max-w-6xl mt-10 space-y-6">
-      {/* Summary */}
-      <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-700 p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Portfolio</h2>
-          <div className="flex flex-wrap gap-2">
+      <CollapsibleSection title="Portfolio">
+        <div className="flex flex-wrap justify-end gap-2 mb-4">
             <button
               onClick={refreshPrices}
               disabled={loadingPrices}
@@ -223,11 +233,10 @@ export function PortfolioPage() {
                 Delete Portfolio
               </button>
             )}
-          </div>
         </div>
 
         {activePositions.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <SummaryCard label="Invested" value={fmt(totalInvested)} />
             <SummaryCard label="Current Value" value={fmt(totalCurrentValue)} />
             <SummaryCard
@@ -244,26 +253,27 @@ export function PortfolioPage() {
             />
           </div>
         )}
-      </div>
+      </CollapsibleSection>
 
-      {/* Performance Chart */}
-      <PerformanceChart portfolio={portfolio} />
+      <CollapsibleSection title="Performance">
+        <PerformanceChart portfolio={portfolio} embedded />
+      </CollapsibleSection>
 
-      {/* Risk Dashboard */}
-      <RiskDashboard portfolio={portfolio} livePrices={livePrices} />
+      <CollapsibleSection title="Risk analytics">
+        <RiskDashboard portfolio={portfolio} livePrices={livePrices} embedded />
+      </CollapsibleSection>
 
-      {/* Positions Table */}
+      <CollapsibleSection title="Holdings">
       {positions.length === 0 ? (
-        <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-700 p-10 text-center">
-          <p className="text-gray-400 dark:text-gray-500 text-sm">No positions yet. Add a transaction to get started.</p>
-        </div>
+          <p className="text-gray-400 dark:text-gray-500 text-sm text-center py-6">
+            No positions yet. Add a transaction to get started.
+          </p>
       ) : (
-        <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-700 overflow-hidden">
-          <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
-            <table className="w-full text-sm min-w-[640px]">
+          <div className="overflow-x-auto -mx-2">
+            <table className="w-full text-sm min-w-[960px]">
               <thead className="bg-gray-100 dark:bg-gray-700/50 border-b border-gray-300 dark:border-gray-700">
                 <tr>
-                  <SortHeader label="Stock" sortKey="name" current={sortKey} dir={sortDir} onSort={toggleSort} align="left" />
+                  <SortHeader label="Name" sortKey="name" current={sortKey} dir={sortDir} onSort={toggleSort} align="left" />
                   <SortHeader label="Qty" sortKey="qty" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="Avg Buy" sortKey="avgBuy" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="CMP" sortKey="cmp" current={sortKey} dir={sortDir} onSort={toggleSort} />
@@ -271,11 +281,13 @@ export function PortfolioPage() {
                   <SortHeader label="Current" sortKey="current" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="P&L" sortKey="pnl" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="P&L %" sortKey="pnlPct" current={sortKey} dir={sortDir} onSort={toggleSort} />
+                  <SortHeader label="Day P&L" sortKey="todayPnl" current={sortKey} dir={sortDir} onSort={toggleSort} />
+                  <SortHeader label="Day P&L %" sortKey="todayPnlPct" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <th className="p-3 w-16" />
                 </tr>
               </thead>
               <tbody>
-                {rows.map(({ pos, cmp, currentValue, unrealized, unrealizedPct, isClosed }) => {
+                {rows.map(({ pos, cmp, currentValue, unrealized, unrealizedPct, todayPnl: rowTodayPnl, todayPnlPct: rowTodayPnlPct, isClosed }) => {
                   const isExpanded = expandedSymbol === pos.symbol;
                   return (
                     <PositionTableRow
@@ -285,6 +297,8 @@ export function PortfolioPage() {
                       currentValue={currentValue}
                       unrealized={unrealized}
                       unrealizedPct={unrealizedPct}
+                      todayPnl={rowTodayPnl}
+                      todayPnlPct={rowTodayPnlPct}
                       isClosed={isClosed}
                       isExpanded={isExpanded}
                       loadingPrices={loadingPrices}
@@ -296,8 +310,8 @@ export function PortfolioPage() {
               </tbody>
             </table>
           </div>
-        </div>
-      )}
+        )}
+      </CollapsibleSection>
 
       {showModal && (
         <AddTransactionModal
@@ -317,12 +331,33 @@ export function PortfolioPage() {
   );
 }
 
-function PositionTableRow({ pos, cmp, currentValue, unrealized, unrealizedPct, isClosed, isExpanded, loadingPrices, onToggle, onRemove }: {
+function CollapsibleSection({ title, children, defaultOpen = true }: {
+  title: string; children: ReactNode; defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-700 overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between gap-3 px-6 py-4 text-left hover:bg-gray-200/50 dark:hover:bg-gray-700/30 transition-colors"
+      >
+        <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">{title}</h2>
+        <span className="text-gray-400 dark:text-gray-500 text-sm shrink-0">{open ? '▲' : '▼'}</span>
+      </button>
+      {open && <div className="px-6 pb-6">{children}</div>}
+    </div>
+  );
+}
+
+function PositionTableRow({ pos, cmp, currentValue, unrealized, unrealizedPct, todayPnl, todayPnlPct, isClosed, isExpanded, loadingPrices, onToggle, onRemove }: {
   pos: Position; cmp: number; currentValue: number; unrealized: number; unrealizedPct: number;
+  todayPnl: number; todayPnlPct: number;
   isClosed: boolean; isExpanded: boolean; loadingPrices: boolean;
   onToggle: () => void; onRemove: () => void;
 }) {
   const pnlColor = unrealized >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400';
+  const dayColor = todayPnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400';
 
   return (
     <>
@@ -350,6 +385,12 @@ function PositionTableRow({ pos, cmp, currentValue, unrealized, unrealizedPct, i
         <td className={`p-3 text-right font-mono font-semibold ${isClosed ? 'text-gray-400 dark:text-gray-500' : pnlColor}`}>
           {isClosed ? '—' : `${unrealizedPct >= 0 ? '+' : ''}${unrealizedPct.toFixed(2)}%`}
         </td>
+        <td className={`p-3 text-right font-mono font-semibold ${isClosed ? 'text-gray-400 dark:text-gray-500' : dayColor}`}>
+          {isClosed ? '—' : cmp ? `${todayPnl >= 0 ? '+' : ''}${fmt(todayPnl)}` : '—'}
+        </td>
+        <td className={`p-3 text-right font-mono font-semibold ${isClosed ? 'text-gray-400 dark:text-gray-500' : dayColor}`}>
+          {isClosed ? '—' : cmp ? `${todayPnlPct >= 0 ? '+' : ''}${todayPnlPct.toFixed(2)}%` : '—'}
+        </td>
         <td className="p-3 text-center">
           <div className="flex items-center gap-2 justify-end">
             <button
@@ -367,7 +408,7 @@ function PositionTableRow({ pos, cmp, currentValue, unrealized, unrealizedPct, i
       </tr>
       {isExpanded && (
         <tr>
-          <td colSpan={9} className="p-0">
+          <td colSpan={11} className="p-0">
             <TransactionHistory transactions={pos.transactions} />
           </td>
         </tr>
