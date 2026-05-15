@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { fetchScreenerList, ScreenerStock } from '../utils/screener';
-import { fetchHeatmapBatch, HeatmapTimeframe, QuoteFull } from '../utils/fetchStockData';
+import { fetchScreenerList, ScreenerStock } from '../../utils/screener';
+import { fetchHeatmapBatch, HeatmapTimeframe, QuoteFull } from '../../utils/fetchStockData';
 
 interface Props {
   onViewStock?: (symbol: string) => void;

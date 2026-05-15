@@ -1,6 +1,6 @@
 # KiteView
 
-**A soaring view of the markets** — A comprehensive Indian stock analysis and portfolio management platform built with React, TypeScript, and Yahoo Finance data.
+**A soaring view of the markets** — Indian stock analysis and portfolio tracking built with React, TypeScript, and Yahoo Finance data.
 
 ![React](https://img.shields.io/badge/React-18-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4) ![Vite](https://img.shields.io/badge/Vite-5-646CFF) ![Vercel](https://img.shields.io/badge/Deployed_on-Vercel-black)
 
@@ -9,130 +9,100 @@
 ## Table of Contents
 
 - [Features](#features)
-  - [Live Screener](#1-live-screener)
-  - [Market Heatmap](#2-market-heatmap)
-  - [Stock Lookup & Pattern Detection](#3-stock-lookup--pattern-detection)
-  - [Stock Comparison Tool](#4-stock-comparison-tool)
-  - [Portfolio Management](#5-portfolio-management)
-  - [Performance Chart](#6-performance-chart)
-  - [Risk Dashboard](#7-risk-dashboard)
-  - [Dividend Dashboard](#8-dividend-dashboard)
-  - [Dark Mode](#9-dark-mode)
+  - [Overview](#1-overview)
+  - [Live Screener](#2-live-screener)
+  - [Market Heatmap](#3-market-heatmap)
+  - [Stock Lookup & Pattern Detection](#4-stock-lookup--pattern-detection)
+  - [Stock Comparison](#5-stock-comparison)
+  - [Portfolio Management](#6-portfolio-management)
+  - [About](#7-about)
+  - [Dark Mode & Layout](#8-dark-mode--layout)
 - [Technical Architecture](#technical-architecture)
-  - [Frontend](#frontend)
-  - [Backend / API Proxy](#backend--api-proxy)
-  - [Data Sources](#data-sources)
-  - [Data Storage](#data-storage)
 - [Project Structure](#project-structure)
 - [API Endpoints](#api-endpoints)
 - [Pattern Detection Logic](#pattern-detection-logic)
 - [Getting Started](#getting-started)
 - [Deployment](#deployment)
+- [Key Design Decisions](#key-design-decisions)
 
 ---
 
 ## Features
 
-### 1. Live Screener
+### 1. Overview
 
-Scans the entire NSE universe (stocks with market cap > ₹1,000 Cr) to find stocks that triggered a bullish breakout pattern **today**.
+Landing page with quick navigation into every major tool.
 
-- Server-side batch scanning with concurrency of 30 for speed
-- Filters for only the most recent trading day's breakouts
-- Displays: Stock name, CMP, Buy Price, Buy Trigger, Pattern, 52W High/Low, % distance from 52W extremes, All-Time High, Market Cap
-- Toggle to show/hide buy price columns
-- Auto-scan and manual scan modes
-- Results cached in `sessionStorage` to persist across tab switches
+- Card grid for Screener, Heatmap, Lookup, Compare, Portfolio, and About
+- Lightweight animated previews (respects `prefers-reduced-motion`)
+- Flat, minimal UI using shared design tokens
 
-### 2. Market Heatmap
+### 2. Live Screener
 
-A treemap visualization of NSE stocks, sized by market cap and colored by daily percentage change.
+Scans the NSE universe (market cap > ₹1,000 Cr) for bullish breakout patterns on the latest trading day.
 
-- Squarified treemap layout algorithm (no external library)
-- Color gradient: deep red (-3% or worse) → gray (0%) → deep green (+3% or better)
-- Sector filter dropdown
-- Click any tile to jump to the Lookup tab for that stock
-- Shows gainers/losers count and color legend
+- Server-side batch scanning with concurrency of 30
+- Columns: stock, CMP, buy price, buy trigger, pattern, 52W high/low, distance from extremes, ATH, market cap
+- Toggle buy-price columns; auto-scan and manual scan
+- Results cached in `sessionStorage`
+- Click a row to open **Lookup** for that symbol
 
-### 3. Stock Lookup & Pattern Detection
+### 3. Market Heatmap
 
-Search for any Indian stock and detect candlestick patterns with custom buy price calculation.
+Treemap of NSE stocks sized by market cap and colored by performance.
 
-- **Symbol autocomplete**: Search by company name (e.g., "NALCO" → `NATIONALUM.NS`) via Yahoo Finance search API
-- **Two patterns detected**:
-  - **Bullish Harami**: Red candle → inside green candle → breakout green candle
-  - **Bullish Engulfing**: Red candle → engulfing green candle → breakout green candle
-- **Custom buy price logic**: `Buy Price = 0.98 × Candle3.Close`
-- **Buy trigger price**: `0.985 × Candle3.Close`
-- **Signal indicator**: BUY (current price ≤ buy price) or WAIT
-- **Stop loss calculator**: Configurable percentage dropdown (1%–10%)
-- **Quantity & Investment table**: Shows how many shares to buy for investment amounts from ₹10K to ₹10L
-- **Stock metadata**: 52-week high/low, all-time high, market cap category (Large/Mid/Small Cap), sector, industry
+- Custom squarified treemap (no external treemap library)
+- Timeframes: **1D**, **1W**, **1M**, **1Y**
+- Color scale: red (down) → gray (flat) → green (up)
+- Sector filter; click a tile to jump to **Lookup**
+- Batch quote loading via `/api/heatmap-batch`
 
-### 4. Stock Comparison Tool
+### 4. Stock Lookup & Pattern Detection
 
-Compare 2–4 stocks side by side within the Lookup tab.
+Search any NSE/BSE symbol and run candlestick pattern detection with buy-level math.
 
-- Multi-stock search with chip-based selection (up to 4 stocks)
-- **Overlaid price chart**: Normalized percentage returns using Recharts LineChart
-- **Time range selector**: 1M, 3M, 6M, 1Y
-- **Comparison table**: CMP, Market Cap, P/E, Forward P/E, P/B, Beta, Dividend Yield, 52W Change, Sector
-- Color-coded lines for each stock
+- Symbol autocomplete (Yahoo Finance search)
+- Patterns: **Bullish Harami**, **Bullish Engulfing** (with breakout confirmation)
+- Buy price = `0.98 ×` breakout close; buy trigger = `0.985 ×` breakout close
+- BUY / WAIT signal vs current price
+- Stop-loss calculator (1%–10%)
+- Quantity table for investment sizes ₹10K–₹10L
+- Metadata: 52W range, ATH, cap tier, sector, industry
+- **Compare** action sends the symbol to the Compare page
 
-### 5. Portfolio Management
+### 5. Stock Comparison
 
-Full-featured portfolio tracker with transaction management.
+Dedicated page to compare up to four stocks (not embedded in Lookup).
 
-- **Add transactions**: BUY/SELL with quantity, price, and date
-- **Import from Excel/CSV**: Upload `.xlsx` or `.csv` files with ISIN, Buy Price, Quantity columns — ISINs are auto-resolved to NSE ticker symbols
-- **Position tracking**: Average buy price, total quantity, invested amount, current value, total P&L (absolute and percentage)
-- **Live prices**: Batch-fetched from Yahoo Finance for all holdings
-- **Sortable table**: Sort by any column (name, quantity, avg buy, CMP, invested, current, P&L, P&L %)
-- **Portfolio actions**: Delete individual positions, clear entire portfolio, export functionality
-- **Transaction history**: View and manage all transactions per stock
-- Data persisted in `localStorage`
+- Chip-based symbol search with autocomplete
+- Normalized return chart (Recharts) with ranges **1M**, **3M**, **6M**, **1Y**
+- Optional benchmark overlay: Nifty 50 or Sensex
+- Comparison table: CMP, market cap, P/E, forward P/E, P/B, beta, 52W change, sector
+- Best/worst highlighting per metric row
+- Seed symbol support when navigating from Lookup or Screener
 
-### 6. Performance Chart
+### 6. Portfolio Management
 
-Compare your portfolio's performance against major Nifty indices.
+Transaction-based portfolio tracker with analytics.
 
-- **Indices**: Nifty 50, Bank Nifty, Midcap 50, Nifty 200
-- **View modes**:
-  - Normalized % returns (all lines start at 0%)
-  - Absolute values (dual Y-axis: portfolio value left, index value right)
-- **Time ranges**: 1M, 3M, 6M, 1Y, ALL
-- Computes daily portfolio value from transaction history and historical prices
-
-### 7. Risk Dashboard
-
-Comprehensive portfolio risk analytics with interactive visualizations.
-
-- **Metrics cards** (each with an interactive lightbulb icon providing improvement suggestions):
-  - **Diversification Score**: Based on Herfindahl-Hirschman Index (HHI)
-  - **Portfolio Beta**: Relative volatility vs Nifty 50
-  - **Annualized Volatility**: Standard deviation of daily returns × √252
-  - **Sharpe Ratio**: Risk-adjusted returns (assumes 7% risk-free rate)
-  - **Max Drawdown**: Largest peak-to-trough decline
-- **Sector Allocation**: Interactive donut chart — click any sector to see company-wise breakdown in a modal
-- **Stock Allocation**: Donut chart showing individual stock weightings
-
-### 8. Dividend Dashboard
-
-Dividend income analysis for portfolio holdings.
-
-- **Summary cards**: Total Annual Dividend Income, Portfolio Yield, Dividend-Paying Stocks count
-- **Holdings table**: Dividend per share, yield %, projected annual income, ex-dividend date
-- **Monthly income projection**: Recharts bar chart showing projected monthly dividend income
-- Collapsible section below Risk Dashboard
-
-### 9. Dark Mode
-
-System-aware theme with manual override.
-
-- Three-state toggle: Light → Dark → System
+- **Transactions**: BUY/SELL with qty, price, date
+- **Import**: `.xlsx`, `.xls`, or `.csv` (ISIN, buy price, quantity) via `xlsx`
+- **Positions**: avg buy, qty, invested, live value, P&L (₹ and %)
+- **Live prices**: batch quotes for all holdings
+- **Sortable** positions table
+- **Performance chart**: portfolio vs Nifty 50, Bank Nifty, Midcap 50, Nifty 200 (normalized or absolute; 1M–ALL)
+- **Risk dashboard**: HHI diversification, beta, volatility, Sharpe, max drawdown, sector/stock allocation donuts
 - Persisted in `localStorage`
-- Detects system preference via `matchMedia`
-- All components styled with Tailwind `dark:` variants
+
+### 7. About
+
+Author profile, investing philosophy, and linked P&L proof spreadsheets.
+
+### 8. Dark Mode & Layout
+
+- **Theme**: Light / dark toggle on the sidebar (class-based, persisted in `localStorage`)
+- **Shell**: Collapsible sidebar, mobile slide-out drawer, top **market ticker** (Nifty, Sensex, Bank Nifty, Nifty IT)
+- **Responsive**: `max-w-7xl` content, horizontal scroll on wide tables, sticky first column where needed
 
 ---
 
@@ -142,92 +112,107 @@ System-aware theme with manual override.
 
 | Technology | Purpose |
 |---|---|
-| **React 18** | UI framework |
-| **TypeScript 5.6** | Type safety |
-| **Vite 5** | Build tool and dev server |
-| **Tailwind CSS 3.4** | Utility-first styling |
-| **Recharts 3** | Charts (LineChart, BarChart, PieChart) |
-| **read-excel-file** | XLSX parsing for portfolio import |
-| **@vercel/analytics** | Usage analytics |
-| **@vercel/speed-insights** | Performance monitoring |
+| **React 18** | UI |
+| **TypeScript 5.6** | Types |
+| **Vite 5** | Dev server & production build |
+| **Tailwind CSS 3.4** | Styling + semantic tokens (`surface`, `ink`, `accent`, …) |
+| **Framer Motion** | Overview page motion |
+| **Recharts 3** | Line, bar, and pie charts |
+| **xlsx** | Portfolio Excel/CSV import |
+| **@vercel/analytics** / **speed-insights** | Production telemetry |
 
-### Backend / API Proxy
+### Backend / API proxy
 
-| Layer | Purpose |
+| Layer | Role |
 |---|---|
-| **Express.js** (`server.js`) | Local development proxy server on port 3006 |
-| **Vercel Serverless Functions** (`api/`) | Production API proxy deployed on Vercel |
+| **`server.js`** | Express proxy on port **3006** (local dev) |
+| **`api/`** | Vercel serverless functions (production) |
 
-All API calls to Yahoo Finance are proxied through the backend to handle CORS restrictions and Yahoo's crumb/cookie authentication.
+Yahoo Finance calls are proxied server-side for CORS and crumb/cookie auth (`getYahooCrumb()`, 10-minute cache).
 
-### Data Sources
+### Data sources
 
-All market data is sourced from **Yahoo Finance** via multiple API endpoints:
-
-| Yahoo API | Used For |
+| Yahoo API | Used for |
 |---|---|
-| `v8/finance/chart` | Historical OHLCV candlestick data |
-| `v7/finance/quote` | Live quotes, batch prices, market cap |
-| `v10/finance/quoteSummary` | Asset profile (sector/industry), key statistics (P/E, P/B, beta), dividend data, calendar events |
-| `v1/finance/search` | Symbol autocomplete |
-| `v1/finance/screener` | NSE stock universe filtering |
+| `v8/finance/chart` | OHLCV history |
+| `v7/finance/quote` | Live quotes (incl. batch) |
+| `v10/finance/quoteSummary` | Profile, key stats |
+| `v1/finance/search` | Symbol search |
+| `v1/finance/screener` | NSE universe |
 
-**Authentication**: Yahoo Finance requires a crumb token and session cookie. The backend implements `getYahooCrumb()` which fetches these from `fc.yahoo.com` and caches them for 10 minutes.
+### Data storage
 
-### Data Storage
-
-| Store | Data |
+| Store | Contents |
 |---|---|
-| `localStorage` | Portfolio transactions, theme preference |
-| `sessionStorage` | Screener stock list cache |
-| In-memory (server) | Yahoo crumb/cookie cache |
+| `localStorage` | Portfolio, theme |
+| `sessionStorage` | Screener list cache |
+| Server memory | Yahoo crumb/cookie cache |
 
 ---
 
 ## Project Structure
 
 ```
-bullish-harami-buy-price-app/
-├── api/                              # Vercel Serverless Functions
-│   ├── chart/[symbol].js             # Historical price data proxy
-│   ├── quote/[symbol].js             # Live quote proxy (supports batch)
-│   ├── profile/[symbol].js           # Asset profile (sector, industry)
-│   ├── stats/[symbol].js             # Key statistics (P/E, P/B, beta)
-│   ├── dividends/[symbol].js         # Dividend data & ex-dates
-│   ├── search.js                     # Symbol autocomplete
-│   ├── screener-list.js              # NSE stock universe
-│   └── screener-scan.js              # Server-side pattern scanning
+KiteView/
+├── api/                              # Vercel serverless (mirrors server.js routes)
+│   ├── chart/[symbol].js
+│   ├── quote/[symbol].js
+│   ├── profile/[symbol].js
+│   ├── stats/[symbol].js
+│   ├── search.js
+│   ├── screener-list.js
+│   ├── screener-scan.js
+│   ├── heatmap-batch.js
+│   └── lib/yahooCrumb.js
 ├── src/
-│   ├── App.tsx                       # Root component, tab navigation, theme
-│   ├── types.ts                      # TypeScript interfaces
+│   ├── main.tsx                      # App entry
+│   ├── index.css                     # Tailwind + component layer (.card, .btn-primary, …)
+│   ├── types.ts                      # Shared TypeScript types
+│   ├── app/
+│   │   ├── App.tsx                   # Theme, navigation state, AppShell
+│   │   └── pages.tsx                 # PAGE_COMPONENTS registry (one active page)
 │   ├── components/
-│   │   ├── ScreenerPage.tsx          # Live breakout screener
-│   │   ├── HeatmapPage.tsx           # Market heatmap treemap
-│   │   ├── SearchBar.tsx             # Symbol search with autocomplete
-│   │   ├── ResultCard.tsx            # Pattern detection result display
-│   │   ├── QuantityTable.tsx         # Investment quantity calculator
-│   │   ├── StockComparePage.tsx      # Multi-stock comparison tool
-│   │   ├── PortfolioPage.tsx         # Portfolio management hub
-│   │   ├── AddTransactionModal.tsx   # Buy/Sell transaction form
-│   │   ├── ImportExcelModal.tsx      # Excel/CSV portfolio import
-│   │   ├── TransactionHistory.tsx    # Transaction log per stock
-│   │   ├── PerformanceChart.tsx      # Portfolio vs indices chart
-│   │   ├── RiskDashboard.tsx         # Risk analytics & donut charts
-│   │   └── DividendDashboard.tsx     # Dividend income dashboard
-│   └── utils/
-│       ├── fetchStockData.ts         # API data fetching functions
-│       ├── patternDetector.ts        # Candlestick pattern detection
-│       ├── buyPrice.ts              # Buy price calculation
-│       ├── screener.ts              # Screener utilities & caching
-│       ├── portfolio.ts             # Portfolio CRUD & localStorage
-│       ├── portfolioChart.ts        # Historical portfolio value computation
-│       ├── riskMetrics.ts           # Risk metric computations
-│       └── theme.ts                 # Dark mode theme management
-├── server.js                         # Express proxy for local development
-├── vercel.json                       # Vercel deployment config & routing
-├── tailwind.config.js                # Tailwind with dark mode class strategy
+│   │   ├── layout/
+│   │   │   ├── AppShell.tsx          # Sidebar + ticker + main
+│   │   │   ├── Sidebar.tsx
+│   │   │   ├── MarketTicker.tsx
+│   │   │   ├── PageLayout.tsx
+│   │   │   └── types.ts              # Page union type
+│   │   └── ui/                       # Reusable primitives
+│   │       ├── Button.tsx, Card.tsx, Alert.tsx, Modal.tsx, …
+│   │       ├── DataTable.tsx, SearchField.tsx, PageHeader.tsx
+│   │       └── index.ts
+│   ├── features/
+│   │   ├── overview/OverviewPage.tsx
+│   │   ├── screener/ScreenerPage.tsx
+│   │   ├── heatmap/HeatmapPage.tsx
+│   │   ├── lookup/
+│   │   │   ├── LookupPage.tsx
+│   │   │   ├── useLookup.ts
+│   │   │   ├── SearchBar.tsx, ResultCard.tsx, QuantityTable.tsx
+│   │   ├── compare/ComparePage.tsx
+│   │   ├── portfolio/
+│   │   │   ├── PortfolioPage.tsx
+│   │   │   └── components/           # Modals, charts, risk, history
+│   │   └── about/AboutPage.tsx
+│   ├── lib/
+│   │   ├── format.ts                 # fmtInr, fmtNumber, fmtPct, …
+│   │   └── cn.ts
+│   ├── services/
+│   │   ├── fetchStockData.ts         # Chart, quote, heatmap batch helpers
+│   │   └── apiBatch.ts               # Client batch helpers (compare, lookup)
+│   └── utils/                        # Domain logic only
+│       ├── patternDetector.ts
+│       ├── buyPrice.ts
+│       ├── screener.ts
+│       ├── portfolio.ts
+│       ├── portfolioChart.ts
+│       ├── riskMetrics.ts
+│       └── theme.ts
+├── server.js
+├── vercel.json
+├── tailwind.config.js
 ├── package.json
-├── tsconfig.json
 └── index.html
 ```
 
@@ -235,51 +220,51 @@ bullish-harami-buy-price-app/
 
 ## API Endpoints
 
-All endpoints are available at `http://localhost:3006` in development and at the deployed Vercel URL in production.
+Base URL: `http://localhost:3006` in development; your Vercel deployment URL in production.
 
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/api/chart/:symbol` | Historical OHLCV data. Query params: `range` (1d, 5d, 1mo, 1y, max), `interval` (1d, 1mo) |
-| GET | `/api/quote/:symbols` | Live quote data. Supports comma-separated symbols for batch requests |
-| GET | `/api/profile/:symbol` | Sector and industry from Yahoo's asset profile |
-| GET | `/api/stats/:symbol` | Key statistics: P/E, P/B, beta, forward P/E, dividend yield, 52W change |
-| GET | `/api/dividends/:symbol` | Dividend rate, yield, trailing annual rate, ex-dividend date |
-| GET | `/api/search?q=query` | Symbol autocomplete filtered to NSE/BSE exchanges |
-| GET | `/api/screener-list` | Full NSE stock universe (market cap > ₹1,000 Cr) |
-| POST | `/api/screener-scan` | Server-side pattern scanning. Body: `{ symbols: string[] }` |
+| GET | `/api/chart/:symbol` | Historical OHLCV. Query: `range`, `interval` |
+| GET | `/api/quote/:symbols` | Live quote(s); comma-separated symbols supported |
+| GET | `/api/profile/:symbol` | Sector and industry |
+| GET | `/api/stats/:symbol` | P/E, forward P/E, P/B, beta, 52W change, market cap |
+| GET | `/api/search?q=` | Symbol autocomplete (NSE/BSE) |
+| GET | `/api/screener-list` | NSE universe (cap > ₹1,000 Cr) |
+| POST | `/api/screener-scan` | Pattern scan. Body: `{ symbols: string[] }` |
+| POST | `/api/heatmap-batch` | Batch quotes for heatmap. Body: `{ symbols, timeframe }` |
 
 ---
 
 ## Pattern Detection Logic
 
-### Bullish Harami (3-candle pattern)
+### Bullish Harami (3-candle)
 
 ```
-Candle 1 (Red):  Close < Open (bearish)
-Candle 2 (Green): Contained within Candle 1's range (high < C1.high, low > C1.low)
-Candle 3 (Green): Breaks above both candles (high > C1.high, close > C1.open)
+Candle 1 (Red):   Close < Open
+Candle 2 (Green): Inside Candle 1 range
+Candle 3 (Green): Breaks above both; close > Candle 1 open
 ```
 
-### Bullish Engulfing + Breakout (3-candle pattern)
+### Bullish Engulfing + breakout (3-candle)
 
 ```
-Candle 1 (Red):  Close < Open (bearish)
-Candle 2 (Green): Engulfs Candle 1 (close > C1.open, open < C1.close, range exceeds C1)
-Candle 3 (Green): Confirms breakout (low > both candles, close > C2.close)
+Candle 1 (Red):   Close < Open
+Candle 2 (Green): Engulfs Candle 1
+Candle 3 (Green): Confirms breakout above prior highs
 ```
 
-### Filters Applied
+### Filters
 
-- Volume > 2,00,000 on the breakout candle
+- Breakout volume > 2,00,000
 - Close > ₹50
-- Market Cap > ₹5,000 Cr
+- Market cap > ₹5,000 Cr (screener universe uses ₹1,000 Cr list filter)
 
-### Price Calculations
+### Price calculations
 
 ```
 Buy Price         = 0.98  × Candle3.Close
 Buy Trigger Price = 0.985 × Candle3.Close
-Stop Loss         = Buy Price × (1 - stop_loss_percentage)
+Stop Loss         = Buy Price × (1 − stop_loss_%)
 ```
 
 ---
@@ -294,30 +279,26 @@ Stop Loss         = Buy Price × (1 - stop_loss_percentage)
 ### Installation
 
 ```bash
-git clone https://github.com/<your-username>/bullish-harami-buy-price-app.git
-cd bullish-harami-buy-price-app
+git clone https://github.com/<your-username>/KiteView.git
+cd KiteView
 npm install
 ```
 
 ### Development
 
-Start both the proxy server and the Vite dev server:
-
 ```bash
-# Terminal 1: Start the CORS proxy for Yahoo Finance (port 3006)
-npm run proxy
-
-# Terminal 2: Start the Vite dev server (port 5173)
-npm run dev
-```
-
-Or run both together:
-
-```bash
+# Proxy (port 3006) + Vite (port 5173)
 npm start
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+Or separately:
+
+```bash
+npm run proxy   # Terminal 1
+npm run dev     # Terminal 2
+```
+
+Open [http://localhost:5173](http://localhost:5173).
 
 ### Build
 
@@ -325,27 +306,23 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 npm run build
 ```
 
-This runs TypeScript type-checking (`tsc -b`) followed by the Vite production build. Output goes to the `dist/` directory.
+Runs `tsc -b` then Vite; output in `dist/`.
 
 ---
 
 ## Deployment
 
-The app is configured for **Vercel** deployment.
+Configured for **Vercel**:
 
-### Configuration
-
-- `vercel.json` handles routing: API routes are directed to serverless functions in `api/`, all other routes fall through to the SPA's `index.html`
-- Serverless functions in `api/` mirror the Express routes in `server.js`
-- Vercel Analytics and Speed Insights are integrated
-
-### Deploy
+- `vercel.json` routes `/api/*` to `api/` functions; all other paths serve the SPA
+- `api/` handlers mirror `server.js` for production
+- Analytics and Speed Insights enabled in `src/app/App.tsx`
 
 ```bash
 npx vercel
 ```
 
-Or connect the GitHub repository to Vercel for automatic deployments on push.
+Or connect the GitHub repo for automatic deploys on push.
 
 ---
 
@@ -353,10 +330,10 @@ Or connect the GitHub repository to Vercel for automatic deployments on push.
 
 | Decision | Rationale |
 |---|---|
-| **No external treemap library** | Custom squarify algorithm keeps bundle size small and gives full control over tile rendering |
-| **Server-side screener scanning** | Client-side scanning of 500+ stocks was too slow; server-side with concurrency of 30 completes in seconds |
-| **`read-excel-file` over `xlsx`** | `xlsx@0.18.5` had HIGH severity security vulnerabilities; `read-excel-file` is lightweight and secure |
-| **Tab panels use `display: none`** | Preserves component state (e.g., screener results) when switching tabs, unlike conditional rendering which unmounts |
-| **Yahoo crumb caching** | Yahoo Finance requires crumb/cookie auth; caching for 10 minutes avoids redundant auth round-trips |
-| **`localStorage` for portfolio** | Simple, zero-setup persistence; suitable for a personal finance tool without backend database requirements |
-| **Tailwind `darkMode: 'class'`** | Enables programmatic dark mode control with system preference detection and manual override |
+| **Feature folders** | Each screen owns its UI; shared pieces live in `components/ui` and `layout` |
+| **Page registry** | `pages.tsx` maps `Page` → component; only the active route mounts |
+| **Semantic Tailwind tokens** | Consistent surfaces and typography without scattered `gray-*` strings |
+| **Custom treemap** | No treemap dependency; full control over heatmap tiles |
+| **Server-side screener** | 500+ symbols scanned with concurrency instead of slow client loops |
+| **`localStorage` portfolio** | No backend DB; suitable for personal tracking |
+| **Yahoo crumb cache** | Avoids repeated auth handshakes to `fc.yahoo.com` |

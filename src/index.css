@@ -9,10 +9,11 @@
   }
 
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply bg-surface-muted text-ink-primary antialiased;
   }
+
   .dark body {
-    @apply bg-gray-900 text-gray-100;
+    @apply bg-surface-dark text-ink-dark-primary;
   }
 
   ::-webkit-scrollbar {
@@ -23,9 +24,51 @@
     @apply bg-transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 dark:bg-gray-700 rounded-full;
+    @apply bg-border rounded-full;
   }
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-400 dark:bg-gray-600;
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-border-dark;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-xl;
+  }
+
+  .card-muted {
+    @apply bg-surface-muted dark:bg-surface-dark-muted border border-border dark:border-border-dark rounded-xl;
+  }
+
+  .page-title {
+    @apply text-2xl font-semibold tracking-tight text-ink-primary dark:text-ink-dark-primary;
+  }
+
+  .page-desc {
+    @apply text-sm text-ink-secondary dark:text-ink-dark-secondary leading-relaxed;
+  }
+
+  .label-caps {
+    @apply text-xs font-medium uppercase tracking-wide text-ink-muted dark:text-ink-dark-muted;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-primary {
+    @apply btn px-4 py-2 bg-accent text-white hover:bg-accent-hover;
+  }
+
+  .btn-secondary {
+    @apply btn px-4 py-2 bg-surface-muted dark:bg-surface-dark-muted text-ink-primary dark:text-ink-dark-primary border border-border dark:border-border-dark hover:bg-border/30 dark:hover:bg-border-dark/50;
+  }
+
+  .btn-ghost {
+    @apply btn px-3 py-2 text-ink-secondary dark:text-ink-dark-secondary hover:bg-surface-muted dark:hover:bg-surface-dark-muted;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2.5 rounded-lg border border-border dark:border-border-dark bg-surface dark:bg-surface-dark-muted text-ink-primary dark:text-ink-dark-primary text-sm placeholder:text-ink-muted dark:placeholder:text-ink-dark-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent;
   }
 }

@@ -5,7 +5,7 @@ import {
   ScreenerResult,
   ScreenerProgress,
   ScreenerStock,
-} from '../utils/screener';
+} from '../../utils/screener';
 
 function fmt(n: number): string {
   return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });

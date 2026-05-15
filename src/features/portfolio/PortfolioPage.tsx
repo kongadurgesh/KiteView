@@ -1,16 +1,14 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Portfolio, Position, Transaction } from '../types';
-import { loadPortfolio, savePortfolio, addTransaction, getPositions, removePosition, clearPortfolio } from '../utils/portfolio';
-import { fetchBatchQuotesDetailed } from '../utils/fetchStockData';
-import { AddTransactionModal } from './AddTransactionModal';
-import { ImportExcelModal } from './ImportExcelModal';
-import { TransactionHistory } from './TransactionHistory';
-import { PerformanceChart } from './PerformanceChart';
-import { RiskDashboard } from './RiskDashboard';
-
-function fmt(n: number): string {
-  return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+import { Portfolio, Position, Transaction } from '../../types';
+import { loadPortfolio, savePortfolio, addTransaction, getPositions, removePosition, clearPortfolio } from '../../utils/portfolio';
+import { fetchBatchQuotesDetailed } from '../../services/fetchStockData';
+import { fmtNumber } from '../../lib/format';
+import { AddTransactionModal } from './components/AddTransactionModal';
+import { ImportExcelModal } from './components/ImportExcelModal';
+import { TransactionHistory } from './components/TransactionHistory';
+import { PerformanceChart } from './components/PerformanceChart';
+import { RiskDashboard } from './components/RiskDashboard';
+const fmt = fmtNumber;
 
 type SortKey = 'name' | 'qty' | 'avgBuy' | 'cmp' | 'invested' | 'current' | 'pnl' | 'pnlPct';
 type SortDir = 'asc' | 'desc';

@@ -9,6 +9,7 @@ import {
   Legend,
   CartesianGrid,
 } from 'recharts';
+import { fetchChartBatch, fetchStatsBatch } from '../../services/apiBatch';
 
 const PROXY_BASE = import.meta.env.DEV ? 'http://localhost:3006' : '';
 
@@ -49,7 +50,6 @@ interface StockStats {
   forwardPE: number | null;
   pb: number | null;
   beta: number | null;
-  dividendYield: number | null;
   fiftyTwoWeekChange: number | null;
   marketCap: number | null;
   shortName: string;
@@ -290,26 +290,17 @@ export function StockComparePage({ seedSymbol, onSeedConsumed }: StockComparePag
     async function loadCharts() {
       setChartLoading(true);
       try {
-        const results = await Promise.all(
-          symbols.map(async (sym) => {
-            const res = await fetch(
-              `${PROXY_BASE}/api/chart/${encodeURIComponent(sym)}?range=${range}&interval=1d`,
-            );
-            const data = await res.json();
-            return { sym, series: parseChartPayload(data) };
-          }),
-        );
+        const chartSymbols = benchOpt ? [...symbols, benchOpt.sym] : [...symbols];
+        const charts = await fetchChartBatch(chartSymbols, range, '1d');
         if (cancelled) return;
         const map: Record<string, { date: string; close: number }[]> = {};
-        for (const r of results) map[r.sym] = r.series;
+        for (const sym of symbols) {
+          map[sym] = parseChartPayload(charts[sym]);
+        }
 
         let benchArg: { key: string; points: { date: string; close: number }[] } | null = null;
         if (benchOpt) {
-          const res = await fetch(
-            `${PROXY_BASE}/api/chart/${encodeURIComponent(benchOpt.sym)}?range=${range}&interval=1d`,
-          );
-          const data = await res.json();
-          const pts = parseChartPayload(data);
+          const pts = parseChartPayload(charts[benchOpt.sym]);
           if (pts.length > 0) benchArg = { key: benchOpt.dataKey, points: pts };
         }
         if (cancelled) return;
@@ -334,34 +325,23 @@ export function StockComparePage({ seedSymbol, onSeedConsumed }: StockComparePag
     async function loadStats() {
       setStatsLoading(true);
       try {
-        const entries = await Promise.all(
-          symbols.map(async (sym) => {
-            try {
-              const res = await fetch(`${PROXY_BASE}/api/stats/${encodeURIComponent(sym)}`);
-              const data = (await res.json()) as StockStats;
-              return [sym, data] as const;
-            } catch {
-              return [
-                sym,
-                {
-                  pe: null,
-                  forwardPE: null,
-                  pb: null,
-                  beta: null,
-                  dividendYield: null,
-                  fiftyTwoWeekChange: null,
-                  marketCap: null,
-                  shortName: sym,
-                  regularMarketPrice: null,
-                  sector: '',
-                } satisfies StockStats,
-              ] as const;
-            }
-          }),
-        );
+        const batch = await fetchStatsBatch<StockStats>(symbols);
         if (cancelled) return;
+        const empty: StockStats = {
+          pe: null,
+          forwardPE: null,
+          pb: null,
+          beta: null,
+          fiftyTwoWeekChange: null,
+          marketCap: null,
+          shortName: '',
+          regularMarketPrice: null,
+          sector: '',
+        };
         const next: Record<string, StockStats> = {};
-        for (const [sym, st] of entries) next[sym] = st;
+        for (const sym of symbols) {
+          next[sym] = batch[sym] ?? { ...empty, shortName: sym };
+        }
         setStatsBySymbol(next);
       } finally {
         if (!cancelled) setStatsLoading(false);
@@ -414,12 +394,6 @@ export function StockComparePage({ seedSymbol, onSeedConsumed }: StockComparePag
           rank: 'none' as const,
           value: (_s: string) => null as number | null,
           fmt: (s: string) => fmtRatio(statsBySymbol[s]?.beta ?? null),
-        },
-        {
-          label: 'Div Yield',
-          rank: 'higher' as const,
-          value: (s: string) => statsBySymbol[s]?.dividendYield ?? null,
-          fmt: (s: string) => fmtPct(statsBySymbol[s]?.dividendYield ?? null),
         },
         {
           label: '52W Change',

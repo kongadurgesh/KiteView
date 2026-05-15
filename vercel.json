@@ -6,7 +6,6 @@
     { "src": "/api/quote/([^/]+)", "dest": "/api/quote/[symbol].js?symbol=$1" },
     { "src": "/api/profile/([^/]+)", "dest": "/api/profile/[symbol].js?symbol=$1" },
     { "src": "/api/stats/([^/]+)", "dest": "/api/stats/[symbol].js?symbol=$1" },
-    { "src": "/api/dividends/([^/]+)", "dest": "/api/dividends/[symbol].js?symbol=$1" },
     { "src": "/api/search", "dest": "/api/search.js" },
     { "src": "/api/screener-list", "dest": "/api/screener-list.js" },
     { "src": "/api/screener-scan", "dest": "/api/screener-scan.js" },
