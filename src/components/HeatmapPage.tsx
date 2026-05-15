@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { fetchScreenerList, ScreenerStock } from '../utils/screener';
-import { fetchBatchQuotesFull, QuoteFull } from '../utils/fetchStockData';
+import { fetchHeatmapBatch, HeatmapTimeframe, QuoteFull } from '../utils/fetchStockData';
 
 interface Props {
   onViewStock?: (symbol: string) => void;
+  isActive?: boolean;
 }
 
 interface IndexOption {
@@ -26,18 +27,24 @@ const INDICES: IndexOption[] = [
   { id: 'all', label: 'All Stocks', start: 0, end: Infinity },
 ];
 
+const TIMEFRAME_OPTIONS: { key: HeatmapTimeframe; label: string }[] = [
+  { key: '1d', label: '1D' },
+  { key: '1w', label: '1W' },
+  { key: '1m', label: '1M' },
+  { key: '1y', label: '1Y' },
+];
+
+const AUTO_REFRESH_MS = 120_000;
+
 function heatColor(pct: number): string {
   const c = Math.max(-4, Math.min(4, pct));
   const t = Math.min(Math.abs(c) / 3, 1);
-  // Neutral: rgb(198, 195, 195)
   const nr = 198, ng = 195, nb = 195;
 
   if (c > 0) {
-    // Green target: rgb(0, 144, 74)
     return `rgb(${Math.round(nr + (0 - nr) * t)},${Math.round(ng + (144 - ng) * t)},${Math.round(nb + (74 - nb) * t)})`;
   }
   if (c < 0) {
-    // Red target: rgb(204, 50, 56)
     return `rgb(${Math.round(nr + (204 - nr) * t)},${Math.round(ng + (50 - ng) * t)},${Math.round(nb + (56 - nb) * t)})`;
   }
   return `rgb(${nr},${ng},${nb})`;
@@ -46,6 +53,10 @@ function heatColor(pct: number): string {
 function fmtPrice(n: number): string {
   if (n >= 10000) return `₹${(n / 1000).toFixed(1)}K`;
   return `₹${Math.round(n).toLocaleString('en-IN')}`;
+}
+
+function fmtTime(d: Date): string {
+  return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 }
 
 interface TreemapRect {
@@ -127,27 +138,41 @@ function squarify(items: QuoteFull[], width: number, height: number): TreemapRec
   return rects;
 }
 
-export function HeatmapPage({ onViewStock }: Props) {
+export function HeatmapPage({ onViewStock, isActive = false }: Props) {
   const [allStocks, setAllStocks] = useState<ScreenerStock[]>([]);
   const [selectedIndex, setSelectedIndex] = useState('nifty50');
+  const [timeframe, setTimeframe] = useState<HeatmapTimeframe>('1d');
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState({ loaded: 0, total: 0 });
   const [error, setError] = useState<string | null>(null);
   const [displayQuotes, setDisplayQuotes] = useState<QuoteFull[]>([]);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const cache = useRef(new Map<string, QuoteFull>());
   const runId = useRef(0);
 
-  const loadQuotes = useCallback(async (stocks: ScreenerStock[], force: boolean) => {
+  const currentStocks = useMemo(() => {
+    if (allStocks.length === 0) return [];
+    const idx = INDICES.find((i) => i.id === selectedIndex) ?? INDICES[0];
+    return allStocks.slice(idx.start, Math.min(idx.end, allStocks.length));
+  }, [allStocks, selectedIndex]);
+
+  const cacheKey = useCallback((symbol: string, tf: HeatmapTimeframe) => `${symbol}:${tf}`, []);
+
+  const loadQuotes = useCallback(async (stocks: ScreenerStock[], tf: HeatmapTimeframe, force: boolean) => {
     const id = ++runId.current;
     setLoading(true);
     setError(null);
 
-    const needed = force ? stocks : stocks.filter((s) => !cache.current.has(s.symbol));
+    const needed = force
+      ? stocks
+      : stocks.filter((s) => !cache.current.has(cacheKey(s.symbol, tf)));
 
     if (needed.length === 0) {
       if (runId.current === id) {
-        setDisplayQuotes(stocks.map((s) => cache.current.get(s.symbol)!).filter(Boolean));
+        setDisplayQuotes(
+          stocks.map((s) => cache.current.get(cacheKey(s.symbol, tf))!).filter(Boolean),
+        );
         setLoading(false);
       }
       return;
@@ -159,9 +184,9 @@ export function HeatmapPage({ onViewStock }: Props) {
       if (runId.current !== id) return;
       const batch = needed.slice(i, i + 50).map((s) => s.symbol);
       try {
-        const results = await fetchBatchQuotesFull(batch);
+        const results = await fetchHeatmapBatch(batch, tf);
         for (const q of results) {
-          if (q.regularMarketPrice > 0) cache.current.set(q.symbol, q);
+          if (q.regularMarketPrice > 0) cache.current.set(cacheKey(q.symbol, tf), q);
         }
       } catch { /* continue */ }
       if (runId.current === id) {
@@ -170,10 +195,13 @@ export function HeatmapPage({ onViewStock }: Props) {
     }
 
     if (runId.current === id) {
-      setDisplayQuotes(stocks.map((s) => cache.current.get(s.symbol)!).filter(Boolean));
+      setDisplayQuotes(
+        stocks.map((s) => cache.current.get(cacheKey(s.symbol, tf))!).filter(Boolean),
+      );
+      setLastUpdated(new Date());
       setLoading(false);
     }
-  }, []);
+  }, [cacheKey]);
 
   useEffect(() => {
     (async () => {
@@ -188,18 +216,25 @@ export function HeatmapPage({ onViewStock }: Props) {
   }, []);
 
   useEffect(() => {
-    if (allStocks.length === 0) return;
-    const idx = INDICES.find((i) => i.id === selectedIndex) ?? INDICES[0];
-    const stocks = allStocks.slice(idx.start, Math.min(idx.end, allStocks.length));
-    loadQuotes(stocks, false);
-  }, [allStocks, selectedIndex, loadQuotes]);
+    if (currentStocks.length === 0) return;
+    loadQuotes(currentStocks, timeframe, false);
+  }, [currentStocks, timeframe, loadQuotes]);
+
+  useEffect(() => {
+    if (!isActive || currentStocks.length === 0) return;
+    const id = setInterval(() => {
+      if (document.hidden) return;
+      loadQuotes(currentStocks, timeframe, true);
+    }, AUTO_REFRESH_MS);
+    return () => clearInterval(id);
+  }, [isActive, currentStocks, timeframe, loadQuotes]);
 
   const handleRefresh = () => {
-    if (allStocks.length === 0) return;
-    const idx = INDICES.find((i) => i.id === selectedIndex) ?? INDICES[0];
-    const stocks = allStocks.slice(idx.start, Math.min(idx.end, allStocks.length));
-    loadQuotes(stocks, true);
+    if (currentStocks.length === 0) return;
+    loadQuotes(currentStocks, timeframe, true);
   };
+
+  const timeframeLabel = TIMEFRAME_OPTIONS.find((t) => t.key === timeframe)?.label ?? '1D';
 
   const CW = 1600;
   const CH = useMemo(() => {
@@ -212,22 +247,26 @@ export function HeatmapPage({ onViewStock }: Props) {
 
   const rects = useMemo(() => squarify(displayQuotes, CW, CH), [displayQuotes, CH]);
 
-  const gainers = displayQuotes.filter((q) => q.regularMarketChangePercent > 0).length;
-  const losers = displayQuotes.filter((q) => q.regularMarketChangePercent < 0).length;
+  const gainers = displayQuotes.filter((q) => q.changePercent > 0).length;
+  const losers = displayQuotes.filter((q) => q.changePercent < 0).length;
   const unchanged = displayQuotes.length - gainers - losers;
 
   const progressPct = progress.total > 0 ? (progress.loaded / progress.total) * 100 : 0;
 
   return (
     <div className="w-full max-w-7xl mt-6 space-y-4">
-      {/* Header */}
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
         <div className="flex flex-col gap-4">
           <div className="flex items-start justify-between">
             <div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Market Heatmap</h2>
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                Sized by market cap, colored by daily change &mdash; approximated by cap ranking
+                Sized by market cap, colored by {timeframeLabel} change
+                {lastUpdated && (
+                  <span className="ml-2 text-gray-400 dark:text-gray-500">
+                    &middot; Last updated {fmtTime(lastUpdated)}
+                  </span>
+                )}
               </p>
             </div>
             <button
@@ -242,7 +281,6 @@ export function HeatmapPage({ onViewStock }: Props) {
             </button>
           </div>
 
-          {/* Controls row */}
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
               <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Index</label>
@@ -259,7 +297,28 @@ export function HeatmapPage({ onViewStock }: Props) {
 
             <div className="h-5 w-px bg-gray-300 dark:bg-gray-700 hidden sm:block" />
 
-            {/* Stats */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Period</span>
+              <div className="flex gap-0.5 bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5 border border-gray-200 dark:border-gray-700">
+                {TIMEFRAME_OPTIONS.map(({ key, label }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setTimeframe(key)}
+                    className={`px-2.5 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+                      timeframe === key
+                        ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-300 shadow-sm'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="h-5 w-px bg-gray-300 dark:bg-gray-700 hidden sm:block" />
+
             {!loading && displayQuotes.length > 0 && (
               <div className="flex items-center gap-3 text-xs font-medium">
                 <span className="text-gray-500 dark:text-gray-400">{displayQuotes.length} stocks</span>
@@ -277,7 +336,6 @@ export function HeatmapPage({ onViewStock }: Props) {
               </div>
             )}
 
-            {/* Legend gradient */}
             <div className="ml-auto hidden sm:flex items-center gap-2 text-[10px] font-medium text-gray-400 dark:text-gray-500">
               <span>-3%</span>
               <div
@@ -290,7 +348,6 @@ export function HeatmapPage({ onViewStock }: Props) {
             </div>
           </div>
 
-          {/* Progress bar */}
           {loading && progress.total > 0 && (
             <div className="w-full">
               <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 overflow-hidden">
@@ -313,7 +370,6 @@ export function HeatmapPage({ onViewStock }: Props) {
         </div>
       )}
 
-      {/* Loading skeleton */}
       {loading && displayQuotes.length === 0 && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-16 flex flex-col items-center gap-4">
           <div className="size-10 border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin" />
@@ -321,7 +377,6 @@ export function HeatmapPage({ onViewStock }: Props) {
         </div>
       )}
 
-      {/* Heatmap treemap */}
       {displayQuotes.length > 0 && (
         <div className="bg-gray-100 dark:bg-gray-950 rounded-2xl border border-gray-300 dark:border-gray-700 overflow-hidden p-1.5">
           <div className="relative w-full" style={{ paddingBottom: `${(CH / CW) * 100}%` }}>
@@ -336,7 +391,7 @@ export function HeatmapPage({ onViewStock }: Props) {
                 const showChange = sizeFactor > 1.8;
                 const showPrice = sizeFactor > 5;
                 const fontSize = sizeFactor > 7 ? 15 : sizeFactor > 5 ? 13 : sizeFactor > 3 ? 11 : sizeFactor > 2 ? 9 : 7;
-                const changePct = r.quote.regularMarketChangePercent;
+                const changePct = r.quote.changePercent;
                 const intensity = Math.min(Math.abs(changePct) / 1.5, 1);
                 const useDarkText = intensity < 0.4;
                 const textColor = useDarkText ? '#1f2937' : '#ffffff';

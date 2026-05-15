@@ -127,33 +127,41 @@ export async function fetchBatchQuotesDetailed(symbols: string[]): Promise<Recor
   }
 }
 
+export type HeatmapTimeframe = '1d' | '1w' | '1m' | '1y';
+
 export interface QuoteFull {
   symbol: string;
   shortName: string;
   regularMarketPrice: number;
-  regularMarketChangePercent: number;
+  changePercent: number;
   marketCap: number;
   sector: string;
 }
 
-export async function fetchBatchQuotesFull(symbols: string[]): Promise<QuoteFull[]> {
+export async function fetchHeatmapBatch(symbols: string[], timeframe: HeatmapTimeframe): Promise<QuoteFull[]> {
   if (symbols.length === 0) return [];
   try {
-    const joined = symbols.join(',');
-    const url = `${PROXY_BASE}/api/quote/${encodeURIComponent(joined)}`;
-    const res = await fetch(url);
+    const res = await fetch(`${PROXY_BASE}/api/heatmap-batch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ symbols, timeframe }),
+    });
     if (!res.ok) return [];
     const data = await res.json();
-    const results = data?.quoteResponse?.result ?? [];
-    return results.map((r: Record<string, unknown>) => ({
+    const quotes = data?.quotes ?? [];
+    return quotes.map((r: Record<string, unknown>) => ({
       symbol: (r.symbol as string) ?? '',
       shortName: (r.shortName as string) ?? (r.symbol as string) ?? '',
       regularMarketPrice: (r.regularMarketPrice as number) ?? 0,
-      regularMarketChangePercent: (r.regularMarketChangePercent as number) ?? 0,
+      changePercent: (r.changePercent as number) ?? 0,
       marketCap: (r.marketCap as number) ?? 0,
       sector: (r.sector as string) ?? '',
     }));
   } catch {
     return [];
   }
+}
+
+export async function fetchBatchQuotesFull(symbols: string[]): Promise<QuoteFull[]> {
+  return fetchHeatmapBatch(symbols, '1d');
 }

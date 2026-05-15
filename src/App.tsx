@@ -10,6 +10,7 @@ import { ScreenerPage } from './components/ScreenerPage';
 import { HeatmapPage } from './components/HeatmapPage';
 import { StockComparePage } from './components/StockComparePage';
 import { AboutPage } from './components/AboutPage';
+import { OverviewPage } from './components/OverviewPage';
 import { fetchStockData, fetchStockMeta, fetchAllTimeHigh } from './utils/fetchStockData';
 import { detectPattern } from './utils/patternDetector';
 import { initTheme, getTheme, toggleTheme } from './utils/theme';
@@ -23,7 +24,7 @@ function App() {
   const [isDark, setIsDark] = useState(() => getTheme() === 'dark');
   useEffect(() => { initTheme(); }, []);
 
-  const [activePage, setActivePage] = useState<Page>('screener');
+  const [activePage, setActivePage] = useState<Page>('overview');
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [compareSeedSymbol, setCompareSeedSymbol] = useState<string | null>(null);
 
@@ -115,6 +116,10 @@ function App() {
         <MarketTicker sidebarExpanded={sidebarExpanded} />
 
         <main className="flex-1 px-6 py-6 flex flex-col items-center overflow-y-auto">
+          <div style={{ display: activePage === 'overview' ? undefined : 'none' }} className="w-full max-w-3xl flex flex-col items-center">
+            <OverviewPage onNavigate={setActivePage} />
+          </div>
+
           {activePage === 'about' && <AboutPage />}
 
           <div style={{ display: activePage === 'screener' ? undefined : 'none' }} className="w-full flex flex-col items-center">
@@ -122,7 +127,7 @@ function App() {
           </div>
 
           <div style={{ display: activePage === 'heatmap' ? undefined : 'none' }} className="w-full flex flex-col items-center">
-            <HeatmapPage onViewStock={navigateToLookup} />
+            <HeatmapPage onViewStock={navigateToLookup} isActive={activePage === 'heatmap'} />
           </div>
 
           <div style={{ display: activePage === 'lookup' ? undefined : 'none' }} className="w-full max-w-3xl flex flex-col items-center">
