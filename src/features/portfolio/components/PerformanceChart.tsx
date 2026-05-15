@@ -9,12 +9,12 @@ import {
   Legend,
   CartesianGrid,
 } from 'recharts';
-import { Portfolio } from '../types';
+import { Portfolio } from '../../../types';
 import {
   fetchHistoricalPrices,
   computeDailyPortfolioValue,
-} from '../utils/portfolioChart';
-import { getPositions } from '../utils/portfolio';
+} from '../../../utils/portfolioChart';
+import { getPositions } from '../../../utils/portfolio';
 
 const INDICES = [
   { key: 'nifty50', symbol: '^NSEI', label: 'Nifty 50', color: '#f59e0b' },

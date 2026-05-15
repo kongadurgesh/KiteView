@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { Portfolio } from '../types';
-import { getPositions } from '../utils/portfolio';
-import { fetchHistoricalPrices } from '../utils/portfolioChart';
-import { fetchStockMeta } from '../utils/fetchStockData';
+import { Portfolio } from '../../../types';
+import { getPositions } from '../../../utils/portfolio';
+import { fetchHistoricalPrices } from '../../../utils/portfolioChart';
+import { fetchStockMeta } from '../../../utils/fetchStockData';
 import {
   dailyReturns,
   computeBeta,
@@ -13,7 +13,7 @@ import {
   diversificationScore,
   computeSectorConcentration,
   SectorWeight,
-} from '../utils/riskMetrics';
+} from '../../../utils/riskMetrics';
 
 const PIE_COLORS = ['#2563eb', '#f59e0b', '#10b981', '#f43f5e', '#8b5cf6', '#06b6d4', '#ec4899', '#6366f1', '#84cc16', '#64748b'];
 

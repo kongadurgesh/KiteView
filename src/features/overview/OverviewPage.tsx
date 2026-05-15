@@ -1,4 +1,4 @@
-import type { Page } from './Sidebar';
+import type { Page } from '../../components/layout/types';
 import { motion, useReducedMotion } from 'framer-motion';
 
 interface OverviewPageProps {
@@ -9,17 +9,13 @@ const PREVIEW_ROOT = 'relative h-full w-full min-h-0 overflow-hidden';
 
 function OpenButton({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="px-3 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-500 transition-colors"
-    >
+    <button type="button" onClick={onClick} className="btn-primary text-xs px-3 py-2">
       {label}
     </button>
   );
 }
 
-function Card({
+function OverviewCard({
   title,
   blurb,
   action,
@@ -33,32 +29,14 @@ function Card({
   className?: string;
 }) {
   return (
-    <div
-      className={[
-        'group relative h-full min-h-[220px] flex flex-col overflow-hidden',
-        'bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800',
-        'p-5',
-        'hover:border-gray-300 dark:hover:border-gray-700 transition-colors',
-        className,
-      ].join(' ')}
-    >
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-        <div className="absolute -top-24 -right-24 size-56 rounded-full bg-blue-500/10 blur-2xl" />
-        <div className="absolute -bottom-24 -left-24 size-56 rounded-full bg-emerald-500/10 blur-2xl" />
-      </div>
-
-      <div className="relative flex flex-col flex-1 min-h-0">
-        <div className="shrink-0 h-28 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/40 p-3 overflow-hidden">
-          {preview}
+    <div className={['card h-full min-h-[220px] flex flex-col p-5', className].join(' ')}>
+      <div className="card-muted shrink-0 h-28 p-3 overflow-hidden">{preview}</div>
+      <div className="mt-4 flex items-start justify-between gap-3 flex-1">
+        <div className="min-w-0 flex-1 pr-2">
+          <p className="text-sm font-semibold text-ink-primary dark:text-ink-dark-primary">{title}</p>
+          <p className="mt-1 text-xs text-ink-secondary dark:text-ink-dark-secondary leading-relaxed">{blurb}</p>
         </div>
-
-        <div className="mt-4 flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1 pr-2">
-            <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{title}</p>
-            <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{blurb}</p>
-          </div>
-          <div className="shrink-0">{action}</div>
-        </div>
+        <div className="shrink-0">{action}</div>
       </div>
     </div>
   );
@@ -232,14 +210,10 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
   return (
     <div className="w-full max-w-6xl mx-auto pb-10">
       <div className="flex flex-col gap-2 mb-6">
-        <div className="relative">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
-            KiteView
-          </h1>
-          <div className="absolute -top-10 -left-10 size-40 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-10 -right-10 size-40 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
+        <div>
+          <h1 className="page-title text-2xl md:text-3xl">KiteView</h1>
         </div>
-        <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed max-w-2xl">
+        <p className="page-desc max-w-2xl">
           A single workspace to scan for breakout patterns, inspect a symbol, read the market heatmap, compare names, and track a portfolio.
         </p>
       </div>
@@ -258,7 +232,7 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch"
       >
         <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
-          <Card
+          <OverviewCard
             title="Screener"
             blurb="Scan ranked NSE lists for Bullish Harami / Engulfing breakouts."
             action={<OpenButton label="Open" onClick={() => onNavigate('screener')} />}
@@ -268,7 +242,7 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
         </motion.div>
 
         <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
-          <Card
+          <OverviewCard
             title="Heatmap"
             blurb="Treemap by market cap with 1D / 1W / 1M / 1Y color."
             action={<OpenButton label="Open" onClick={() => onNavigate('heatmap')} />}
@@ -277,7 +251,7 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
         </motion.div>
 
         <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
-          <Card
+          <OverviewCard
             title="Lookup"
             blurb="Search a symbol and get pattern, buy levels, and key context."
             action={<OpenButton label="Open" onClick={() => onNavigate('lookup')} />}
@@ -286,7 +260,7 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
         </motion.div>
 
         <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
-          <Card
+          <OverviewCard
             title="Compare"
             blurb="Normalized performance + index overlay and a ranked metric grid."
             action={<OpenButton label="Open" onClick={() => onNavigate('compare')} />}
@@ -295,7 +269,7 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
         </motion.div>
 
         <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
-          <Card
+          <OverviewCard
             title="Portfolio"
             blurb="Weights and simple performance view across your holdings."
             action={<OpenButton label="Open" onClick={() => onNavigate('portfolio')} />}
@@ -304,7 +278,7 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
         </motion.div>
 
         <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
-          <Card
+          <OverviewCard
             title="About"
             blurb="Author profile, philosophy, and track record proof links."
             action={<OpenButton label="Open" onClick={() => onNavigate('about')} />}

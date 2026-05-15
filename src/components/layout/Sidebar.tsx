@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import type { Page } from './types';
 
-export type Page = 'overview' | 'screener' | 'heatmap' | 'lookup' | 'compare' | 'portfolio' | 'about';
+export type { Page } from './types';
 
 interface SidebarProps {
   active: Page;

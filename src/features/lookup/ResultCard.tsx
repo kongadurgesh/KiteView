@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PatternMatch } from "../types";
+import { PatternMatch } from "../../types";
 import { QuantityTable } from "./QuantityTable";
 
 interface ResultCardProps {

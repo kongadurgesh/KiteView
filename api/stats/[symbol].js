@@ -42,7 +42,6 @@ export default async function handler(req, res) {
       forwardPE: sd.forwardPE?.raw ?? null,
       pb: ks.priceToBook?.raw ?? null,
       beta: ks.beta?.raw ?? null,
-      dividendYield: sd.dividendYield?.raw ?? null,
       fiftyTwoWeekChange: ks.fiftyTwoWeekChange?.raw ?? null,
       marketCap: pr.marketCap?.raw ?? null,
       shortName: pr.shortName ?? symbol,
@@ -51,6 +50,6 @@ export default async function handler(req, res) {
     });
   } catch {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.status(200).json({ pe: null, pb: null, beta: null, forwardPE: null, dividendYield: null, fiftyTwoWeekChange: null, marketCap: null, shortName: symbol, regularMarketPrice: null, sector: '' });
+    res.status(200).json({ pe: null, pb: null, beta: null, forwardPE: null, fiftyTwoWeekChange: null, marketCap: null, shortName: symbol, regularMarketPrice: null, sector: '' });
   }
 }
