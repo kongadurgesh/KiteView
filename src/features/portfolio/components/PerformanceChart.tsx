@@ -38,9 +38,10 @@ const PORTFOLIO_COLOR = '#2563eb';
 
 interface Props {
   portfolio: Portfolio;
+  embedded?: boolean;
 }
 
-export function PerformanceChart({ portfolio }: Props) {
+export function PerformanceChart({ portfolio, embedded }: Props) {
   const [selectedIndices, setSelectedIndices] = useState<Set<IndexKey>>(
     new Set(['nifty50']),
   );
@@ -166,21 +167,23 @@ export function PerformanceChart({ portfolio }: Props) {
 
   if (activeSymbols.length === 0) {
     return (
-      <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-700 p-8 text-center">
-        <p className="text-gray-400 dark:text-gray-500 text-sm">
-          Add holdings to see portfolio performance chart.
-        </p>
-      </div>
+      <p className={`text-gray-400 dark:text-gray-500 text-sm ${embedded ? 'text-center py-6' : ''}`}>
+        Add holdings to see portfolio performance chart.
+      </p>
     );
   }
 
+  const shell = embedded ? '' : 'bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-700 p-6';
+
   return (
-    <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-700 p-6">
+    <div className={shell}>
       <div className="flex flex-col gap-4 mb-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider">
-            Performance
-          </h3>
+        <div className={`flex flex-col gap-3 ${embedded ? '' : 'sm:flex-row sm:items-center sm:justify-between'}`}>
+          {!embedded && (
+            <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider">
+              Performance
+            </h3>
+          )}
           <div className="flex flex-wrap items-center gap-2">
             {TIME_RANGES.map((tr) => (
               <button

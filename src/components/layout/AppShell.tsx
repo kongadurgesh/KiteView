@@ -1,11 +1,7 @@
 import { ReactNode } from 'react';
 import { Sidebar } from './Sidebar';
 import { MarketTicker } from './MarketTicker';
-import type { Page } from './types';
-
 interface AppShellProps {
-  activePage: Page;
-  onNavigate: (page: Page) => void;
   isDark: boolean;
   onToggleTheme: () => void;
   sidebarExpanded: boolean;
@@ -16,8 +12,6 @@ interface AppShellProps {
 }
 
 export function AppShell({
-  activePage,
-  onNavigate,
   isDark,
   onToggleTheme,
   sidebarExpanded,
@@ -29,8 +23,6 @@ export function AppShell({
   return (
     <div className="flex min-h-screen bg-surface-muted dark:bg-surface-dark">
       <Sidebar
-        active={activePage}
-        onChange={onNavigate}
         isDark={isDark}
         onToggleTheme={onToggleTheme}
         onExpandChange={onSidebarExpandChange}

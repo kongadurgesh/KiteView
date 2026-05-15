@@ -1,9 +1,5 @@
-import type { Page } from '../../components/layout/types';
 import { motion, useReducedMotion } from 'framer-motion';
-
-interface OverviewPageProps {
-  onNavigate: (page: Page) => void;
-}
+import { useAppNavigation } from '../../app/navigation';
 
 const PREVIEW_ROOT = 'relative h-full w-full min-h-0 overflow-hidden';
 
@@ -194,7 +190,8 @@ function AboutPreview({ animated }: { animated: boolean }) {
   );
 }
 
-export function OverviewPage({ onNavigate }: OverviewPageProps) {
+export function OverviewPage() {
+  const { goToPage } = useAppNavigation();
   const reduceMotion = useReducedMotion();
   const animated = !reduceMotion;
 
@@ -235,7 +232,7 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
           <OverviewCard
             title="Screener"
             blurb="Scan ranked NSE lists for Bullish Harami / Engulfing breakouts."
-            action={<OpenButton label="Open" onClick={() => onNavigate('screener')} />}
+            action={<OpenButton label="Open" onClick={() => goToPage('screener')} />}
             preview={<ScreenerPreview animated={animated} />}
             className="lg:col-span-2"
           />
@@ -245,7 +242,7 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
           <OverviewCard
             title="Heatmap"
             blurb="Treemap by market cap with 1D / 1W / 1M / 1Y color."
-            action={<OpenButton label="Open" onClick={() => onNavigate('heatmap')} />}
+            action={<OpenButton label="Open" onClick={() => goToPage('heatmap')} />}
             preview={<HeatmapPreview animated={animated} />}
           />
         </motion.div>
@@ -254,7 +251,7 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
           <OverviewCard
             title="Lookup"
             blurb="Search a symbol and get pattern, buy levels, and key context."
-            action={<OpenButton label="Open" onClick={() => onNavigate('lookup')} />}
+            action={<OpenButton label="Open" onClick={() => goToPage('lookup')} />}
             preview={<LookupPreview animated={animated} />}
           />
         </motion.div>
@@ -263,7 +260,7 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
           <OverviewCard
             title="Compare"
             blurb="Normalized performance + index overlay and a ranked metric grid."
-            action={<OpenButton label="Open" onClick={() => onNavigate('compare')} />}
+            action={<OpenButton label="Open" onClick={() => goToPage('compare')} />}
             preview={<ComparePreview animated={animated} />}
           />
         </motion.div>
@@ -272,7 +269,7 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
           <OverviewCard
             title="Portfolio"
             blurb="Weights and simple performance view across your holdings."
-            action={<OpenButton label="Open" onClick={() => onNavigate('portfolio')} />}
+            action={<OpenButton label="Open" onClick={() => goToPage('portfolio')} />}
             preview={<PortfolioPreview animated={animated} />}
           />
         </motion.div>
@@ -281,7 +278,7 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
           <OverviewCard
             title="About"
             blurb="Author profile, philosophy, and track record proof links."
-            action={<OpenButton label="Open" onClick={() => onNavigate('about')} />}
+            action={<OpenButton label="Open" onClick={() => goToPage('about')} />}
             preview={<AboutPreview animated={animated} />}
           />
         </motion.div>

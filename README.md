@@ -19,6 +19,7 @@
   - [Dark Mode & Layout](#8-dark-mode--layout)
 - [Technical Architecture](#technical-architecture)
 - [Project Structure](#project-structure)
+- [Routes](#routes)
 - [API Endpoints](#api-endpoints)
 - [Pattern Detection Logic](#pattern-detection-logic)
 - [Getting Started](#getting-started)
@@ -45,7 +46,7 @@ Scans the NSE universe (market cap > ₹1,000 Cr) for bullish breakout patterns 
 - Columns: stock, CMP, buy price, buy trigger, pattern, 52W high/low, distance from extremes, ATH, market cap
 - Toggle buy-price columns; auto-scan and manual scan
 - Results cached in `sessionStorage`
-- Click a row to open **Lookup** for that symbol
+- Click a row to open **Lookup** (`/lookup?symbol=…`)
 
 ### 3. Market Heatmap
 
@@ -54,7 +55,7 @@ Treemap of NSE stocks sized by market cap and colored by performance.
 - Custom squarified treemap (no external treemap library)
 - Timeframes: **1D**, **1W**, **1M**, **1Y**
 - Color scale: red (down) → gray (flat) → green (up)
-- Sector filter; click a tile to jump to **Lookup**
+- Sector filter; click a tile to jump to **Lookup** (`/lookup?symbol=…`)
 - Batch quote loading via `/api/heatmap-batch`
 
 ### 4. Stock Lookup & Pattern Detection
@@ -79,7 +80,7 @@ Dedicated page to compare up to four stocks (not embedded in Lookup).
 - Optional benchmark overlay: Nifty 50 or Sensex
 - Comparison table: CMP, market cap, P/E, forward P/E, P/B, beta, 52W change, sector
 - Best/worst highlighting per metric row
-- Seed symbol support when navigating from Lookup or Screener
+- Deep links via `/compare?symbol=TCS.NS` (e.g. from Lookup or Screener)
 
 ### 6. Portfolio Management
 
@@ -91,7 +92,7 @@ Transaction-based portfolio tracker with analytics.
 - **Live prices**: batch quotes for all holdings
 - **Sortable** positions table
 - **Performance chart**: portfolio vs Nifty 50, Bank Nifty, Midcap 50, Nifty 200 (normalized or absolute; 1M–ALL)
-- **Risk dashboard**: HHI diversification, beta, volatility, Sharpe, max drawdown, sector/stock allocation donuts
+- **Risk dashboard**: HHI diversification, beta, volatility, Sharpe, max drawdown, sector/stock/market-cap allocation donuts (click a cap slice to see holdings)
 - Persisted in `localStorage`
 
 ### 7. About
@@ -102,6 +103,7 @@ Author profile, investing philosophy, and linked P&L proof spreadsheets.
 
 - **Theme**: Light / dark toggle on the sidebar (class-based, persisted in `localStorage`)
 - **Shell**: Collapsible sidebar, mobile slide-out drawer, top **market ticker** (Nifty, Sensex, Bank Nifty, Nifty IT)
+- **Routing**: Each page has its own URL (React Router); sidebar uses links so refresh and share work
 - **Responsive**: `max-w-7xl` content, horizontal scroll on wide tables, sticky first column where needed
 
 ---
@@ -113,6 +115,7 @@ Author profile, investing philosophy, and linked P&L proof spreadsheets.
 | Technology | Purpose |
 |---|---|
 | **React 18** | UI |
+| **React Router 7** | Client-side routes and shareable URLs |
 | **TypeScript 5.6** | Types |
 | **Vite 5** | Dev server & production build |
 | **Tailwind CSS 3.4** | Styling + semantic tokens (`surface`, `ink`, `accent`, …) |
@@ -169,8 +172,10 @@ KiteView/
 │   ├── index.css                     # Tailwind + component layer (.card, .btn-primary, …)
 │   ├── types.ts                      # Shared TypeScript types
 │   ├── app/
-│   │   ├── App.tsx                   # Theme, navigation state, AppShell
-│   │   └── pages.tsx                 # PAGE_COMPONENTS registry (one active page)
+│   │   ├── App.tsx                   # Route definitions
+│   │   ├── AppLayout.tsx             # Shell + theme + Outlet
+│   │   ├── routes.ts                 # Path map + lookup/compare URL helpers
+│   │   └── navigation.ts             # useAppNavigation hook
 │   ├── components/
 │   │   ├── layout/
 │   │   │   ├── AppShell.tsx          # Sidebar + ticker + main
@@ -215,6 +220,22 @@ KiteView/
 ├── package.json
 └── index.html
 ```
+
+---
+
+## Routes
+
+| Path | Page |
+|---|---|
+| `/` | Overview |
+| `/screener` | Live Screener |
+| `/heatmap` | Market Heatmap |
+| `/lookup` | Stock Lookup (`?symbol=` optional) |
+| `/compare` | Stock Comparison (`?symbol=` optional) |
+| `/portfolio` | Portfolio |
+| `/about` | About |
+
+Unknown paths redirect to `/`. Vercel serves `index.html` for all non-API routes (SPA fallback in `vercel.json`).
 
 ---
 

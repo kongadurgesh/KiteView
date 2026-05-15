@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useAppNavigation } from '../../app/navigation';
 import {
   fetchScreenerList,
   runScreener,
@@ -26,11 +27,8 @@ function distPct(current: number, target: number): string {
 type SortKey = 'name' | 'pattern' | 'buyPrice' | 'trigger' | 'cmp' | 'mcap' | 'sector' | '52wLow' | '52wHigh' | 'distLow' | 'distHigh' | 'ath';
 type SortDir = 'asc' | 'desc';
 
-interface Props {
-  onViewStock?: (symbol: string) => void;
-}
-
-export function ScreenerPage({ onViewStock }: Props) {
+export function ScreenerPage() {
+  const { viewStock } = useAppNavigation();
   const [autoScan, setAutoScan] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [loadingList, setLoadingList] = useState(false);
@@ -265,7 +263,7 @@ export function ScreenerPage({ onViewStock }: Props) {
                   <tr
                     key={r.symbol}
                     className="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
-                    onClick={() => onViewStock?.(r.symbol)}
+                    onClick={() => viewStock(r.symbol)}
                   >
                     <td className="p-3 text-left sticky left-0 z-10 bg-white dark:bg-gray-900 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)] dark:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.3)]">
                       <p className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[180px]">{r.shortName}</p>
