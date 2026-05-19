@@ -11,6 +11,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 import { fetchChartBatch, fetchStatsBatch } from '../../services/apiBatch';
+import type { StockStats } from '../../types/stockStats';
 
 const PROXY_BASE = import.meta.env.DEV ? 'http://localhost:3006' : '';
 
@@ -39,18 +40,6 @@ interface Suggestion {
   symbol: string;
   shortname: string;
   exchange: string;
-}
-
-interface StockStats {
-  pe: number | null;
-  forwardPE: number | null;
-  pb: number | null;
-  beta: number | null;
-  fiftyTwoWeekChange: number | null;
-  marketCap: number | null;
-  shortName: string;
-  regularMarketPrice: number | null;
-  sector: string;
 }
 
 function fmtInr(n: number): string {

@@ -1,8 +1,12 @@
 import { useState, useCallback } from 'react';
 import { PatternMatch } from '../../types';
-import { fetchLookupBundle } from '../../services/apiBatch';
+import type { StockStats } from '../../types/stockStats';
+import { fetchLookupBundle, fetchStatsBatch } from '../../services/apiBatch';
 import { detectPattern } from '../../utils/patternDetector';
 import type { Candle, StockInfo } from '../../types';
+import { normalizeNseSymbol } from '../../lib/nseSymbol';
+import { parseQuoteSnapshot, type QuoteSnapshot } from './quoteSnapshot';
+import { getPatternChartWindow, type PatternChartBar } from './patternChartCandles';
 
 function parseStockInfo(chartData: unknown, symbol: string): StockInfo {
   const result = (chartData as { chart?: { result?: unknown[] } })?.chart?.result?.[0] as {
@@ -87,18 +91,31 @@ export function useLookup() {
   const [sector, setSector] = useState('');
   const [industry, setIndustry] = useState('');
   const [noMatch, setNoMatch] = useState(false);
-  const [lastLookup, setLastLookup] = useState<{ symbol: string; name: string; price: number } | null>(null);
+  const [quoteSnapshot, setQuoteSnapshot] = useState<QuoteSnapshot | null>(null);
+  const [stockStats, setStockStats] = useState<StockStats | null>(null);
+  const [patternChartBars, setPatternChartBars] = useState<PatternChartBar[]>([]);
 
   const search = useCallback(async (sym: string) => {
     setIsLoading(true);
     setError(null);
     setMatch(null);
     setNoMatch(false);
-    setSymbol(sym);
+    setQuoteSnapshot(null);
+    setStockStats(null);
+    setPatternChartBars([]);
+    setStockName('');
+    setCurrentPrice(0);
+
+    const norm = normalizeNseSymbol(sym);
+    setSymbol(norm);
 
     try {
-      const bundle = await fetchLookupBundle(sym);
-      const stockInfo = parseStockInfo(bundle.chart1y, sym);
+      const [bundle, statsMap] = await Promise.all([
+        fetchLookupBundle(norm),
+        fetchStatsBatch<StockStats>([norm]),
+      ]);
+
+      const stockInfo = parseStockInfo(bundle.chart1y, norm);
       const ath = parseAth(bundle.chartMax);
       const r = (bundle.quote as { quoteResponse?: { result?: Array<{ marketCap?: number; sector?: string; industry?: string }> } })
         ?.quoteResponse?.result?.[0];
@@ -119,11 +136,17 @@ export function useLookup() {
       const mcCr = stockInfo.marketCap > 0 ? stockInfo.marketCap : meta.marketCapCr;
       setMarketCapCr(mcCr);
 
-      const result = detectPattern(stockInfo.candles, mcCr);
-      if (result) setMatch(result);
-      else setNoMatch(true);
+      setQuoteSnapshot(parseQuoteSnapshot(bundle.quote));
+      setStockStats(statsMap[norm] ?? null);
 
-      setLastLookup({ symbol: sym, name: stockInfo.shortName, price: stockInfo.currentPrice });
+      const result = detectPattern(stockInfo.candles, mcCr);
+      if (result) {
+        setMatch(result);
+        setPatternChartBars(getPatternChartWindow(stockInfo.candles, result));
+      } else {
+        setNoMatch(true);
+        setPatternChartBars([]);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');
     } finally {
@@ -145,7 +168,9 @@ export function useLookup() {
     sector,
     industry,
     noMatch,
-    lastLookup,
+    quoteSnapshot,
+    stockStats,
+    patternChartBars,
     search,
     canRescan: Boolean(symbol) && !isLoading,
   };
