@@ -23,7 +23,7 @@ interface SearchFieldProps {
 export function SearchField({
   onSelect,
   isLoading = false,
-  placeholder = 'Search stock (e.g. NALCO, RELIANCE)',
+  placeholder = 'Search stock (e.g. RELIANCE, TCS)',
   submitLabel = 'Scan',
   loadingLabel = 'Scanning…',
   maxWidth = 'max-w-lg',

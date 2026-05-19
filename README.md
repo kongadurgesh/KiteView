@@ -62,10 +62,13 @@ Treemap of NSE stocks sized by market cap and colored by performance.
 
 Search any NSE/BSE symbol and run candlestick pattern detection with buy-level math.
 
-- Symbol autocomplete (Yahoo Finance search)
+- Symbol autocomplete (Yahoo Finance search); **shareable URL** `/lookup?symbol=TCS.NS` (query stays after a scan)
+- Single-column layout: search, then **instrument strip** (name, symbol, CMP, Rescan, Compare, **Copy link**, **Open on Yahoo**)
 - Patterns: **Bullish Harami**, **Bullish Engulfing** (with breakout confirmation)
 - Buy price = `0.98 ×` breakout close; buy trigger = `0.985 ×` breakout close
-- BUY / WAIT signal vs current price
+- BUY / WAIT signal vs current price; **pattern candlestick chart** (context bars + buy/trigger levels; hover for OHLC)
+- **Session** snapshot when available: day change (₹ / %), previous close, day high/low, volume
+- **Key stats** when available: P/E, forward P/E, P/B, beta, 52-week change %, market cap (via `/api/stats-batch` alongside the lookup bundle)
 - Stop-loss calculator (1%–10%)
 - Quantity table for investment sizes ₹10K–₹10L
 - Metadata: 52W range, ATH, cap tier, sector, industry
@@ -171,6 +174,7 @@ KiteView/
 │   ├── main.tsx                      # App entry
 │   ├── index.css                     # Tailwind + component layer (.card, .btn-primary, …)
 │   ├── types.ts                      # Shared TypeScript types
+│   ├── types/stockStats.ts           # Key stats DTO (Compare + Lookup)
 │   ├── app/
 │   │   ├── App.tsx                   # Route definitions
 │   │   ├── AppLayout.tsx             # Shell + theme + Outlet
@@ -194,7 +198,10 @@ KiteView/
 │   │   ├── lookup/
 │   │   │   ├── LookupPage.tsx
 │   │   │   ├── useLookup.ts
-│   │   │   ├── SearchBar.tsx, ResultCard.tsx, QuantityTable.tsx
+│   │   │   ├── quoteSnapshot.ts
+│   │   │   ├── components/LookupInstrumentStrip.tsx, PatternCandleChart.tsx
+│   │   │   ├── patternChartCandles.ts
+│   │   │   ├── ResultCard.tsx, QuantityTable.tsx
 │   │   ├── compare/ComparePage.tsx
 │   │   ├── portfolio/
 │   │   │   ├── PortfolioPage.tsx
@@ -202,6 +209,7 @@ KiteView/
 │   │   └── about/AboutPage.tsx
 │   ├── lib/
 │   │   ├── format.ts                 # fmtInr, fmtNumber, fmtPct, …
+│   │   ├── nseSymbol.ts              # normalizeNseSymbol for URLs / API
 │   │   └── cn.ts
 │   ├── services/
 │   │   ├── fetchStockData.ts         # Chart, quote, heatmap batch helpers

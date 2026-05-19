@@ -2,9 +2,11 @@ export function fmtNumber(
   n: number,
   opts?: { min?: number; max?: number },
 ): string {
+  const max = opts?.max ?? 2;
+  const min = opts?.min ?? (opts?.max !== undefined ? max : 2);
   return n.toLocaleString('en-IN', {
-    minimumFractionDigits: opts?.min ?? 2,
-    maximumFractionDigits: opts?.max ?? 2,
+    minimumFractionDigits: Math.min(min, max),
+    maximumFractionDigits: max,
   });
 }
 
