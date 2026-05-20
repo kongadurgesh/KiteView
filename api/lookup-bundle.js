@@ -1,4 +1,11 @@
 import { getYahooCrumb } from './lib/yahooCrumb.js';
+import {
+  fetchQuoteSummary,
+  parseProfile,
+  parseFinancial,
+  parseRecommendations,
+  parseNews,
+} from './lib/analysisBundleParse.js';
 
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -27,18 +34,32 @@ async function fetchQuote(symbol) {
   }
 }
 
-async function fetchProfile(symbol) {
+async function fetchAnalysisExtras(symbol) {
   try {
     const { crumb, cookie } = await getYahooCrumb();
-    const url = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=assetProfile&crumb=${encodeURIComponent(crumb)}`;
-    const response = await fetch(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0', Cookie: cookie },
-    });
-    const data = await response.json();
-    const profile = data?.quoteSummary?.result?.[0]?.assetProfile ?? {};
-    return { sector: profile.sector ?? '', industry: profile.industry ?? '' };
+    const data = await fetchQuoteSummary(
+      symbol,
+      'assetProfile,financialData,recommendationTrend',
+      crumb,
+      cookie,
+    );
+    const result = data?.quoteSummary?.result?.[0] ?? {};
+    const newsData = await fetchQuoteSummary(symbol, 'news', crumb, cookie);
+    const newsResult = newsData?.quoteSummary?.result?.[0] ?? {};
+
+    return {
+      profile: parseProfile(result.assetProfile ?? {}),
+      financials: parseFinancial(result.financialData ?? {}),
+      recommendations: parseRecommendations(result.recommendationTrend ?? {}),
+      news: parseNews(newsResult ?? {}),
+    };
   } catch {
-    return { sector: '', industry: '' };
+    return {
+      profile: parseProfile({}),
+      financials: parseFinancial({}),
+      recommendations: parseRecommendations({}),
+      news: [],
+    };
   }
 }
 
@@ -52,17 +73,20 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'symbol query parameter is required' });
   }
 
-  const [chart1y, chartMax, quote, profile] = await Promise.all([
+  const [chart1y, chartMax, quote, extras] = await Promise.all([
     fetchChart(symbol, '1y', '1d'),
     fetchChart(symbol, 'max', '1d'),
     fetchQuote(symbol),
-    fetchProfile(symbol),
+    fetchAnalysisExtras(symbol),
   ]);
 
   return res.status(200).json({
     chart1y: chart1y ?? null,
     chartMax: chartMax ?? null,
     quote: quote ?? null,
-    profile: profile ?? { sector: '', industry: '' },
+    profile: extras.profile,
+    financials: extras.financials,
+    recommendations: extras.recommendations,
+    news: extras.news,
   });
 }

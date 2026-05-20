@@ -5,7 +5,7 @@ export const PAGE_PATHS: Record<Page, string> = {
   overview: '/',
   screener: '/screener',
   heatmap: '/heatmap',
-  lookup: '/lookup',
+  analysis: '/analysis',
   compare: '/compare',
   portfolio: '/portfolio',
   about: '/about',
@@ -23,12 +23,16 @@ export function pathToPage(pathname: string): Page {
   const normalized = pathname.length > 1 && pathname.endsWith('/')
     ? pathname.slice(0, -1)
     : pathname;
+  if (normalized === '/lookup') return 'analysis';
   return PATH_TO_PAGE.get(normalized) ?? 'overview';
 }
 
-export function lookupPath(symbol: string): string {
-  return `${PAGE_PATHS.lookup}?symbol=${encodeURIComponent(symbol)}`;
+export function analysisPath(symbol: string): string {
+  return `${PAGE_PATHS.analysis}?symbol=${encodeURIComponent(symbol)}`;
 }
+
+/** @deprecated Use analysisPath */
+export const lookupPath = analysisPath;
 
 export function comparePath(symbol: string): string {
   return `${PAGE_PATHS.compare}?symbol=${encodeURIComponent(symbol)}`;
