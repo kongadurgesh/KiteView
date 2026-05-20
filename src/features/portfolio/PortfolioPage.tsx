@@ -2,14 +2,14 @@ import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react
 import { Portfolio, Position, Transaction } from '../../types';
 import { loadPortfolio, savePortfolio, addTransaction, getPositions, removePosition, clearPortfolio } from '../../utils/portfolio';
 import { fetchBatchQuotesDetailed } from '../../services/fetchStockData';
+import { PageLayout } from '../../components/layout/PageLayout';
+import { PAGE_COPY } from '../../content/pageCopy';
 import { fmtNumber } from '../../lib/format';
 import { AddTransactionModal } from './components/AddTransactionModal';
 import { ImportExcelModal } from './components/ImportExcelModal';
 import { TransactionHistory } from './components/TransactionHistory';
 import { PerformanceChart } from './components/PerformanceChart';
 import { RiskDashboard } from './components/RiskDashboard';
-const fmt = fmtNumber;
-
 type SortKey = 'name' | 'qty' | 'avgBuy' | 'cmp' | 'invested' | 'current' | 'pnl' | 'pnlPct' | 'todayPnl' | 'todayPnlPct';
 type SortDir = 'asc' | 'desc';
 
@@ -203,7 +203,8 @@ export function PortfolioPage() {
   const todayPnlPct = totalPrevValue > 0 ? (todayPnl / totalPrevValue) * 100 : 0;
 
   return (
-    <div className="w-full max-w-6xl mt-10 space-y-6">
+    <PageLayout className="max-w-6xl mt-6" title={PAGE_COPY.portfolio.title} description={PAGE_COPY.portfolio.description}>
+      <div className="w-full space-y-6">
       <CollapsibleSection title="Portfolio">
         <div className="flex flex-wrap justify-end gap-2 mb-4">
             <button
@@ -237,17 +238,17 @@ export function PortfolioPage() {
 
         {activePositions.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <SummaryCard label="Invested" value={fmt(totalInvested)} />
-            <SummaryCard label="Current Value" value={fmt(totalCurrentValue)} />
+            <SummaryCard label="Invested" value={fmtNumber(totalInvested)} />
+            <SummaryCard label="Current Value" value={fmtNumber(totalCurrentValue)} />
             <SummaryCard
               label="Total P&L"
-              value={`${totalUnrealizedPnl >= 0 ? '+' : ''}${fmt(totalUnrealizedPnl)}`}
+              value={`${totalUnrealizedPnl >= 0 ? '+' : ''}${fmtNumber(totalUnrealizedPnl)}`}
               valueColor={totalUnrealizedPnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}
-              sub={`${totalPnlPct >= 0 ? '+' : ''}${totalPnlPct.toFixed(2)}%${totalRealizedPnl !== 0 ? ` · Realized: ${totalRealizedPnl >= 0 ? '+' : ''}${fmt(totalRealizedPnl)}` : ''}`}
+              sub={`${totalPnlPct >= 0 ? '+' : ''}${totalPnlPct.toFixed(2)}%${totalRealizedPnl !== 0 ? ` · Realized: ${totalRealizedPnl >= 0 ? '+' : ''}${fmtNumber(totalRealizedPnl)}` : ''}`}
             />
             <SummaryCard
               label="Day's P&L"
-              value={`${todayPnl >= 0 ? '+' : ''}${fmt(todayPnl)}`}
+              value={`${todayPnl >= 0 ? '+' : ''}${fmtNumber(todayPnl)}`}
               valueColor={todayPnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}
               sub={`${todayPnlPct >= 0 ? '+' : ''}${todayPnlPct.toFixed(2)}%`}
             />
@@ -327,7 +328,8 @@ export function PortfolioPage() {
           onClose={() => setShowImport(false)}
         />
       )}
-    </div>
+      </div>
+    </PageLayout>
   );
 }
 
@@ -373,20 +375,20 @@ function PositionTableRow({ pos, cmp, currentValue, unrealized, unrealizedPct, t
           )}
         </td>
         <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">{isClosed ? '—' : pos.totalQty}</td>
-        <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">{isClosed ? '—' : fmt(pos.avgBuyPrice)}</td>
+        <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">{isClosed ? '—' : fmtNumber(pos.avgBuyPrice)}</td>
         <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">
-          {isClosed ? '—' : cmp ? fmt(cmp) : (loadingPrices ? '...' : '—')}
+          {isClosed ? '—' : cmp ? fmtNumber(cmp) : (loadingPrices ? '...' : '—')}
         </td>
-        <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">{isClosed ? '—' : fmt(pos.investedAmount)}</td>
-        <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">{isClosed ? '—' : cmp ? fmt(currentValue) : '—'}</td>
+        <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">{isClosed ? '—' : fmtNumber(pos.investedAmount)}</td>
+        <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">{isClosed ? '—' : cmp ? fmtNumber(currentValue) : '—'}</td>
         <td className={`p-3 text-right font-mono font-semibold ${isClosed ? 'text-gray-400 dark:text-gray-500' : pnlColor}`}>
-          {isClosed ? '—' : `${unrealized >= 0 ? '+' : ''}${fmt(unrealized)}`}
+          {isClosed ? '—' : `${unrealized >= 0 ? '+' : ''}${fmtNumber(unrealized)}`}
         </td>
         <td className={`p-3 text-right font-mono font-semibold ${isClosed ? 'text-gray-400 dark:text-gray-500' : pnlColor}`}>
           {isClosed ? '—' : `${unrealizedPct >= 0 ? '+' : ''}${unrealizedPct.toFixed(2)}%`}
         </td>
         <td className={`p-3 text-right font-mono font-semibold ${isClosed ? 'text-gray-400 dark:text-gray-500' : dayColor}`}>
-          {isClosed ? '—' : cmp ? `${todayPnl >= 0 ? '+' : ''}${fmt(todayPnl)}` : '—'}
+          {isClosed ? '—' : cmp ? `${todayPnl >= 0 ? '+' : ''}${fmtNumber(todayPnl)}` : '—'}
         </td>
         <td className={`p-3 text-right font-mono font-semibold ${isClosed ? 'text-gray-400 dark:text-gray-500' : dayColor}`}>
           {isClosed ? '—' : cmp ? `${todayPnlPct >= 0 ? '+' : ''}${todayPnlPct.toFixed(2)}%` : '—'}

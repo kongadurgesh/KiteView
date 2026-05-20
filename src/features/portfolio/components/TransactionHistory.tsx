@@ -1,11 +1,8 @@
 import { Transaction } from '../../../types';
+import { fmtNumber } from '../../../lib/format';
 
 interface TransactionHistoryProps {
   transactions: Transaction[];
-}
-
-function fmt(n: number): string {
-  return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 export function TransactionHistory({ transactions }: TransactionHistoryProps) {
@@ -39,8 +36,8 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
                 </span>
               </td>
               <td className="px-4 py-2 text-right font-mono text-gray-700 dark:text-gray-300">{t.qty}</td>
-              <td className="px-4 py-2 text-right font-mono text-gray-700 dark:text-gray-300">{fmt(t.price)}</td>
-              <td className="px-4 py-2 text-right font-mono text-gray-700 dark:text-gray-300">{fmt(t.qty * t.price)}</td>
+              <td className="px-4 py-2 text-right font-mono text-gray-700 dark:text-gray-300">{fmtNumber(t.price)}</td>
+              <td className="px-4 py-2 text-right font-mono text-gray-700 dark:text-gray-300">{fmtNumber(t.qty * t.price)}</td>
             </tr>
           ))}
         </tbody>

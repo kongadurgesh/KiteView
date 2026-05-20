@@ -1,3 +1,4 @@
+import { PAGE_COPY } from '../../../content/pageCopy';
 import type { SwotAnalysis } from '../swotEngine';
 
 const QUADRANTS: { key: keyof SwotAnalysis; title: string; border: string; bg: string }[] = [
@@ -11,9 +12,7 @@ export function SwotSection({ swot }: { swot: SwotAnalysis }) {
   return (
     <div className="card p-5">
       <p className="label-caps mb-1">SWOT analysis</p>
-      <p className="text-xs text-ink-muted dark:text-ink-dark-muted mb-4">
-        Automated signals from market data — not investment advice.
-      </p>
+      <p className="section-desc mb-4">{PAGE_COPY.analysis.swotDisclaimer}</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {QUADRANTS.map(({ key, title, border, bg }) => (
           <div key={key} className={`rounded-xl border p-4 ${border} ${bg}`}>

@@ -6,6 +6,7 @@ export { DataTable, SortableHeader, TableBody, TableCell, TableHead, TableRow } 
 export { EmptyState } from './EmptyState';
 export { Modal } from './Modal';
 export { PageHeader } from './PageHeader';
+export { SectionHeader } from './SectionHeader';
 export { SearchField } from './SearchField';
 export type { SearchSuggestion } from './SearchField';
 export { SegmentedControl } from './SegmentedControl';

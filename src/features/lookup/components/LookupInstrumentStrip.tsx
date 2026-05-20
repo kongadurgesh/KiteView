@@ -1,4 +1,5 @@
 import { Button } from '../../../components/ui';
+import { fmtInr } from '../../../lib/format';
 
 interface LookupInstrumentStripProps {
   stockName: string;
@@ -33,7 +34,7 @@ export function LookupInstrumentStrip({
           </h2>
           <p className="font-mono text-sm text-ink-muted dark:text-ink-dark-muted mt-0.5">{symbol}</p>
           <p className="text-xl font-mono font-semibold tabular-nums text-ink-primary dark:text-ink-dark-primary mt-2">
-            {currentPrice > 0 ? `₹${currentPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : isLoading ? '…' : '—'}
+            {currentPrice > 0 ? fmtInr(currentPrice) : isLoading ? '…' : '—'}
           </p>
         </div>
         <div className="flex flex-wrap gap-2 shrink-0">

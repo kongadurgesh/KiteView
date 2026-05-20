@@ -209,8 +209,9 @@ KiteView/
 │   │   │   ├── PortfolioPage.tsx
 │   │   │   └── components/           # Modals, charts, risk, history
 │   │   └── about/AboutPage.tsx
+│   ├── content/pageCopy.ts           # Page titles, descriptions, static copy
 │   ├── lib/
-│   │   ├── format.ts                 # fmtInr, fmtNumber, fmtPct, …
+│   │   ├── format.ts                 # Shared INR, %, mcap, volume, time formatters
 │   │   ├── nseSymbol.ts              # normalizeNseSymbol for URLs / API
 │   │   └── cn.ts
 │   ├── services/

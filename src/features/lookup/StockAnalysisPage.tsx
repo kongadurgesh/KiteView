@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAppNavigation } from '../../app/navigation';
 import { analysisPath } from '../../app/routes';
+import { PAGE_COPY } from '../../content/pageCopy';
 import { PageLayout } from '../../components/layout/PageLayout';
 import { Alert, LoadingBlock } from '../../components/ui';
 import { SearchField } from '../../components/ui/SearchField';
@@ -74,9 +75,8 @@ export function StockAnalysisPage() {
   return (
     <PageLayout
       className="max-w-6xl"
-      title="Stock Analysis"
-      description="Research any NSE symbol: overview, rule-based SWOT, technicals, checklist, and a bullish pattern panel when Harami or Engulfing is detected."
-      centered
+      title={PAGE_COPY.analysis.title}
+      description={PAGE_COPY.analysis.description}
     >
       <div className="w-full flex flex-col gap-4 items-stretch">
         <SearchField onSelect={handleSelect} isLoading={analysis.isLoading} maxWidth="w-full" className="mx-auto w-full" />

@@ -7,7 +7,9 @@ interface PageLayoutProps {
   title?: string;
   description?: string;
   headerAction?: ReactNode;
+  /** @deprecated Use align="center" */
   centered?: boolean;
+  align?: 'start' | 'center';
   narrow?: boolean;
   className?: string;
 }
@@ -18,13 +20,16 @@ export function PageLayout({
   description,
   headerAction,
   centered,
+  align,
   narrow,
   className,
 }: PageLayoutProps) {
+  const headerAlign = align ?? (centered ? 'center' : 'start');
+
   return (
     <div
       className={cn(
-        'w-full mx-auto flex flex-col items-center',
+        'w-full mx-auto flex flex-col items-stretch',
         narrow ? 'max-w-5xl' : 'max-w-7xl',
         className,
       )}
@@ -34,7 +39,7 @@ export function PageLayout({
           title={title}
           description={description}
           action={headerAction}
-          centered={centered}
+          align={headerAlign}
         />
       )}
       {children}

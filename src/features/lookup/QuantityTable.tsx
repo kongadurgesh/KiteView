@@ -1,3 +1,5 @@
+import { fmtNumber } from '../../lib/format';
+
 interface QuantityTableProps {
   buyPrice: number;
 }
@@ -59,9 +61,6 @@ function getRows(buyPrice: number, range: AmountRange): Row[] {
   return rows;
 }
 
-function formatCurrency(n: number): string {
-  return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
 
 export function QuantityTable({ buyPrice }: QuantityTableProps) {
   const ranges = getRanges(buyPrice);
@@ -81,7 +80,7 @@ export function QuantityTable({ buyPrice }: QuantityTableProps) {
             >
               <div className="bg-white dark:bg-gray-900 px-4 py-2 border-b border-gray-200 dark:border-gray-800">
                 <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                  {formatCurrency(range.min)} &ndash; {formatCurrency(range.max)}
+                  {fmtNumber(range.min)} &ndash; {fmtNumber(range.max)}
                 </p>
               </div>
               {rows.length === 0 ? (
@@ -99,7 +98,7 @@ export function QuantityTable({ buyPrice }: QuantityTableProps) {
                       <tr key={row.qty} className="border-b border-gray-200 dark:border-gray-800 last:border-b-0">
                         <td className="px-4 py-2 font-mono font-semibold text-gray-800 dark:text-gray-200">{row.qty}</td>
                         <td className="px-4 py-2 text-right font-mono text-gray-700 dark:text-gray-300">
-                          {formatCurrency(row.amount)}
+                          {fmtNumber(row.amount)}
                         </td>
                       </tr>
                     ))}

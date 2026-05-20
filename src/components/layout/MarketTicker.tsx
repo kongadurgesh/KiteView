@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { fmtNumber } from '../../lib/format';
 
 const PROXY_BASE = import.meta.env.DEV ? 'http://localhost:3006' : '';
 
@@ -16,10 +17,6 @@ const INDICES = [
   { label: 'BANK NIFTY', symbol: '^NSEBANK' },
   { label: 'NIFTY IT', symbol: '^CNXIT' },
 ];
-
-function fmt(n: number): string {
-  return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
 
 interface MarketTickerProps {
   sidebarExpanded?: boolean;
@@ -84,9 +81,9 @@ export function MarketTicker({ sidebarExpanded }: MarketTickerProps) {
           return (
             <div key={q.symbol} className="flex items-center gap-2 whitespace-nowrap">
               <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{q.label}</span>
-              <span className="text-xs font-mono text-gray-800 dark:text-gray-200">{fmt(q.price)}</span>
+              <span className="text-xs font-mono text-gray-800 dark:text-gray-200">{fmtNumber(q.price)}</span>
               <span className={`text-xs font-mono font-medium ${isUp ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
-                {isUp ? '+' : ''}{fmt(q.change)} ({isUp ? '+' : ''}{q.changePct.toFixed(2)}%)
+                {isUp ? '+' : ''}{fmtNumber(q.change)} ({isUp ? '+' : ''}{q.changePct.toFixed(2)}%)
               </span>
             </div>
           );
