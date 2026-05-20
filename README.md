@@ -65,7 +65,7 @@ Research any NSE/BSE symbol with always-on sections and a conditional breakout p
 - Symbol autocomplete (Yahoo Finance search); **shareable URL** `/analysis?symbol=TCS.NS` (`/lookup?symbol=` redirects for old links)
 - **Instrument strip**: name, symbol, CMP, Rescan, Compare, **Copy link**, **Open on Yahoo**
 - **Overview**: session snapshot, key stats, 52W range, ATH, cap tier, sector
-- **SWOT**: rule-based 2×2 grid from market data (not investment advice)
+- **SWOT**: embedded Trendlyne SWOT widget (updates per symbol)
 - **Technicals**: % from 52W high/low, range position, 50-day SMA, RSI (14), **1Y price chart**
 - **Investment checklist** and **DVM scorecard** (Durability / Valuation / Momentum, rule-based 0–100)
 - **Company profile**, **financial highlights**, **analyst recommendations**, **recent news** (Yahoo `quoteSummary` modules via analysis bundle)
@@ -200,7 +200,7 @@ KiteView/
 │   │   ├── heatmap/HeatmapPage.tsx
 │   │   ├── lookup/                   # Stock Analysis feature (route /analysis)
 │   │   │   ├── StockAnalysisPage.tsx
-│   │   │   ├── useStockAnalysis.ts, swotEngine.ts, technicalUtils.ts, analysisScores.ts
+│   │   │   ├── useStockAnalysis.ts, technicalUtils.ts, analysisScores.ts
 │   │   │   ├── quoteSnapshot.ts, patternChartCandles.ts, LookupRedirect.tsx
 │   │   │   ├── components/           # Overview, SWOT, technicals, pattern, profile, news, …
 │   │   │   └── QuantityTable.tsx

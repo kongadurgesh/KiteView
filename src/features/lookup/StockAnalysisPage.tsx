@@ -117,7 +117,7 @@ export function StockAnalysisPage() {
                 quoteSnapshot={analysis.quoteSnapshot}
                 stockStats={analysis.stockStats}
               />
-              <SwotSection swot={analysis.swot} />
+              <SwotSection symbol={analysis.symbol} />
               <TechnicalSection technical={analysis.technical} priceSeries={analysis.priceSeries} />
               <ChecklistSection items={analysis.checklist} />
               <DvmSection dvm={analysis.dvm} />

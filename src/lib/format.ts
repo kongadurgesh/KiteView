@@ -20,10 +20,17 @@ export function fmtInrCompact(n: number): string {
   return `₹${Math.round(n).toLocaleString('en-IN')}`;
 }
 
+/** Ratios from fundamentals (0.15 → 15%); values already ≥1 or ≤-1 stay as percent points. */
 export function fmtPct(raw: number | null): string {
   if (raw == null || Number.isNaN(raw)) return '—';
   const v = Math.abs(raw) <= 1 ? raw * 100 : raw;
   return `${v.toFixed(2)}%`;
+}
+
+/** Yahoo quote % fields (e.g. regularMarketChangePercent) — already in percent units. */
+export function fmtQuotePct(raw: number | null, decimals = 2): string {
+  if (raw == null || Number.isNaN(raw)) return '—';
+  return fmtSignedPct(raw, decimals);
 }
 
 export function fmtSignedPct(pct: number, decimals = 2): string {

@@ -1,6 +1,6 @@
 import type { StockStats } from '../../../types/stockStats';
 import type { QuoteSnapshot } from '../quoteSnapshot';
-import { fmtMarketCap, fmtMarketCapCr, fmtNumber, fmtPct, fmtRatio, fmtVolume } from '../../../lib/format';
+import { fmtMarketCap, fmtMarketCapCr, fmtNumber, fmtPct, fmtQuotePct, fmtRatio, fmtVolume } from '../../../lib/format';
 import { capCategoryBadgeClass, getCapCategory } from '../../../lib/marketCap';
 
 interface Props {
@@ -59,7 +59,7 @@ export function StockOverviewSection({
       {hasQuote && quoteSnapshot && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <MiniStat label="Day chg" value={ch != null ? `${ch >= 0 ? '+' : ''}${fmtNumber(ch)}` : '—'} valueClass={ch != null ? dayColor : undefined} />
-          <MiniStat label="Day chg %" value={chPct != null ? fmtPct(chPct) : '—'} valueClass={chPct != null ? dayColor : undefined} />
+          <MiniStat label="Day chg %" value={chPct != null ? fmtQuotePct(chPct) : '—'} valueClass={chPct != null ? dayColor : undefined} />
           <MiniStat label="Prev close" value={quoteSnapshot.previousClose != null ? fmtNumber(quoteSnapshot.previousClose) : '—'} />
           <MiniStat label="Day high" value={quoteSnapshot.dayHigh != null ? fmtNumber(quoteSnapshot.dayHigh) : '—'} />
           <MiniStat label="Day low" value={quoteSnapshot.dayLow != null ? fmtNumber(quoteSnapshot.dayLow) : '—'} />

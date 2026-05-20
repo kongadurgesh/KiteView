@@ -1,33 +1,53 @@
-import { PAGE_COPY } from '../../../content/pageCopy';
-import type { SwotAnalysis } from '../swotEngine';
+import { useEffect, useRef } from 'react';
+import { nseSymbolToTrendlyneTicker } from '../../../lib/nseSymbol';
 
-const QUADRANTS: { key: keyof SwotAnalysis; title: string; border: string; bg: string }[] = [
-  { key: 'strengths', title: 'Strengths', border: 'border-emerald-200 dark:border-emerald-900/60', bg: 'bg-emerald-50/50 dark:bg-emerald-950/20' },
-  { key: 'weaknesses', title: 'Weaknesses', border: 'border-red-200 dark:border-red-900/60', bg: 'bg-red-50/50 dark:bg-red-950/20' },
-  { key: 'opportunities', title: 'Opportunities', border: 'border-blue-200 dark:border-blue-900/60', bg: 'bg-blue-50/50 dark:bg-blue-950/20' },
-  { key: 'threats', title: 'Threats', border: 'border-amber-200 dark:border-amber-900/60', bg: 'bg-amber-50/50 dark:bg-amber-950/20' },
-];
+const TL_WIDGETS_SRC = 'https://cdn-static.trendlyne.com/static/js/webwidgets/tl-widgets.js';
+const SWOT_WIDGET_COLORS = 'posCol=00A25B&primaryCol=006AFF&negCol=EB3B00&neuCol=F7941E';
 
-export function SwotSection({ swot }: { swot: SwotAnalysis }) {
+function swotWidgetUrl(ticker: string): string {
+  return `https://trendlyne.com/web-widget/swot-widget/Poppins/${encodeURIComponent(ticker)}/?${SWOT_WIDGET_COLORS}`;
+}
+
+function widgetTheme(): 'light' | 'dark' {
+  return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+}
+
+function loadTrendlyneScript(): void {
+  if (document.querySelector(`script[src="${TL_WIDGETS_SRC}"]`)) return;
+  const script = document.createElement('script');
+  script.src = TL_WIDGETS_SRC;
+  script.async = true;
+  script.charset = 'utf-8';
+  document.body.appendChild(script);
+}
+
+export function SwotSection({ symbol }: { symbol: string }) {
+  const hostRef = useRef<HTMLDivElement>(null);
+  const ticker = nseSymbolToTrendlyneTicker(symbol);
+
+  useEffect(() => {
+    loadTrendlyneScript();
+  }, []);
+
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!host || !ticker) return;
+
+    host.replaceChildren();
+    const el = document.createElement('blockquote');
+    el.className = 'trendlyne-widgets';
+    el.setAttribute('data-get-url', swotWidgetUrl(ticker));
+    el.setAttribute('data-theme', widgetTheme());
+    host.appendChild(el);
+  }, [ticker]);
+
+  if (!ticker) return null;
+
   return (
-    <div className="card p-5">
-      <p className="label-caps mb-1">SWOT analysis</p>
-      <p className="section-desc mb-4">{PAGE_COPY.analysis.swotDisclaimer}</p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {QUADRANTS.map(({ key, title, border, bg }) => (
-          <div key={key} className={`rounded-xl border p-4 ${border} ${bg}`}>
-            <h3 className="text-sm font-semibold text-ink-primary dark:text-ink-dark-primary mb-2">{title}</h3>
-            <ul className="space-y-1.5 max-h-40 overflow-y-auto text-sm text-ink-secondary dark:text-ink-dark-secondary">
-              {swot[key].map((b, i) => (
-                <li key={i} className="flex gap-2">
-                  <span className="text-ink-muted shrink-0">•</span>
-                  <span>{b.text}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-    </div>
+    <div
+      ref={hostRef}
+      className="trendlyne-swot-host w-full min-h-[280px] [&_.trendlyne-widgets]:!m-0"
+      aria-label="SWOT analysis"
+    />
   );
 }

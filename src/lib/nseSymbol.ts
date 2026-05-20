@@ -5,3 +5,8 @@ export function normalizeNseSymbol(sym: string): string {
   if (t.includes('.')) return t;
   return `${t}.NS`;
 }
+
+/** NSE/BSE Yahoo symbol → Trendlyne ticker (e.g. `TCS.NS` → `TCS`). */
+export function nseSymbolToTrendlyneTicker(symbol: string): string {
+  return symbol.trim().toUpperCase().replace(/\.(NS|BO)$/i, '');
+}

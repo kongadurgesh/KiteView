@@ -14,7 +14,6 @@ import { normalizeNseSymbol } from '../../lib/nseSymbol';
 import { parseQuoteSnapshot, type QuoteSnapshot } from './quoteSnapshot';
 import { getPatternChartWindow, type PatternChartBar } from './patternChartCandles';
 import { buildTechnicalSummary, candlesToChartSeries } from './technicalUtils';
-import { buildSwotAnalysis } from './swotEngine';
 import { buildChecklist, buildDvmScores } from './analysisScores';
 
 function parseStockInfo(chartData: unknown, symbol: string): StockInfo {
@@ -215,32 +214,6 @@ export function useStockAnalysis() {
 
   const priceSeries = useMemo(() => candlesToChartSeries(candles), [candles]);
 
-  const swot = useMemo(
-    () =>
-      buildSwotAnalysis({
-        currentPrice,
-        fiftyTwoWeekHigh,
-        fiftyTwoWeekLow,
-        marketCapCr,
-        stockStats,
-        quoteSnapshot,
-        match,
-        rsi14: technical.rsi14,
-        aboveSma50: technical.aboveSma50,
-      }),
-    [
-      currentPrice,
-      fiftyTwoWeekHigh,
-      fiftyTwoWeekLow,
-      marketCapCr,
-      stockStats,
-      quoteSnapshot,
-      match,
-      technical.rsi14,
-      technical.aboveSma50,
-    ],
-  );
-
   const checklist = useMemo(
     () =>
       buildChecklist(
@@ -284,7 +257,6 @@ export function useStockAnalysis() {
     news,
     technical,
     priceSeries,
-    swot,
     checklist,
     dvm,
     search,
