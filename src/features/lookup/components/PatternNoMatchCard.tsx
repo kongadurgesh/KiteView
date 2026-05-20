@@ -5,7 +5,7 @@ import { PAGE_COPY } from '../../../content/pageCopy';
 export function PatternNoMatchCard({ symbol }: { symbol: string }) {
   return (
     <div className="card p-5 border-dashed">
-      <p className="label-caps mb-2">Bullish pattern</p>
+      <p className="label-caps mb-2">Breakout</p>
       <p className="body-text">
         {PAGE_COPY.analysis.noPattern} <strong>{symbol}</strong>
       </p>

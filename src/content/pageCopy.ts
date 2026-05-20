@@ -9,7 +9,7 @@ export const PAGE_COPY = {
   screener: {
     title: 'Live Screener',
     description:
-      'Scans NSE stocks with market cap above ₹1,000 Cr for Bullish Harami and Bullish Engulfing breakouts on the latest trading day.',
+      'Scan NSE stocks (market cap above ₹1,000 Cr) for breakout stocks. Use Today for the latest session, or pick a date range for historical breakouts. Signal is BUY when CMP is within 2% of the calculated buy price.',
   },
   heatmap: {
     title: 'Market Heatmap',
@@ -19,13 +19,13 @@ export const PAGE_COPY = {
   analysis: {
     title: 'Stock Analysis',
     description:
-      'Research any NSE symbol: overview, rule-based SWOT, technicals, checklist, and a bullish pattern panel when Harami or Engulfing is detected.',
+      'Research any NSE symbol: overview, rule-based SWOT, technicals, checklist, and a breakout panel when a qualifying pattern is detected.',
     swotDisclaimer: 'Automated signals from market data — not investment advice.',
     patternChartNote:
       'Base, pattern, and breakout bars. Dashed lines = buy trigger and buy price.',
     dvmNote: 'Rule-based Durability, Valuation, Momentum (0–100)',
     noPattern:
-      'No qualifying Bullish Harami or Bullish Engulfing in the last 1Y. Use the Screener to scan the market for fresh breakouts.',
+      'No qualifying breakout in the last 1Y.',
   },
   compare: {
     title: 'Stock Comparison',
@@ -54,7 +54,7 @@ export const PAGE_COPY = {
   toolCards: {
     screener: {
       title: 'Screener',
-      blurb: 'Scan ranked NSE lists for Bullish Harami / Engulfing breakouts.',
+      blurb: 'Scan ranked NSE lists for breakout stocks.',
     },
     heatmap: {
       title: 'Heatmap',
@@ -62,7 +62,7 @@ export const PAGE_COPY = {
     },
     analysis: {
       title: 'Analysis',
-      blurb: 'SWOT, technicals, checklist, and conditional bullish pattern levels.',
+      blurb: 'SWOT, technicals, checklist, and conditional breakout levels.',
     },
     compare: {
       title: 'Compare',

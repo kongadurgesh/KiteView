@@ -1,3 +1,4 @@
+import { getTradeSignal } from '../../lib/tradeSignal';
 import type { PatternMatch } from '../../types';
 import type { StockStats } from '../../types/stockStats';
 import type { TechnicalSummary } from './technicalUtils';
@@ -65,13 +66,13 @@ export function buildChecklist(
         (1 - currentPrice / fiftyTwoWeekHigh) * 100 <= 15,
     },
     {
-      label: 'Bullish pattern detected',
+      label: 'Breakout pattern detected',
       pass: match != null,
-      detail: match?.patternName,
+      detail: match ? 'In last 1Y' : undefined,
     },
     {
-      label: 'BUY vs pattern buy price',
-      pass: match != null && currentPrice > 0 && currentPrice <= match.buyPrice,
+      label: 'BUY signal (within 2% of buy price)',
+      pass: match != null && currentPrice > 0 && getTradeSignal(currentPrice, match.buyPrice) === 'BUY',
     },
     {
       label: 'Adequate liquidity (volume)',

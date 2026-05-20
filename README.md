@@ -40,12 +40,12 @@ Landing page with quick navigation into every major tool.
 
 ### 2. Live Screener
 
-Scans the NSE universe (market cap > ₹1,000 Cr) for bullish breakout patterns on the latest trading day.
+Scans the NSE universe (market cap > ₹1,000 Cr) for breakout stocks.
 
-- Server-side batch scanning with concurrency of 30
-- Columns: stock, CMP, buy price, buy trigger, pattern, 52W high/low, distance from extremes, ATH, market cap
-- Toggle buy-price columns; auto-scan and manual scan
-- Results cached in `sessionStorage`
+- **Today** mode: patterns on the latest trading session (auto-scan or manual)
+- **Date range** mode: historical scan — finds the latest breakout whose pattern date falls in your selected window (up to 365 days)
+- **Signal** column: **BUY** when CMP is within 2% of buy price (`0.98 ×` breakout close); otherwise **WAIT**
+- Server-side batch scanning; columns include signal, pattern date, CMP, % vs buy price (green/red), buy price (toggle), 52W stats, ATH, market cap
 - Click a row to open **Stock Analysis** (`/analysis?symbol=…`)
 
 ### 3. Market Heatmap
@@ -60,7 +60,7 @@ Treemap of NSE stocks sized by market cap and colored by performance.
 
 ### 4. Stock Analysis
 
-Research any NSE/BSE symbol with always-on sections and a conditional bullish pattern panel.
+Research any NSE/BSE symbol with always-on sections and a conditional breakout panel.
 
 - Symbol autocomplete (Yahoo Finance search); **shareable URL** `/analysis?symbol=TCS.NS` (`/lookup?symbol=` redirects for old links)
 - **Instrument strip**: name, symbol, CMP, Rescan, Compare, **Copy link**, **Open on Yahoo**
@@ -69,9 +69,9 @@ Research any NSE/BSE symbol with always-on sections and a conditional bullish pa
 - **Technicals**: % from 52W high/low, range position, 50-day SMA, RSI (14), **1Y price chart**
 - **Investment checklist** and **DVM scorecard** (Durability / Valuation / Momentum, rule-based 0–100)
 - **Company profile**, **financial highlights**, **analyst recommendations**, **recent news** (Yahoo `quoteSummary` modules via analysis bundle)
-- **Bullish pattern panel** (right column on desktop): only when **Bullish Harami** or **Bullish Engulfing** is detected — pattern chart, buy/trigger, BUY/WAIT, stop-loss, quantity table
+- **Breakout panel** (right column on desktop): only when a qualifying breakout is detected — pattern chart, buy/trigger, **BUY/WAIT signal** (BUY when CMP within 2% of buy price), stop-loss, quantity table
 - **No pattern**: compact callout + link to Screener; analysis sections still shown
-- Buy price = `0.98 ×` breakout close; buy trigger = `0.985 ×` breakout close
+- Buy price = `0.98 ×` breakout close; buy trigger = `0.985 ×` breakout close; **BUY** when `CMP ≤ buy price × 1.02`
 
 ### 5. Stock Comparison
 
@@ -263,7 +263,7 @@ Base URL: `http://localhost:3006` in development; your Vercel deployment URL in 
 | GET | `/api/stats/:symbol` | P/E, forward P/E, P/B, beta, 52W change, market cap |
 | GET | `/api/search?q=` | Symbol autocomplete (NSE/BSE) |
 | GET | `/api/screener-list` | NSE universe (cap > ₹1,000 Cr) |
-| POST | `/api/screener-scan` | Pattern scan. Body: `{ symbols: string[] }` |
+| POST | `/api/screener-scan` | Pattern scan. Body: `{ symbols, mode: 'today' \| 'historical', fromDate?, toDate? }` — historical requires both dates |
 | POST | `/api/heatmap-batch` | Batch quotes for heatmap. Body: `{ symbols, timeframe }` |
 | POST | `/api/chart-batch` | Batch chart data. Body: `{ symbols, range?, interval? }` → `{ charts }` |
 | POST | `/api/stats-batch` | Batch key stats. Body: `{ symbols }` → `{ stats }` |
@@ -273,7 +273,7 @@ Base URL: `http://localhost:3006` in development; your Vercel deployment URL in 
 
 ## Pattern Detection Logic
 
-### Bullish Harami (3-candle)
+### Harami (3-candle)
 
 ```
 Candle 1 (Red):   Close < Open
@@ -281,7 +281,7 @@ Candle 2 (Green): Inside Candle 1 range
 Candle 3 (Green): Breaks above both; close > Candle 1 open
 ```
 
-### Bullish Engulfing + breakout (3-candle)
+### Engulfing + breakout (3-candle)
 
 ```
 Candle 1 (Red):   Close < Open
