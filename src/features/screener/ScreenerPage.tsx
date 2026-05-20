@@ -5,6 +5,7 @@ import { SectionHeader } from '../../components/ui';
 import { PAGE_COPY } from '../../content/pageCopy';
 import { fmtDistPct, fmtMarketCapCr, fmtNumber } from '../../lib/format';
 import {
+  defaultHistoricalRange,
   fetchScreenerList,
   runScreener,
   ScreenerResult,
@@ -12,11 +13,44 @@ import {
   ScreenerStock,
 } from '../../utils/screener';
 
-type SortKey = 'name' | 'pattern' | 'buyPrice' | 'trigger' | 'cmp' | 'mcap' | 'sector' | '52wLow' | '52wHigh' | 'distLow' | 'distHigh' | 'ath';
+type ScanMode = 'today' | 'range';
+type SortKey =
+  | 'name'
+  | 'patternDate'
+  | 'signal'
+  | 'distBuy'
+  | 'buyPrice'
+  | 'cmp'
+  | 'mcap'
+  | 'sector'
+  | '52wLow'
+  | '52wHigh'
+  | 'distLow'
+  | 'distHigh'
+  | 'ath';
 type SortDir = 'asc' | 'desc';
+
+function SignalBadge({ signal }: { signal: 'BUY' | 'WAIT' }) {
+  const isBuy = signal === 'BUY';
+  return (
+    <span
+      className={`inline-block px-2 py-0.5 rounded text-[11px] font-bold uppercase ${
+        isBuy
+          ? 'bg-emerald-600 text-white'
+          : 'bg-amber-100 dark:bg-amber-500/15 text-amber-700 dark:text-amber-400'
+      }`}
+    >
+      {signal}
+    </span>
+  );
+}
 
 export function ScreenerPage() {
   const { viewStock } = useAppNavigation();
+  const defaultRange = useMemo(() => defaultHistoricalRange(), []);
+  const [scanMode, setScanMode] = useState<ScanMode>('today');
+  const [fromDate, setFromDate] = useState(defaultRange.fromDate);
+  const [toDate, setToDate] = useState(defaultRange.toDate);
   const [autoScan, setAutoScan] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [loadingList, setLoadingList] = useState(false);
@@ -32,6 +66,14 @@ export function ScreenerPage() {
 
   const startScan = useCallback(async (stocks?: ScreenerStock[]) => {
     if (scanning) return;
+    if (scanMode === 'range' && (!fromDate || !toDate)) {
+      setError('Select both From and To dates for a date range scan.');
+      return;
+    }
+    if (scanMode === 'range' && fromDate > toDate) {
+      setError('From date must be on or before To date.');
+      return;
+    }
     setError(null);
     setResults([]);
     setProgress({ scanned: 0, total: 0, found: 0 });
@@ -57,12 +99,18 @@ export function ScreenerPage() {
     const controller = new AbortController();
     abortRef.current = controller;
 
+    const options =
+      scanMode === 'range'
+        ? { mode: 'historical' as const, fromDate, toDate }
+        : { mode: 'today' as const };
+
     try {
       await runScreener(
         list,
         (p) => setProgress(p),
         (r) => setResults((prev) => [...prev, r]),
         controller.signal,
+        options,
       );
     } catch (err) {
       if (!controller.signal.aborted) {
@@ -72,18 +120,28 @@ export function ScreenerPage() {
       setScanning(false);
       abortRef.current = null;
     }
-  }, [scanning, stockList]);
+  }, [scanning, stockList, scanMode, fromDate, toDate]);
 
   const stopScan = useCallback(() => {
     abortRef.current?.abort();
   }, []);
 
   useEffect(() => {
+    if (scanMode === 'range') {
+      setAutoScan(false);
+      return;
+    }
     if (autoScan && !hasAutoScanned.current) {
       hasAutoScanned.current = true;
       startScan();
     }
-  }, [autoScan, startScan]);
+  }, [autoScan, startScan, scanMode]);
+
+  useEffect(() => {
+    setResults([]);
+    setProgress({ scanned: 0, total: 0, found: 0 });
+    setError(null);
+  }, [scanMode, fromDate, toDate]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
@@ -96,9 +154,15 @@ export function ScreenerPage() {
       let cmp = 0;
       switch (sortKey) {
         case 'name': cmp = a.shortName.localeCompare(b.shortName); break;
-        case 'pattern': cmp = a.match.patternName.localeCompare(b.match.patternName); break;
+        case 'patternDate': cmp = a.match.candle3.date.localeCompare(b.match.candle3.date); break;
+        case 'signal': cmp = a.signal.localeCompare(b.signal); break;
+        case 'distBuy': {
+          const dA = a.match.buyPrice ? ((a.currentPrice - a.match.buyPrice) / a.match.buyPrice) : 0;
+          const dB = b.match.buyPrice ? ((b.currentPrice - b.match.buyPrice) / b.match.buyPrice) : 0;
+          cmp = dA - dB;
+          break;
+        }
         case 'buyPrice': cmp = a.match.buyPrice - b.match.buyPrice; break;
-        case 'trigger': cmp = a.match.buyTriggerPrice - b.match.buyTriggerPrice; break;
         case 'cmp': cmp = a.currentPrice - b.currentPrice; break;
         case 'mcap': cmp = a.marketCapCr - b.marketCapCr; break;
         case 'sector': cmp = (a.sector || '').localeCompare(b.sector || ''); break;
@@ -135,10 +199,11 @@ export function ScreenerPage() {
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={() => setAutoScan((v) => !v)}
+              disabled={scanMode === 'range'}
               className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
                 autoScan ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
-              }`}
-              title={autoScan ? 'Auto-scan enabled' : 'Auto-scan disabled'}
+              } ${scanMode === 'range' ? 'opacity-40 cursor-not-allowed' : ''}`}
+              title={scanMode === 'range' ? 'Auto-scan only in Today mode' : autoScan ? 'Auto-scan enabled' : 'Auto-scan disabled'}
             >
               <span
                 className={`inline-block h-5 w-5 rounded-full bg-white dark:bg-gray-200 transform transition-transform ${
@@ -168,6 +233,53 @@ export function ScreenerPage() {
           </div>
           }
         />
+
+        <div className="flex flex-wrap items-center gap-3 w-full pt-1">
+          <span className="text-xs font-medium text-ink-muted dark:text-ink-dark-muted">Scan</span>
+          <div className="flex gap-0.5 bg-surface-muted dark:bg-surface-dark-muted rounded-lg p-0.5 border border-border dark:border-border-dark">
+            {(['today', 'range'] as const).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => {
+                  if (scanMode !== mode) setScanMode(mode);
+                }}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+                  scanMode === mode
+                    ? 'bg-surface dark:bg-surface-dark text-accent shadow-sm'
+                    : 'text-ink-muted hover:text-ink-primary dark:hover:text-ink-dark-primary'
+                }`}
+              >
+                {mode === 'today' ? 'Today' : 'Date range'}
+              </button>
+            ))}
+          </div>
+          {scanMode === 'range' && (
+            <>
+              <label className="flex items-center gap-1.5 text-xs text-ink-muted dark:text-ink-dark-muted">
+                From
+                <input
+                  type="date"
+                  value={fromDate}
+                  max={toDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                  className="input-field !w-auto !py-1.5 !px-2 text-xs"
+                />
+              </label>
+              <label className="flex items-center gap-1.5 text-xs text-ink-muted dark:text-ink-dark-muted">
+                To
+                <input
+                  type="date"
+                  value={toDate}
+                  min={fromDate}
+                  max={new Date().toISOString().slice(0, 10)}
+                  onChange={(e) => setToDate(e.target.value)}
+                  className="input-field !w-auto !py-1.5 !px-2 text-xs"
+                />
+              </label>
+            </>
+          )}
+        </div>
 
         {(scanning || progress.total > 0) && (
           <div className="mt-4">
@@ -204,7 +316,9 @@ export function ScreenerPage() {
 
       {results.length === 0 && !scanning && progress.total > 0 && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-10 text-center">
-          <p className="text-gray-400 dark:text-gray-500 text-sm">No patterns found in the current scan.</p>
+          <p className="text-gray-400 dark:text-gray-500 text-sm">
+            No patterns found{scanMode === 'range' ? ' in the selected date range' : ' for today'}.
+          </p>
         </div>
       )}
 
@@ -227,13 +341,12 @@ export function ScreenerPage() {
               <thead className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-800">
                 <tr>
                   <SortHeader label="Stock" k="name" current={sortKey} dir={sortDir} onSort={toggleSort} align="left" />
-                  <SortHeader label="Pattern" k="pattern" current={sortKey} dir={sortDir} onSort={toggleSort} />
+                  <SortHeader label="Signal" k="signal" current={sortKey} dir={sortDir} onSort={toggleSort} />
+                  <SortHeader label="Pattern date" k="patternDate" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="CMP" k="cmp" current={sortKey} dir={sortDir} onSort={toggleSort} />
+                  <SortHeader label="% vs Buy" k="distBuy" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   {showBuyPrices && (
-                    <>
-                      <SortHeader label="Buy Price" k="buyPrice" current={sortKey} dir={sortDir} onSort={toggleSort} />
-                      <SortHeader label="Trigger" k="trigger" current={sortKey} dir={sortDir} onSort={toggleSort} />
-                    </>
+                    <SortHeader label="Buy Price" k="buyPrice" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   )}
                   <SortHeader label="52W Low" k="52wLow" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="Dist Low" k="distLow" current={sortKey} dir={sortDir} onSort={toggleSort} />
@@ -255,26 +368,27 @@ export function ScreenerPage() {
                       <p className="text-[11px] text-gray-400 dark:text-gray-500">{r.symbol}</p>
                     </td>
                     <td className="p-3 text-right">
-                      <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-bold uppercase ${
-                        r.match.patternName === 'Bullish Harami'
-                          ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                          : 'bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400'
-                      }`}>
-                        {r.match.patternName === 'Bullish Harami' ? 'Harami' : 'Engulfing'}
-                      </span>
+                      <SignalBadge signal={r.signal} />
+                    </td>
+                    <td className="p-3 text-right font-mono text-xs text-gray-600 dark:text-gray-400">
+                      {r.match.candle3.date}
                     </td>
                     <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">
                       {r.currentPrice ? fmtNumber(r.currentPrice) : '—'}
                     </td>
+                    <td className={`p-3 text-right font-mono text-xs font-semibold ${
+                      !r.match.buyPrice || !r.currentPrice
+                        ? 'text-gray-500 dark:text-gray-400'
+                        : r.currentPrice >= r.match.buyPrice
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-red-600 dark:text-red-400'
+                    }`}>
+                      {fmtDistPct(r.currentPrice, r.match.buyPrice)}
+                    </td>
                     {showBuyPrices && (
-                      <>
-                        <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">
-                          {fmtNumber(r.match.buyPrice)}
-                        </td>
-                        <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">
-                          {fmtNumber(r.match.buyTriggerPrice)}
-                        </td>
-                      </>
+                      <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">
+                        {fmtNumber(r.match.buyPrice)}
+                      </td>
                     )}
                     <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300 text-xs">
                       {r.fiftyTwoWeekLow ? fmtNumber(r.fiftyTwoWeekLow) : '—'}

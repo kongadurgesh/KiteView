@@ -78,27 +78,42 @@ function buildMatch(
   };
 }
 
-export function detectPattern(
+function tryMatchAt(i: number, candles: Candle[]): PatternMatch | null {
+  const c1 = candles[i];
+  const c2 = candles[i + 1];
+  const c3 = candles[i + 2];
+  if (!isRedCandle(c1) || !passesFilters(c3)) return null;
+  if (isHaramiCandle(c1, c2) && isHaramiBreakout(c1, c2, c3)) {
+    return buildMatch('Bullish Harami', c1, c2, c3);
+  }
+  if (isEngulfingCandle(c1, c2) && isEngulfingBreakout(c1, c2, c3)) {
+    return buildMatch('Bullish Engulfing', c1, c2, c3);
+  }
+  return null;
+}
+
+export function detectPattern(candles: Candle[], marketCapCr: number): PatternMatch | null {
+  if (marketCapCr > 0 && marketCapCr < 5000) return null;
+  for (let i = candles.length - 3; i >= 0; i--) {
+    const m = tryMatchAt(i, candles);
+    if (m) return m;
+  }
+  return null;
+}
+
+/** Most recent pattern whose breakout bar (candle3) falls in [fromDate, toDate] inclusive. */
+export function detectPatternInRange(
   candles: Candle[],
-  marketCapCr: number
+  marketCapCr: number,
+  fromDate: string,
+  toDate: string,
 ): PatternMatch | null {
   if (marketCapCr > 0 && marketCapCr < 5000) return null;
-
   for (let i = candles.length - 3; i >= 0; i--) {
-    const c1 = candles[i];
-    const c2 = candles[i + 1];
-    const c3 = candles[i + 2];
-
-    if (!isRedCandle(c1) || !passesFilters(c3)) continue;
-
-    if (isHaramiCandle(c1, c2) && isHaramiBreakout(c1, c2, c3)) {
-      return buildMatch('Bullish Harami', c1, c2, c3);
-    }
-
-    if (isEngulfingCandle(c1, c2) && isEngulfingBreakout(c1, c2, c3)) {
-      return buildMatch('Bullish Engulfing', c1, c2, c3);
-    }
+    const m = tryMatchAt(i, candles);
+    if (!m) continue;
+    const d = m.candle3.date;
+    if (d >= fromDate && d <= toDate) return m;
   }
-
   return null;
 }

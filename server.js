@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import { detectPattern, detectPatternInRange } from './api/lib/patternDetect.js';
 
 const app = express();
 const PORT = 3006;
@@ -144,48 +145,7 @@ app.get('/api/screener-list', async (req, res) => {
   }
 });
 
-// --- Pattern detection logic (shared with frontend) ---
-
-function isRedCandle(c) { return c.close < c.open; }
-function isGreenCandle(c) { return c.close > c.open; }
-function isHaramiCandle(c1, c2) {
-  return c2.high < c1.high && c2.low > c1.low && c2.open >= c1.close && c2.close <= c1.open && isGreenCandle(c2);
-}
-function isHaramiBreakout(c1, c2, c3) {
-  return c3.high > c2.high && c3.high > c1.high && c3.low > c2.low && isGreenCandle(c3) && c3.close > c2.close && c3.close > c1.close && c3.close > c1.open;
-}
-function isEngulfingCandle(c1, c2) {
-  return c2.close > c1.open && c2.open < c1.close && c2.high > c1.high && c2.low < c1.low;
-}
-function isEngulfingBreakout(c1, c2, c3) {
-  return c3.low > c1.low && c3.low > c2.low && c3.high > c2.high && c3.close > c2.close && isGreenCandle(c3);
-}
-
-function serverDetectPattern(candles, marketCapCr) {
-  if (marketCapCr > 0 && marketCapCr < 5000) return null;
-  for (let i = candles.length - 3; i >= 0; i--) {
-    const c1 = candles[i], c2 = candles[i + 1], c3 = candles[i + 2];
-    if (!isRedCandle(c1)) continue;
-    if (c3.volume <= 200000 || c3.close <= 50) continue;
-    if (isHaramiCandle(c1, c2) && isHaramiBreakout(c1, c2, c3)) {
-      return { patternName: 'Bullish Harami', candle1: c1, candle2: c2, candle3: c3,
-        buyPrice: parseFloat((0.98 * c3.close).toFixed(2)), buyTriggerPrice: parseFloat((0.985 * c3.close).toFixed(2)) };
-    }
-    if (isEngulfingCandle(c1, c2) && isEngulfingBreakout(c1, c2, c3)) {
-      return { patternName: 'Bullish Engulfing', candle1: c1, candle2: c2, candle3: c3,
-        buyPrice: parseFloat((0.98 * c3.close).toFixed(2)), buyTriggerPrice: parseFloat((0.985 * c3.close).toFixed(2)) };
-    }
-  }
-  return null;
-}
-
-async function fetchChartDirect(symbol) {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=5d&interval=1d&includePrePost=false`;
-  const response = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-  if (!response.ok) return null;
-  const data = await response.json();
-  const result = data?.chart?.result?.[0];
-  if (!result) return null;
+function parseChartDirectResult(result, symbol) {
   const timestamps = result.timestamp ?? [];
   const quote = result.indicators?.quote?.[0];
   if (!quote) return null;
@@ -206,6 +166,38 @@ async function fetchChartDirect(symbol) {
     fiftyTwoWeekLow: meta.fiftyTwoWeekLow ?? 0,
     shortName: meta.shortName || meta.symbol || symbol,
   };
+}
+
+async function fetchChartDirect(symbol) {
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=5d&interval=1d&includePrePost=false`;
+  const response = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  if (!response.ok) return null;
+  const data = await response.json();
+  const result = data?.chart?.result?.[0];
+  if (!result) return null;
+  return parseChartDirectResult(result, symbol);
+}
+
+async function fetchChartRangeDirect(symbol, fromDate, toDate) {
+  const period1 = Math.floor(new Date(`${fromDate}T00:00:00Z`).getTime() / 1000) - 7 * 86400;
+  const period2 = Math.floor(new Date(`${toDate}T23:59:59Z`).getTime() / 1000) + 86400;
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?period1=${period1}&period2=${period2}&interval=1d&includePrePost=false`;
+  const response = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  if (!response.ok) return null;
+  const data = await response.json();
+  const result = data?.chart?.result?.[0];
+  if (!result) return null;
+  return parseChartDirectResult(result, symbol);
+}
+
+function validateScreenerDateRange(fromDate, toDate) {
+  if (!fromDate || !toDate) return null;
+  const from = new Date(`${fromDate}T00:00:00Z`);
+  const to = new Date(`${toDate}T00:00:00Z`);
+  if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) return 'Invalid date format';
+  if (from > to) return 'fromDate must be on or before toDate';
+  if ((to - from) / 86400000 > 365) return 'Date range cannot exceed 365 days';
+  return null;
 }
 
 async function fetchATH(symbol) {
@@ -239,9 +231,18 @@ async function fetchSectorBatch(symbols) {
 }
 
 app.post('/api/screener-scan', async (req, res) => {
-  const { symbols } = req.body;
+  const { symbols, mode, fromDate, toDate } = req.body ?? {};
   if (!Array.isArray(symbols) || symbols.length === 0) {
     return res.json({ results: [] });
+  }
+
+  const historical = mode === 'historical';
+  if (historical) {
+    if (!fromDate || !toDate) {
+      return res.status(400).json({ error: 'fromDate and toDate are required for historical scan' });
+    }
+    const err = validateScreenerDateRange(fromDate, toDate);
+    if (err) return res.status(400).json({ error: err });
   }
 
   const CONCURRENCY = 30;
@@ -251,11 +252,20 @@ app.post('/api/screener-scan', async (req, res) => {
     const batch = symbols.slice(i, i + CONCURRENCY);
     const batchResults = await Promise.allSettled(
       batch.map(async (sym) => {
-        const chart = await fetchChartDirect(sym);
+        const chart = historical
+          ? await fetchChartRangeDirect(sym, fromDate, toDate)
+          : await fetchChartDirect(sym);
         if (!chart || chart.candles.length < 3) return null;
-        const lastDate = chart.candles[chart.candles.length - 1].date;
-        const match = serverDetectPattern(chart.candles, 10000);
-        if (!match || match.candle3.date !== lastDate) return null;
+
+        const match = historical
+          ? detectPatternInRange(chart.candles, 10000, fromDate, toDate)
+          : (() => {
+              const lastDate = chart.candles[chart.candles.length - 1].date;
+              const m = detectPattern(chart.candles, 10000);
+              return m && m.candle3.date === lastDate ? m : null;
+            })();
+
+        if (!match) return null;
         return {
           symbol: sym, shortName: chart.shortName,
           marketCapCr: 0, currentPrice: chart.currentPrice, match,

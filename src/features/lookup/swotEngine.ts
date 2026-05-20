@@ -1,3 +1,4 @@
+import { getTradeSignal } from '../../lib/tradeSignal';
 import type { PatternMatch } from '../../types';
 import type { StockStats } from '../../types/stockStats';
 import type { QuoteSnapshot } from './quoteSnapshot';
@@ -103,16 +104,18 @@ export function buildSwotAnalysis(input: SwotInput): SwotAnalysis {
   if (cap === 'Small Cap') threats.push({ text: 'Small-cap — higher volatility and liquidity risk' });
 
   if (match) {
-    strengths.push({ text: `${match.patternName} bullish pattern detected with breakout` });
+    strengths.push({ text: 'Breakout pattern detected' });
   } else {
-    weaknesses.push({ text: 'No Bullish Harami / Engulfing pattern in the last year' });
+    weaknesses.push({ text: 'No breakout pattern in the last year' });
   }
 
-  if (match && currentPrice > match.buyPrice) {
-    threats.push({ text: 'WAIT vs buy price — CMP already above calculated buy level' });
-  }
-  if (match && currentPrice <= match.buyPrice) {
-    opportunities.push({ text: 'BUY signal — CMP at or below calculated buy price' });
+  if (match && currentPrice > 0) {
+    const sig = getTradeSignal(currentPrice, match.buyPrice);
+    if (sig === 'WAIT') {
+      threats.push({ text: 'WAIT — CMP more than 2% above buy price' });
+    } else {
+      opportunities.push({ text: 'BUY signal — CMP within 2% of buy price' });
+    }
   }
 
   if (aboveSma50 === true) strengths.push({ text: 'Price above 50-day moving average' });

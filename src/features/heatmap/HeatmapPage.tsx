@@ -37,19 +37,50 @@ const TIMEFRAME_OPTIONS: { key: HeatmapTimeframe; label: string }[] = [
 
 const AUTO_REFRESH_MS = 120_000;
 
+/** Bright red (losses) or bright green (gains) only — no yellow/gray blend on the gradient. */
+const HEAT_RED_LIGHT = { r: 254, g: 142, b: 142 };
+const HEAT_RED = { r: 239, g: 68, b: 68 };
+const HEAT_RED_DEEP = { r: 220, g: 38, b: 38 };
+const HEAT_GREEN_LIGHT = { r: 134, g: 239, b: 172 };
+const HEAT_GREEN = { r: 34, g: 197, b: 94 };
+const HEAT_GREEN_DEEP = { r: 22, g: 163, b: 74 };
+const HEAT_FLAT = { r: 229, g: 231, b: 235 };
+
+function lerpChannel(a: number, b: number, t: number): number {
+  return Math.round(a + (b - a) * t);
+}
+
+function rgb(c: { r: number; g: number; b: number }): string {
+  return `rgb(${c.r},${c.g},${c.b})`;
+}
+
+function mixRgb(
+  from: { r: number; g: number; b: number },
+  to: { r: number; g: number; b: number },
+  t: number,
+): string {
+  return rgb({
+    r: lerpChannel(from.r, to.r, t),
+    g: lerpChannel(from.g, to.g, t),
+    b: lerpChannel(from.b, to.b, t),
+  });
+}
+
 function heatColor(pct: number): string {
   const c = Math.max(-4, Math.min(4, pct));
   const t = Math.min(Math.abs(c) / 3, 1);
-  const nr = 198, ng = 195, nb = 195;
 
-  if (c > 0) {
-    return `rgb(${Math.round(nr + (0 - nr) * t)},${Math.round(ng + (144 - ng) * t)},${Math.round(nb + (74 - nb) * t)})`;
+  if (c > 0.08) {
+    return mixRgb(HEAT_GREEN_LIGHT, t > 0.55 ? HEAT_GREEN_DEEP : HEAT_GREEN, t);
   }
-  if (c < 0) {
-    return `rgb(${Math.round(nr + (204 - nr) * t)},${Math.round(ng + (50 - ng) * t)},${Math.round(nb + (56 - nb) * t)})`;
+  if (c < -0.08) {
+    return mixRgb(HEAT_RED_LIGHT, t > 0.55 ? HEAT_RED_DEEP : HEAT_RED, t);
   }
-  return `rgb(${nr},${ng},${nb})`;
+  return rgb(HEAT_FLAT);
 }
+
+/** For legend bar: pure red → pure green (no intermediate hues). */
+const HEAT_LEGEND_GRADIENT = `linear-gradient(to right, ${rgb(HEAT_RED_DEEP)}, ${rgb(HEAT_GREEN_DEEP)})`;
 
 
 interface TreemapRect {
@@ -331,10 +362,8 @@ export function HeatmapPage() {
             <div className="ml-auto hidden sm:flex items-center gap-2 text-[10px] font-medium text-gray-400 dark:text-gray-500">
               <span>-3%</span>
               <div
-                className="h-2.5 w-28 rounded-full"
-                style={{
-                  background: `linear-gradient(to right, ${heatColor(-3)}, ${heatColor(-1.5)}, ${heatColor(0)}, ${heatColor(1.5)}, ${heatColor(3)})`,
-                }}
+                className="h-2.5 w-32 rounded-full border border-gray-200 dark:border-gray-700"
+                style={{ background: HEAT_LEGEND_GRADIENT }}
               />
               <span>+3%</span>
             </div>
@@ -384,15 +413,18 @@ export function HeatmapPage() {
                 const showPrice = sizeFactor > 5;
                 const fontSize = sizeFactor > 7 ? 15 : sizeFactor > 5 ? 13 : sizeFactor > 3 ? 11 : sizeFactor > 2 ? 9 : 7;
                 const changePct = r.quote.changePercent;
-                const intensity = Math.min(Math.abs(changePct) / 1.5, 1);
-                const useDarkText = intensity < 0.4;
-                const textColor = useDarkText ? '#1f2937' : '#ffffff';
-                const shadowColor = useDarkText ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.5)';
+                const isFlat = Math.abs(changePct) <= 0.08;
+                const isLightTile =
+                  isFlat ||
+                  (changePct > 0 && Math.abs(changePct) < 0.6) ||
+                  (changePct < 0 && Math.abs(changePct) < 0.6);
+                const textColor = isLightTile ? '#111827' : '#ffffff';
+                const shadowColor = isLightTile ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
 
                 return (
                   <div
                     key={r.quote.symbol}
-                    className="absolute overflow-hidden cursor-pointer flex flex-col items-center justify-center transition-all duration-150 hover:brightness-110 hover:z-10"
+                    className="absolute overflow-hidden cursor-pointer flex flex-col items-center justify-center transition-all duration-150 hover:brightness-125 hover:z-10 hover:ring-2 hover:ring-white/80"
                     style={{
                       left: `calc(${pctX}% + 1px)`,
                       top: `calc(${pctY}% + 1px)`,

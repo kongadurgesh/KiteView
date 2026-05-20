@@ -4,6 +4,7 @@ import type { PatternChartBar } from '../patternChartCandles';
 import { PatternCandleChart } from './PatternCandleChart';
 import { PAGE_COPY } from '../../../content/pageCopy';
 import { fmtNumber } from '../../../lib/format';
+import { getTradeSignal } from '../../../lib/tradeSignal';
 import { QuantityTable } from '../QuantityTable';
 
 interface Props {
@@ -16,16 +17,15 @@ export function BullishPatternSection({ match, currentPrice, patternChartBars }:
   const priceDiff = currentPrice - match.buyPrice;
   const priceDiffPct = ((priceDiff / match.buyPrice) * 100).toFixed(2);
   const isAbove = priceDiff >= 0;
-  const signal = currentPrice > match.buyPrice ? 'WAIT' : 'BUY';
+  const signal = getTradeSignal(currentPrice, match.buyPrice);
   const [slPct, setSlPct] = useState(10);
   const stopLossPrice = parseFloat((match.buyPrice * (1 - slPct / 100)).toFixed(2));
 
   return (
     <div className="space-y-4">
       <div className="card p-5">
-        <p className="label-caps mb-3">Bullish pattern</p>
+        <p className="label-caps mb-3">Breakout</p>
         <div className="flex flex-wrap items-center gap-3">
-          <Badge label="Pattern">{match.patternName}</Badge>
           <Badge label="Signal" highlight={signal === 'BUY'}>
             {signal}
           </Badge>

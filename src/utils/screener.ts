@@ -1,4 +1,5 @@
 import { PatternMatch } from '../types';
+import { getTradeSignal, type TradeSignal } from '../lib/tradeSignal';
 
 const PROXY_BASE = import.meta.env.DEV ? 'http://localhost:3006' : '';
 const CHUNK_SIZE = 50;
@@ -19,12 +20,21 @@ export interface ScreenerResult {
   fiftyTwoWeekLow: number;
   allTimeHigh: number;
   sector: string;
+  signal: TradeSignal;
 }
 
 export interface ScreenerProgress {
   scanned: number;
   total: number;
   found: number;
+}
+
+export type ScreenerScanMode = 'today' | 'historical';
+
+export interface ScreenerScanOptions {
+  mode: ScreenerScanMode;
+  fromDate?: string;
+  toDate?: string;
 }
 
 const LIST_CACHE_KEY = 'screener-stock-list';
@@ -54,14 +64,28 @@ export async function fetchScreenerList(): Promise<ScreenerStock[]> {
 
 async function scanChunkOnServer(
   symbols: string[],
-): Promise<ScreenerResult[]> {
+  options: ScreenerScanOptions,
+): Promise<Omit<ScreenerResult, 'signal'>[]> {
   const url = `${PROXY_BASE}/api/screener-scan`;
+  const body: {
+    symbols: string[];
+    mode: ScreenerScanMode;
+    fromDate?: string;
+    toDate?: string;
+  } = { symbols, mode: options.mode };
+  if (options.mode === 'historical') {
+    body.fromDate = options.fromDate;
+    body.toDate = options.toDate;
+  }
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ symbols }),
+    body: JSON.stringify(body),
   });
-  if (!res.ok) return [];
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as { error?: string }).error ?? `Scan failed (HTTP ${res.status})`);
+  }
   const data = await res.json();
   return data.results ?? [];
 }
@@ -75,6 +99,7 @@ export async function runScreener(
   onProgress: (progress: ScreenerProgress) => void,
   onResult: (result: ScreenerResult) => void,
   signal?: AbortSignal,
+  options: ScreenerScanOptions = { mode: 'today' },
 ): Promise<void> {
   const symbolToStock = new Map(stocks.map((s) => [s.symbol, s]));
   let scanned = 0;
@@ -86,7 +111,7 @@ export async function runScreener(
     const chunk = stocks.slice(i, i + CHUNK_SIZE);
     const symbols = chunk.map((s) => s.symbol);
 
-    const results = await scanChunkOnServer(symbols);
+    const results = await scanChunkOnServer(symbols, options);
 
     for (const r of results) {
       const stock = symbolToStock.get(r.symbol);
@@ -94,8 +119,12 @@ export async function runScreener(
         r.shortName = r.shortName || stock.shortName;
         r.marketCapCr = r.marketCapCr || stock.marketCap / 1e7;
       }
+      const full: ScreenerResult = {
+        ...r,
+        signal: getTradeSignal(r.currentPrice, r.match.buyPrice),
+      };
       found++;
-      onResult(r);
+      onResult(full);
     }
 
     scanned = Math.min(i + chunk.length, stocks.length);
@@ -105,4 +134,19 @@ export async function runScreener(
       await sleep(100);
     }
   }
+}
+
+function localDateString(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+/** Default date range: last 30 calendar days (local YYYY-MM-DD). */
+export function defaultHistoricalRange(): { fromDate: string; toDate: string } {
+  const to = new Date();
+  const from = new Date(to);
+  from.setDate(from.getDate() - 30);
+  return { fromDate: localDateString(from), toDate: localDateString(to) };
 }
