@@ -1,3 +1,4 @@
+import { PAGE_COPY } from '../../../content/pageCopy';
 import type { DvmScores } from '../analysisScores';
 
 function ScoreBar({ label, score }: { label: string; score: number }) {
@@ -21,9 +22,7 @@ export function DvmSection({ dvm }: { dvm: DvmScores }) {
     <div className="card p-5 space-y-4">
       <div>
         <p className="label-caps">DVM scorecard</p>
-        <p className="text-xs text-ink-muted dark:text-ink-dark-muted mt-1">
-          Rule-based Durability, Valuation, Momentum (0–100)
-        </p>
+        <p className="section-desc mt-1">{PAGE_COPY.analysis.dvmNote}</p>
       </div>
       <ScoreBar label="Durability" score={dvm.durability} />
       <ScoreBar label="Valuation" score={dvm.valuation} />

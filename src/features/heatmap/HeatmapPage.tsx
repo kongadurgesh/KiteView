@@ -2,6 +2,10 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useMatch } from 'react-router-dom';
 import { useAppNavigation } from '../../app/navigation';
 import { fetchScreenerList, ScreenerStock } from '../../utils/screener';
+import { PageLayout } from '../../components/layout/PageLayout';
+import { SectionHeader } from '../../components/ui';
+import { PAGE_COPY } from '../../content/pageCopy';
+import { fmtInrCompact, fmtTime } from '../../lib/format';
 import { fetchHeatmapBatch, HeatmapTimeframe, QuoteFull } from '../../utils/fetchStockData';
 
 interface IndexOption {
@@ -47,14 +51,6 @@ function heatColor(pct: number): string {
   return `rgb(${nr},${ng},${nb})`;
 }
 
-function fmtPrice(n: number): string {
-  if (n >= 10000) return `₹${(n / 1000).toFixed(1)}K`;
-  return `₹${Math.round(n).toLocaleString('en-IN')}`;
-}
-
-function fmtTime(d: Date): string {
-  return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-}
 
 interface TreemapRect {
   quote: QuoteFull;
@@ -252,22 +248,18 @@ export function HeatmapPage() {
 
   const progressPct = progress.total > 0 ? (progress.loaded / progress.total) * 100 : 0;
 
+  const heatmapDesc = `${PAGE_COPY.heatmap.description} Colored by ${timeframeLabel} change.${
+    lastUpdated ? ` Last updated ${fmtTime(lastUpdated)}.` : ''
+  }`;
+
   return (
-    <div className="w-full max-w-7xl mt-6 space-y-4">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
+    <PageLayout className="max-w-7xl mt-6" title={PAGE_COPY.heatmap.title} description={heatmapDesc}>
+      <div className="w-full space-y-4">
+      <div className="card p-5">
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Market Heatmap</h2>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                Sized by market cap, colored by {timeframeLabel} change
-                {lastUpdated && (
-                  <span className="ml-2 text-gray-400 dark:text-gray-500">
-                    &middot; Last updated {fmtTime(lastUpdated)}
-                  </span>
-                )}
-              </p>
-            </div>
+          <SectionHeader
+            title="Filters"
+            action={
             <button
               onClick={handleRefresh}
               disabled={loading}
@@ -278,7 +270,8 @@ export function HeatmapPage() {
               </svg>
               {loading ? 'Loading...' : 'Refresh'}
             </button>
-          </div>
+            }
+          />
 
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
@@ -426,7 +419,7 @@ export function HeatmapPage() {
                     )}
                     {showPrice && (
                       <span className="leading-tight mt-0.5 opacity-70" style={{ fontSize: `${Math.max(fontSize - 3, 7)}px` }}>
-                        {fmtPrice(r.quote.regularMarketPrice)}
+                        {fmtInrCompact(r.quote.regularMarketPrice)}
                       </span>
                     )}
                   </div>
@@ -442,6 +435,7 @@ export function HeatmapPage() {
           <p className="text-gray-400 dark:text-gray-500 text-sm">No data available. Click Refresh to load.</p>
         </div>
       )}
-    </div>
+      </div>
+    </PageLayout>
   );
 }

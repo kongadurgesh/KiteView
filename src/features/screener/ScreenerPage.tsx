@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useAppNavigation } from '../../app/navigation';
+import { PageLayout } from '../../components/layout/PageLayout';
+import { SectionHeader } from '../../components/ui';
+import { PAGE_COPY } from '../../content/pageCopy';
+import { fmtDistPct, fmtMarketCapCr, fmtNumber } from '../../lib/format';
 import {
   fetchScreenerList,
   runScreener,
@@ -7,22 +11,6 @@ import {
   ScreenerProgress,
   ScreenerStock,
 } from '../../utils/screener';
-
-function fmt(n: number): string {
-  return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-function formatMcap(cr: number): string {
-  if (cr >= 100000) return `${(cr / 100000).toFixed(1)}L Cr`;
-  if (cr >= 1000) return `${(cr / 1000).toFixed(1)}K Cr`;
-  return `${cr.toFixed(0)} Cr`;
-}
-
-function distPct(current: number, target: number): string {
-  if (!target || !current) return '—';
-  const pct = ((current - target) / target) * 100;
-  return `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%`;
-}
 
 type SortKey = 'name' | 'pattern' | 'buyPrice' | 'trigger' | 'cmp' | 'mcap' | 'sector' | '52wLow' | '52wHigh' | 'distLow' | 'distHigh' | 'ath';
 type SortDir = 'asc' | 'desc';
@@ -138,16 +126,12 @@ export function ScreenerPage() {
   const pct = progress.total > 0 ? Math.round((progress.scanned / progress.total) * 100) : 0;
 
   return (
-    <div className="w-full max-w-7xl mt-10 space-y-6">
-      {/* Controls */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Live Screener</h2>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-              Scans NSE stocks (Market Cap &gt; ₹1,000 Cr) for Bullish Harami &amp; Engulfing breakouts today
-            </p>
-          </div>
+    <PageLayout className="max-w-7xl mt-6" title={PAGE_COPY.screener.title} description={PAGE_COPY.screener.description}>
+      <div className="w-full space-y-6">
+      <div className="card p-6">
+        <SectionHeader
+          title="Scan controls"
+          action={
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={() => setAutoScan((v) => !v)}
@@ -182,7 +166,8 @@ export function ScreenerPage() {
               </button>
             )}
           </div>
-        </div>
+          }
+        />
 
         {(scanning || progress.total > 0) && (
           <div className="mt-4">
@@ -279,39 +264,39 @@ export function ScreenerPage() {
                       </span>
                     </td>
                     <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">
-                      {r.currentPrice ? fmt(r.currentPrice) : '—'}
+                      {r.currentPrice ? fmtNumber(r.currentPrice) : '—'}
                     </td>
                     {showBuyPrices && (
                       <>
                         <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">
-                          {fmt(r.match.buyPrice)}
+                          {fmtNumber(r.match.buyPrice)}
                         </td>
                         <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">
-                          {fmt(r.match.buyTriggerPrice)}
+                          {fmtNumber(r.match.buyTriggerPrice)}
                         </td>
                       </>
                     )}
                     <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300 text-xs">
-                      {r.fiftyTwoWeekLow ? fmt(r.fiftyTwoWeekLow) : '—'}
+                      {r.fiftyTwoWeekLow ? fmtNumber(r.fiftyTwoWeekLow) : '—'}
                     </td>
                     <td className={`p-3 text-right font-mono text-xs font-semibold ${
                       r.fiftyTwoWeekLow && r.currentPrice > r.fiftyTwoWeekLow ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
                     }`}>
-                      {distPct(r.currentPrice, r.fiftyTwoWeekLow)}
+                      {fmtDistPct(r.currentPrice, r.fiftyTwoWeekLow)}
                     </td>
                     <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300 text-xs">
-                      {r.fiftyTwoWeekHigh ? fmt(r.fiftyTwoWeekHigh) : '—'}
+                      {r.fiftyTwoWeekHigh ? fmtNumber(r.fiftyTwoWeekHigh) : '—'}
                     </td>
                     <td className={`p-3 text-right font-mono text-xs font-semibold ${
                       r.fiftyTwoWeekHigh && r.currentPrice >= r.fiftyTwoWeekHigh ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
                     }`}>
-                      {distPct(r.currentPrice, r.fiftyTwoWeekHigh)}
+                      {fmtDistPct(r.currentPrice, r.fiftyTwoWeekHigh)}
                     </td>
                     <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300 text-xs">
-                      {r.allTimeHigh ? fmt(r.allTimeHigh) : '—'}
+                      {r.allTimeHigh ? fmtNumber(r.allTimeHigh) : '—'}
                     </td>
                     <td className="p-3 text-right font-mono text-gray-500 dark:text-gray-400 text-xs">
-                      {r.marketCapCr ? formatMcap(r.marketCapCr) : '—'}
+                      {r.marketCapCr ? fmtMarketCapCr(r.marketCapCr) : '—'}
                     </td>
                   </tr>
                 ))}
@@ -328,7 +313,8 @@ export function ScreenerPage() {
           </p>
         </div>
       )}
-    </div>
+      </div>
+    </PageLayout>
   );
 }
 

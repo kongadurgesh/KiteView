@@ -11,6 +11,10 @@ import {
   CartesianGrid,
 } from 'recharts';
 import { fetchChartBatch, fetchStatsBatch } from '../../services/apiBatch';
+import { PageLayout } from '../../components/layout/PageLayout';
+import { EmptyState } from '../../components/ui';
+import { PAGE_COPY } from '../../content/pageCopy';
+import { fmtInr, fmtMarketCap, fmtPct, fmtRatio } from '../../lib/format';
 import type { StockStats } from '../../types/stockStats';
 
 const PROXY_BASE = import.meta.env.DEV ? 'http://localhost:3006' : '';
@@ -40,28 +44,6 @@ interface Suggestion {
   symbol: string;
   shortname: string;
   exchange: string;
-}
-
-function fmtInr(n: number): string {
-  return `₹${n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
-function fmtMarketCap(raw: number | null): string {
-  if (raw == null || raw <= 0) return '—';
-  const cr = raw / 1e7;
-  if (cr >= 10000) return `${(cr / 10000).toFixed(2)} L Cr`;
-  return `${cr.toLocaleString('en-IN', { maximumFractionDigits: 0 })} Cr`;
-}
-
-function fmtPct(raw: number | null): string {
-  if (raw == null || Number.isNaN(raw)) return '—';
-  const v = Math.abs(raw) <= 1 ? raw * 100 : raw;
-  return `${v.toFixed(2)}%`;
-}
-
-function fmtRatio(raw: number | null): string {
-  if (raw == null || Number.isNaN(raw)) return '—';
-  return raw.toFixed(2);
 }
 
 function parseChartPayload(data: unknown): { date: string; close: number }[] {
@@ -464,23 +446,20 @@ export function StockComparePage() {
   const legendColor = isDark ? '#9ca3af' : '#6b7280';
 
   return (
-    <div className="w-full max-w-6xl flex flex-col gap-6 pb-10">
-      {symbols.length > 0 && (
-        <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-xl mx-auto">
-          Normalized % performance from the start of the range, optional index overlay, and a side-by-side fundamentals grid.
-        </p>
-      )}
-
+    <PageLayout
+      className="max-w-6xl pb-10"
+      title={PAGE_COPY.compare.title}
+      description={PAGE_COPY.compare.description}
+    >
+      <div className="w-full flex flex-col gap-6">
       {symbols.length === 0 && (
-        <div className="w-full rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/40 px-6 py-8 text-center">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Compare up to 4 stocks</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 max-w-md mx-auto">
-            Search below to add NSE symbols. See normalized returns, optionally overlay Nifty 50 or Sensex, and rank key valuation metrics across your picks.
-          </p>
-        </div>
+        <EmptyState
+          title={PAGE_COPY.compare.emptyTitle}
+          description={PAGE_COPY.compare.emptyDescription}
+        />
       )}
 
-      <div ref={wrapperRef} className="relative w-full max-w-lg mx-auto">
+      <div ref={wrapperRef} className="relative w-full">
         <div className="flex flex-wrap gap-2 mb-3 min-h-[36px]">
           {symbols.map((sym, i) => (
             <span
@@ -725,10 +704,11 @@ export function StockComparePage() {
       )}
 
       {symbols.length === 1 && !activeBenchmark && (
-        <div className="text-center text-sm text-gray-500 dark:text-gray-400 py-8 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
+        <p className="body-text py-8 px-6 rounded-xl border border-dashed border-border dark:border-border-dark">
           Add another stock for the comparison table, or turn on an index overlay above to chart vs Nifty / Sensex.
-        </div>
+        </p>
       )}
-    </div>
+      </div>
+    </PageLayout>
   );
 }

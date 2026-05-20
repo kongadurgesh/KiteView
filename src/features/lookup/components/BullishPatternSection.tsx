@@ -2,10 +2,9 @@ import { useState } from 'react';
 import { PatternMatch } from '../../../types';
 import type { PatternChartBar } from '../patternChartCandles';
 import { PatternCandleChart } from './PatternCandleChart';
+import { PAGE_COPY } from '../../../content/pageCopy';
 import { fmtNumber } from '../../../lib/format';
 import { QuantityTable } from '../QuantityTable';
-
-const fmt = fmtNumber;
 
 interface Props {
   match: PatternMatch;
@@ -36,9 +35,7 @@ export function BullishPatternSection({ match, currentPrice, patternChartBars }:
 
       <div className="card p-5">
         <p className="label-caps mb-1">Pattern chart</p>
-        <p className="text-xs text-ink-muted dark:text-ink-dark-muted mb-4">
-          Base, pattern, and breakout bars. Dashed lines = buy trigger and buy price.
-        </p>
+        <p className="section-desc mb-4">{PAGE_COPY.analysis.patternChartNote}</p>
         <PatternCandleChart
           bars={patternChartBars}
           buyPrice={match.buyPrice}
@@ -49,19 +46,19 @@ export function BullishPatternSection({ match, currentPrice, patternChartBars }:
       <div className="grid grid-cols-1 gap-3">
         <PriceCard
           label="Buy trigger"
-          value={fmt(match.buyTriggerPrice)}
-          sub={`0.985 × ${fmt(match.candle3.close)}`}
+          value={fmtNumber(match.buyTriggerPrice)}
+          sub={`0.985 × ${fmtNumber(match.candle3.close)}`}
           accent="amber"
         />
         <PriceCard
           label="Buy price"
-          value={fmt(match.buyPrice)}
-          sub={`0.98 × ${fmt(match.candle3.close)}`}
+          value={fmtNumber(match.buyPrice)}
+          sub={`0.98 × ${fmtNumber(match.candle3.close)}`}
           accent="green"
         />
         <div className="card-muted p-4 text-center border-emerald-200/80 dark:border-emerald-900/50">
           <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Current price</p>
-          <p className="text-2xl font-bold font-mono tabular-nums">{fmt(currentPrice)}</p>
+          <p className="text-2xl font-bold font-mono tabular-nums">{fmtNumber(currentPrice)}</p>
           <p className={`text-sm font-semibold mt-1 ${isAbove ? 'text-emerald-600' : 'text-red-600'}`}>
             {isAbove ? '+' : ''}
             {priceDiffPct}% from buy
@@ -85,7 +82,7 @@ export function BullishPatternSection({ match, currentPrice, patternChartBars }:
         </div>
         <div>
           <p className="text-xs font-semibold uppercase text-red-600 mb-1">Stop loss price</p>
-          <p className="text-xl font-bold text-red-600 font-mono">{fmt(stopLossPrice)}</p>
+          <p className="text-xl font-bold text-red-600 font-mono">{fmtNumber(stopLossPrice)}</p>
         </div>
       </div>
 

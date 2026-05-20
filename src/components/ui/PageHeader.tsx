@@ -5,26 +5,26 @@ interface PageHeaderProps {
   title: string;
   description?: string;
   action?: ReactNode;
-  centered?: boolean;
+  align?: 'start' | 'center';
   className?: string;
 }
 
-export function PageHeader({ title, description, action, centered, className }: PageHeaderProps) {
+export function PageHeader({ title, description, action, align = 'start', className }: PageHeaderProps) {
+  const centered = align === 'center';
+
   return (
-    <div
+    <header
       className={cn(
         'w-full mb-6',
         centered ? 'text-center' : 'flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4',
         className,
       )}
     >
-      <div className={centered ? 'max-w-2xl mx-auto' : ''}>
+      <div className="w-full min-w-0 flex-1">
         <h1 className="page-title">{title}</h1>
-        {description && (
-          <p className={cn('page-desc mt-1', centered && 'mx-auto max-w-lg')}>{description}</p>
-        )}
+        {description && <p className="page-desc mt-2">{description}</p>}
       </div>
-      {action && <div className="shrink-0">{action}</div>}
-    </div>
+      {action && <div className={cn('shrink-0', centered && 'flex justify-center')}>{action}</div>}
+    </header>
   );
 }

@@ -1,5 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { useAppNavigation } from '../../app/navigation';
+import { PageLayout } from '../../components/layout/PageLayout';
+import { PAGE_COPY } from '../../content/pageCopy';
 
 const PREVIEW_ROOT = 'relative h-full w-full min-h-0 overflow-hidden';
 
@@ -30,7 +32,7 @@ function OverviewCard({
       <div className="mt-4 flex items-start justify-between gap-3 flex-1">
         <div className="min-w-0 flex-1 pr-2">
           <p className="text-sm font-semibold text-ink-primary dark:text-ink-dark-primary">{title}</p>
-          <p className="mt-1 text-xs text-ink-secondary dark:text-ink-dark-secondary leading-relaxed">{blurb}</p>
+          <p className="card-blurb mt-1">{blurb}</p>
         </div>
         <div className="shrink-0">{action}</div>
       </div>
@@ -204,17 +206,10 @@ export function OverviewPage() {
 
   const gridCell = 'h-full min-h-[220px]';
 
-  return (
-    <div className="w-full max-w-6xl mx-auto pb-10">
-      <div className="flex flex-col gap-2 mb-6">
-        <div>
-          <h1 className="page-title text-2xl md:text-3xl">KiteView</h1>
-        </div>
-        <p className="page-desc max-w-2xl">
-          A single workspace to scan for breakout patterns, inspect a symbol, read the market heatmap, compare names, and track a portfolio.
-        </p>
-      </div>
+  const cards = PAGE_COPY.toolCards;
 
+  return (
+    <PageLayout className="max-w-6xl pb-10" title={PAGE_COPY.overview.title} description={PAGE_COPY.overview.description}>
       <motion.div
         initial="hidden"
         animate="show"
@@ -230,8 +225,8 @@ export function OverviewPage() {
       >
         <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
           <OverviewCard
-            title="Screener"
-            blurb="Scan ranked NSE lists for Bullish Harami / Engulfing breakouts."
+            title={cards.screener.title}
+            blurb={cards.screener.blurb}
             action={<OpenButton label="Open" onClick={() => goToPage('screener')} />}
             preview={<ScreenerPreview animated={animated} />}
             className="lg:col-span-2"
@@ -240,8 +235,8 @@ export function OverviewPage() {
 
         <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
           <OverviewCard
-            title="Heatmap"
-            blurb="Treemap by market cap with 1D / 1W / 1M / 1Y color."
+            title={cards.heatmap.title}
+            blurb={cards.heatmap.blurb}
             action={<OpenButton label="Open" onClick={() => goToPage('heatmap')} />}
             preview={<HeatmapPreview animated={animated} />}
           />
@@ -249,8 +244,8 @@ export function OverviewPage() {
 
         <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
           <OverviewCard
-            title="Analysis"
-            blurb="SWOT, technicals, checklist, and conditional bullish pattern levels."
+            title={cards.analysis.title}
+            blurb={cards.analysis.blurb}
             action={<OpenButton label="Open" onClick={() => goToPage('analysis')} />}
             preview={<LookupPreview animated={animated} />}
           />
@@ -258,8 +253,8 @@ export function OverviewPage() {
 
         <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
           <OverviewCard
-            title="Compare"
-            blurb="Normalized performance + index overlay and a ranked metric grid."
+            title={cards.compare.title}
+            blurb={cards.compare.blurb}
             action={<OpenButton label="Open" onClick={() => goToPage('compare')} />}
             preview={<ComparePreview animated={animated} />}
           />
@@ -267,8 +262,8 @@ export function OverviewPage() {
 
         <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
           <OverviewCard
-            title="Portfolio"
-            blurb="Weights and simple performance view across your holdings."
+            title={cards.portfolio.title}
+            blurb={cards.portfolio.blurb}
             action={<OpenButton label="Open" onClick={() => goToPage('portfolio')} />}
             preview={<PortfolioPreview animated={animated} />}
           />
@@ -276,8 +271,8 @@ export function OverviewPage() {
 
         <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
           <OverviewCard
-            title="About"
-            blurb="Author profile, philosophy, and track record proof links."
+            title={cards.about.title}
+            blurb={cards.about.blurb}
             action={<OpenButton label="Open" onClick={() => goToPage('about')} />}
             preview={<AboutPreview animated={animated} />}
           />
@@ -370,6 +365,6 @@ export function OverviewPage() {
           100% { filter: hue-rotate(25deg); }
         }
       `}</style>
-    </div>
+    </PageLayout>
   );
 }
