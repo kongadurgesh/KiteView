@@ -12,7 +12,7 @@
   - [Overview](#1-overview)
   - [Live Screener](#2-live-screener)
   - [Market Heatmap](#3-market-heatmap)
-  - [Stock Lookup & Pattern Detection](#4-stock-lookup--pattern-detection)
+  - [Stock Analysis](#4-stock-analysis)
   - [Stock Comparison](#5-stock-comparison)
   - [Portfolio Management](#6-portfolio-management)
   - [About](#7-about)
@@ -34,7 +34,7 @@
 
 Landing page with quick navigation into every major tool.
 
-- Card grid for Screener, Heatmap, Lookup, Compare, Portfolio, and About
+- Card grid for Screener, Heatmap, Stock Analysis, Compare, Portfolio, and About
 - Lightweight animated previews (respects `prefers-reduced-motion`)
 - Flat, minimal UI using shared design tokens
 
@@ -46,7 +46,7 @@ Scans the NSE universe (market cap > ₹1,000 Cr) for bullish breakout patterns 
 - Columns: stock, CMP, buy price, buy trigger, pattern, 52W high/low, distance from extremes, ATH, market cap
 - Toggle buy-price columns; auto-scan and manual scan
 - Results cached in `sessionStorage`
-- Click a row to open **Lookup** (`/lookup?symbol=…`)
+- Click a row to open **Stock Analysis** (`/analysis?symbol=…`)
 
 ### 3. Market Heatmap
 
@@ -55,35 +55,34 @@ Treemap of NSE stocks sized by market cap and colored by performance.
 - Custom squarified treemap (no external treemap library)
 - Timeframes: **1D**, **1W**, **1M**, **1Y**
 - Color scale: red (down) → gray (flat) → green (up)
-- Sector filter; click a tile to jump to **Lookup** (`/lookup?symbol=…`)
+- Sector filter; click a tile to jump to **Stock Analysis** (`/analysis?symbol=…`)
 - Batch quote loading via `/api/heatmap-batch`
 
-### 4. Stock Lookup & Pattern Detection
+### 4. Stock Analysis
 
-Search any NSE/BSE symbol and run candlestick pattern detection with buy-level math.
+Research any NSE/BSE symbol with always-on sections and a conditional bullish pattern panel.
 
-- Symbol autocomplete (Yahoo Finance search); **shareable URL** `/lookup?symbol=TCS.NS` (query stays after a scan)
-- Single-column layout: search, then **instrument strip** (name, symbol, CMP, Rescan, Compare, **Copy link**, **Open on Yahoo**)
-- Patterns: **Bullish Harami**, **Bullish Engulfing** (with breakout confirmation)
+- Symbol autocomplete (Yahoo Finance search); **shareable URL** `/analysis?symbol=TCS.NS` (`/lookup?symbol=` redirects for old links)
+- **Instrument strip**: name, symbol, CMP, Rescan, Compare, **Copy link**, **Open on Yahoo**
+- **Overview**: session snapshot, key stats, 52W range, ATH, cap tier, sector
+- **SWOT**: rule-based 2×2 grid from market data (not investment advice)
+- **Technicals**: % from 52W high/low, range position, 50-day SMA, RSI (14), **1Y price chart**
+- **Investment checklist** and **DVM scorecard** (Durability / Valuation / Momentum, rule-based 0–100)
+- **Company profile**, **financial highlights**, **analyst recommendations**, **recent news** (Yahoo `quoteSummary` modules via analysis bundle)
+- **Bullish pattern panel** (right column on desktop): only when **Bullish Harami** or **Bullish Engulfing** is detected — pattern chart, buy/trigger, BUY/WAIT, stop-loss, quantity table
+- **No pattern**: compact callout + link to Screener; analysis sections still shown
 - Buy price = `0.98 ×` breakout close; buy trigger = `0.985 ×` breakout close
-- BUY / WAIT signal vs current price; **pattern candlestick chart** (context bars + buy/trigger levels; hover for OHLC)
-- **Session** snapshot when available: day change (₹ / %), previous close, day high/low, volume
-- **Key stats** when available: P/E, forward P/E, P/B, beta, 52-week change %, market cap (via `/api/stats-batch` alongside the lookup bundle)
-- Stop-loss calculator (1%–10%)
-- Quantity table for investment sizes ₹10K–₹10L
-- Metadata: 52W range, ATH, cap tier, sector, industry
-- **Compare** action sends the symbol to the Compare page
 
 ### 5. Stock Comparison
 
-Dedicated page to compare up to four stocks (not embedded in Lookup).
+Dedicated page to compare up to four stocks (not embedded in Stock Analysis).
 
 - Chip-based symbol search with autocomplete
 - Normalized return chart (Recharts) with ranges **1M**, **3M**, **6M**, **1Y**
 - Optional benchmark overlay: Nifty 50 or Sensex
 - Comparison table: CMP, market cap, P/E, forward P/E, P/B, beta, 52W change, sector
 - Best/worst highlighting per metric row
-- Deep links via `/compare?symbol=TCS.NS` (e.g. from Lookup or Screener)
+- Deep links via `/compare?symbol=TCS.NS` (e.g. from Stock Analysis or Screener)
 
 ### 6. Portfolio Management
 
@@ -107,6 +106,7 @@ Author profile, investing philosophy, and linked P&L proof spreadsheets.
 - **Theme**: Light / dark toggle on the sidebar (class-based, persisted in `localStorage`)
 - **Shell**: Collapsible sidebar, mobile slide-out drawer, top **market ticker** (Nifty, Sensex, Bank Nifty, Nifty IT)
 - **Routing**: Each page has its own URL (React Router); sidebar uses links so refresh and share work
+- **Persistent pages**: Visited routes stay mounted when you navigate away — scan results, analysis, compare symbols, heatmap filters, and scroll position are kept until you refresh the tab
 - **Responsive**: `max-w-7xl` content, horizontal scroll on wide tables, sticky first column where needed
 
 ---
@@ -174,11 +174,14 @@ KiteView/
 │   ├── main.tsx                      # App entry
 │   ├── index.css                     # Tailwind + component layer (.card, .btn-primary, …)
 │   ├── types.ts                      # Shared TypeScript types
-│   ├── types/stockStats.ts           # Key stats DTO (Compare + Lookup)
+│   ├── types/stockStats.ts           # Key stats DTO (Compare + Analysis)
+│   ├── types/analysisExtras.ts       # Profile, news, recommendations, financials
 │   ├── app/
 │   │   ├── App.tsx                   # Route definitions
-│   │   ├── AppLayout.tsx             # Shell + theme + Outlet
-│   │   ├── routes.ts                 # Path map + lookup/compare URL helpers
+│   │   ├── AppLayout.tsx             # Shell + theme + persistent pages
+│   │   ├── PersistentOutlet.tsx      # Keeps visited pages mounted
+│   │   ├── persistentPages.tsx       # Path → page component map
+│   │   ├── routes.ts                 # Path map + analysis/compare URL helpers
 │   │   └── navigation.ts             # useAppNavigation hook
 │   ├── components/
 │   │   ├── layout/
@@ -195,13 +198,12 @@ KiteView/
 │   │   ├── overview/OverviewPage.tsx
 │   │   ├── screener/ScreenerPage.tsx
 │   │   ├── heatmap/HeatmapPage.tsx
-│   │   ├── lookup/
-│   │   │   ├── LookupPage.tsx
-│   │   │   ├── useLookup.ts
-│   │   │   ├── quoteSnapshot.ts
-│   │   │   ├── components/LookupInstrumentStrip.tsx, PatternCandleChart.tsx
-│   │   │   ├── patternChartCandles.ts
-│   │   │   ├── ResultCard.tsx, QuantityTable.tsx
+│   │   ├── lookup/                   # Stock Analysis feature (route /analysis)
+│   │   │   ├── StockAnalysisPage.tsx
+│   │   │   ├── useStockAnalysis.ts, swotEngine.ts, technicalUtils.ts, analysisScores.ts
+│   │   │   ├── quoteSnapshot.ts, patternChartCandles.ts, LookupRedirect.tsx
+│   │   │   ├── components/           # Overview, SWOT, technicals, pattern, profile, news, …
+│   │   │   └── QuantityTable.tsx
 │   │   ├── compare/ComparePage.tsx
 │   │   ├── portfolio/
 │   │   │   ├── PortfolioPage.tsx
@@ -213,7 +215,7 @@ KiteView/
 │   │   └── cn.ts
 │   ├── services/
 │   │   ├── fetchStockData.ts         # Chart, quote, heatmap batch helpers
-│   │   └── apiBatch.ts               # Client batch helpers (compare, lookup)
+│   │   └── apiBatch.ts               # Client batch helpers (compare, analysis bundle)
 │   └── utils/                        # Domain logic only
 │       ├── patternDetector.ts
 │       ├── buyPrice.ts
@@ -238,7 +240,8 @@ KiteView/
 | `/` | Overview |
 | `/screener` | Live Screener |
 | `/heatmap` | Market Heatmap |
-| `/lookup` | Stock Lookup (`?symbol=` optional) |
+| `/analysis` | Stock Analysis (`?symbol=` optional) |
+| `/lookup` | Redirects to `/analysis` (preserves `?symbol=`) |
 | `/compare` | Stock Comparison (`?symbol=` optional) |
 | `/portfolio` | Portfolio |
 | `/about` | About |
@@ -263,7 +266,7 @@ Base URL: `http://localhost:3006` in development; your Vercel deployment URL in 
 | POST | `/api/heatmap-batch` | Batch quotes for heatmap. Body: `{ symbols, timeframe }` |
 | POST | `/api/chart-batch` | Batch chart data. Body: `{ symbols, range?, interval? }` → `{ charts }` |
 | POST | `/api/stats-batch` | Batch key stats. Body: `{ symbols }` → `{ stats }` |
-| GET | `/api/lookup-bundle?symbol=` | Chart 1y + max, quote, and profile in one request |
+| GET | `/api/lookup-bundle?symbol=` | Chart 1y + max, quote, profile, financials, recommendations, news |
 
 ---
 

@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, type Ref } from 'react';
 import { Sidebar } from './Sidebar';
 import { MarketTicker } from './MarketTicker';
 interface AppShellProps {
@@ -8,6 +8,7 @@ interface AppShellProps {
   onSidebarExpandChange: (expanded: boolean) => void;
   mobileMenuOpen: boolean;
   onMobileMenuOpen: (open: boolean) => void;
+  mainScrollRef?: Ref<HTMLElement>;
   children: ReactNode;
 }
 
@@ -18,6 +19,7 @@ export function AppShell({
   onSidebarExpandChange,
   mobileMenuOpen,
   onMobileMenuOpen,
+  mainScrollRef,
   children,
 }: AppShellProps) {
   return (
@@ -47,7 +49,10 @@ export function AppShell({
 
         <MarketTicker sidebarExpanded={sidebarExpanded} />
 
-        <main className="flex-1 px-4 py-4 sm:px-6 sm:py-6 flex flex-col items-center overflow-y-auto overflow-x-hidden min-w-0 w-full">
+        <main
+          ref={mainScrollRef}
+          className="flex-1 px-4 py-4 sm:px-6 sm:py-6 flex flex-col items-center overflow-y-auto overflow-x-hidden min-w-0 w-full"
+        >
           {children}
         </main>
       </div>

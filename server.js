@@ -550,32 +550,33 @@ app.get('/api/lookup-bundle', async (req, res) => {
     return res.status(400).json({ error: 'symbol query parameter is required' });
   }
   try {
+    const { fetchQuoteSummary, parseProfile, parseFinancial, parseRecommendations, parseNews } =
+      await import('./api/lib/analysisBundleParse.js');
     const { crumb, cookie } = await getYahooCrumb();
     const quoteUrl = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(symbol)}&crumb=${encodeURIComponent(crumb)}`;
-    const profileUrl = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=assetProfile&crumb=${encodeURIComponent(crumb)}`;
 
-    const [chart1y, chartMax, quoteRes, profileRes] = await Promise.all([
+    const [chart1y, chartMax, quoteRes, summaryData, newsData] = await Promise.all([
       fetchChartPayload(symbol, '1y', '1d'),
       fetchChartPayload(symbol, 'max', '1d'),
       fetch(quoteUrl, { headers: { 'User-Agent': 'Mozilla/5.0', Cookie: cookie } }),
-      fetch(profileUrl, { headers: { 'User-Agent': 'Mozilla/5.0', Cookie: cookie } }),
+      fetchQuoteSummary(symbol, 'assetProfile,financialData,recommendationTrend', crumb, cookie),
+      fetchQuoteSummary(symbol, 'news', crumb, cookie),
     ]);
 
     let quote = null;
     if (quoteRes.ok) quote = await quoteRes.json();
 
-    let profile = { sector: '', industry: '' };
-    if (profileRes.ok) {
-      const profileData = await profileRes.json();
-      const asset = profileData?.quoteSummary?.result?.[0]?.assetProfile ?? {};
-      profile = { sector: asset.sector ?? '', industry: asset.industry ?? '' };
-    }
+    const summaryResult = summaryData?.quoteSummary?.result?.[0] ?? {};
+    const newsResult = newsData?.quoteSummary?.result?.[0] ?? {};
 
     res.json({
       chart1y: chart1y ?? null,
       chartMax: chartMax ?? null,
       quote,
-      profile,
+      profile: parseProfile(summaryResult.assetProfile ?? {}),
+      financials: parseFinancial(summaryResult.financialData ?? {}),
+      recommendations: parseRecommendations(summaryResult.recommendationTrend ?? {}),
+      news: parseNews(newsResult ?? {}),
     });
   } catch (err) {
     res.status(500).json({ error: 'Lookup bundle failed', details: err.message });

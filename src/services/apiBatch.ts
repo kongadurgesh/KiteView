@@ -29,16 +29,31 @@ export async function fetchStatsBatch<T>(symbols: string[]): Promise<Record<stri
   const data = await postJson<{ stats: Record<string, T> }>('/api/stats-batch', { symbols });
   return data.stats ?? {};
 }
-export interface LookupBundleResponse {
+import type {
+  AnalysisProfile,
+  AnalysisNewsItem,
+  AnalysisRecommendations,
+  FinancialHighlights,
+} from '../types/analysisExtras';
+
+export interface AnalysisBundleResponse {
   chart1y: unknown;
   chartMax: unknown;
   quote: unknown;
-  profile: { sector: string; industry: string };
+  profile: AnalysisProfile;
+  financials: FinancialHighlights;
+  recommendations: AnalysisRecommendations;
+  news: AnalysisNewsItem[];
 }
 
-export async function fetchLookupBundle(symbol: string): Promise<LookupBundleResponse> {
+/** @deprecated Use AnalysisBundleResponse */
+export type LookupBundleResponse = AnalysisBundleResponse;
+
+export async function fetchAnalysisBundle(symbol: string): Promise<AnalysisBundleResponse> {
   const url = `${PROXY_BASE}/api/lookup-bundle?symbol=${encodeURIComponent(symbol)}`;
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`Lookup bundle failed (HTTP ${res.status})`);
-  return res.json() as Promise<LookupBundleResponse>;
+  if (!res.ok) throw new Error(`Analysis bundle failed (HTTP ${res.status})`);
+  return res.json() as Promise<AnalysisBundleResponse>;
 }
+
+export const fetchLookupBundle = fetchAnalysisBundle;

@@ -249,9 +249,9 @@ export function OverviewPage() {
 
         <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
           <OverviewCard
-            title="Lookup"
-            blurb="Search a symbol and get pattern, buy levels, and key context."
-            action={<OpenButton label="Open" onClick={() => goToPage('lookup')} />}
+            title="Analysis"
+            blurb="SWOT, technicals, checklist, and conditional bullish pattern levels."
+            action={<OpenButton label="Open" onClick={() => goToPage('analysis')} />}
             preview={<LookupPreview animated={animated} />}
           />
         </motion.div>

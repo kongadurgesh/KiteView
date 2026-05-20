@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { AppShell } from '../components/layout/AppShell';
+import { PersistentOutlet } from './PersistentOutlet';
 import { initTheme, getTheme, toggleTheme } from '../utils/theme';
 
 export function AppLayout() {
   const location = useLocation();
+  const mainScrollRef = useRef<HTMLElement | null>(null);
   const [isDark, setIsDark] = useState(() => getTheme() === 'dark');
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -29,8 +31,9 @@ export function AppLayout() {
       onSidebarExpandChange={setSidebarExpanded}
       mobileMenuOpen={mobileMenuOpen}
       onMobileMenuOpen={setMobileMenuOpen}
+      mainScrollRef={mainScrollRef}
     >
-      <Outlet />
+      <PersistentOutlet scrollContainerRef={mainScrollRef} />
     </AppShell>
   );
 }
