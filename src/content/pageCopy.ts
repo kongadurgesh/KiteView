@@ -19,8 +19,7 @@ export const PAGE_COPY = {
   analysis: {
     title: 'Stock Analysis',
     description:
-      'Research any NSE symbol: overview, rule-based SWOT, technicals, checklist, and a breakout panel when a qualifying pattern is detected.',
-    swotDisclaimer: 'Automated signals from market data — not investment advice.',
+      'Research any NSE symbol: overview, SWOT (Trendlyne), technicals, last 5 quarters P&L, and a breakout panel when a qualifying pattern is detected.',
     patternChartNote:
       'Base, pattern, and breakout bars. Dashed lines = buy trigger and buy price.',
     dvmNote: 'Rule-based Durability, Valuation, Momentum (0–100)',
@@ -62,7 +61,7 @@ export const PAGE_COPY = {
     },
     analysis: {
       title: 'Analysis',
-      blurb: 'SWOT, technicals, checklist, and conditional breakout levels.',
+      blurb: 'Trendlyne SWOT, quarterly results, technicals, and conditional breakout levels.',
     },
     compare: {
       title: 'Compare',

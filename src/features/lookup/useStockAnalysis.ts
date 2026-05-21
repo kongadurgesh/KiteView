@@ -6,6 +6,8 @@ import type {
   AnalysisNewsItem,
   AnalysisRecommendations,
   FinancialHighlights,
+  QuarterlyPeriod,
+  QuarterlyResults,
 } from '../../types/analysisExtras';
 import { fetchAnalysisBundle, fetchStatsBatch } from '../../services/apiBatch';
 import { detectPattern } from '../../utils/patternDetector';
@@ -14,8 +16,43 @@ import { normalizeNseSymbol } from '../../lib/nseSymbol';
 import { parseQuoteSnapshot, type QuoteSnapshot } from './quoteSnapshot';
 import { getPatternChartWindow, type PatternChartBar } from './patternChartCandles';
 import { buildTechnicalSummary, candlesToChartSeries } from './technicalUtils';
-import { buildSwotAnalysis } from './swotEngine';
-import { buildChecklist, buildDvmScores } from './analysisScores';
+import { buildDvmScores } from './analysisScores';
+
+/** Map legacy API keys to current QuarterlyPeriod fields. */
+function normalizeQuarterlyPeriod(p: QuarterlyPeriod & {
+  profitBeforeTax?: number | null;
+  incomeBeforeTax?: number | null;
+  operatingProfit?: number | null;
+  netProfit?: number | null;
+  netIncome?: number | null;
+  netIncomeCommonStockholders?: number | null;
+  netIncomeApplicableToCommonShares?: number | null;
+  basicEPS?: number | null;
+}): QuarterlyPeriod {
+  return {
+    endDate: p.endDate,
+    label: p.label,
+    revenue: p.revenue ?? null,
+    pretaxIncome: p.pretaxIncome ?? p.profitBeforeTax ?? p.incomeBeforeTax ?? null,
+    netIncomeCommon:
+      p.netIncomeCommon
+      ?? p.netIncomeCommonStockholders
+      ?? p.netIncomeApplicableToCommonShares
+      ?? p.netProfit
+      ?? p.netIncome
+      ?? null,
+    basicEps: p.basicEps ?? p.basicEPS ?? null,
+  };
+}
+
+function normalizeQuarterlyResults(qr: QuarterlyResults): QuarterlyResults {
+  return {
+    basis: qr.basis,
+    periods: qr.periods
+      .map((p) => normalizeQuarterlyPeriod(p))
+      .sort((a, b) => b.endDate.localeCompare(a.endDate)),
+  };
+}
 
 function parseStockInfo(chartData: unknown, symbol: string): StockInfo {
   const result = (chartData as { chart?: { result?: unknown[] } })?.chart?.result?.[0] as {
@@ -110,6 +147,8 @@ const emptyRecs: AnalysisRecommendations = {
   strongSell: 0,
 };
 
+const emptyQuarterly: QuarterlyResults = { basis: 'unknown', periods: [] };
+
 export function useStockAnalysis() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -132,6 +171,7 @@ export function useStockAnalysis() {
   const [financials, setFinancials] = useState<FinancialHighlights>(emptyFinancials);
   const [recommendations, setRecommendations] = useState<AnalysisRecommendations>(emptyRecs);
   const [news, setNews] = useState<AnalysisNewsItem[]>([]);
+  const [quarterlyResults, setQuarterlyResults] = useState<QuarterlyResults>(emptyQuarterly);
   const [hasSearched, setHasSearched] = useState(false);
 
   const search = useCallback(async (sym: string) => {
@@ -147,6 +187,7 @@ export function useStockAnalysis() {
     setFinancials(emptyFinancials);
     setRecommendations(emptyRecs);
     setNews([]);
+    setQuarterlyResults(emptyQuarterly);
     setStockName('');
     setCurrentPrice(0);
     setHasSearched(true);
@@ -180,6 +221,9 @@ export function useStockAnalysis() {
       setFinancials(bundle.financials ?? emptyFinancials);
       setRecommendations(bundle.recommendations ?? emptyRecs);
       setNews(bundle.news ?? []);
+      setQuarterlyResults(
+        normalizeQuarterlyResults(bundle.quarterlyResults ?? emptyQuarterly),
+      );
 
       const mcCr =
         stockInfo.marketCap > 0
@@ -215,45 +259,6 @@ export function useStockAnalysis() {
 
   const priceSeries = useMemo(() => candlesToChartSeries(candles), [candles]);
 
-  const swot = useMemo(
-    () =>
-      buildSwotAnalysis({
-        currentPrice,
-        fiftyTwoWeekHigh,
-        fiftyTwoWeekLow,
-        marketCapCr,
-        stockStats,
-        quoteSnapshot,
-        match,
-        rsi14: technical.rsi14,
-        aboveSma50: technical.aboveSma50,
-      }),
-    [
-      currentPrice,
-      fiftyTwoWeekHigh,
-      fiftyTwoWeekLow,
-      marketCapCr,
-      stockStats,
-      quoteSnapshot,
-      match,
-      technical.rsi14,
-      technical.aboveSma50,
-    ],
-  );
-
-  const checklist = useMemo(
-    () =>
-      buildChecklist(
-        stockStats,
-        currentPrice,
-        fiftyTwoWeekHigh,
-        match,
-        technical,
-        quoteSnapshot?.volume ?? null,
-      ),
-    [stockStats, currentPrice, fiftyTwoWeekHigh, match, technical, quoteSnapshot?.volume],
-  );
-
   const dvm = useMemo(
     () => buildDvmScores(stockStats, currentPrice, fiftyTwoWeekHigh, fiftyTwoWeekLow, technical),
     [stockStats, currentPrice, fiftyTwoWeekHigh, fiftyTwoWeekLow, technical],
@@ -284,8 +289,7 @@ export function useStockAnalysis() {
     news,
     technical,
     priceSeries,
-    swot,
-    checklist,
+    quarterlyResults,
     dvm,
     search,
     canRescan: Boolean(symbol) && !isLoading,

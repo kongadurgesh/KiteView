@@ -45,7 +45,7 @@ Scans the NSE universe (market cap > ₹1,000 Cr) for breakout stocks.
 - **Today** mode: patterns on the latest trading session (auto-scan or manual)
 - **Date range** mode: historical scan — finds the latest breakout whose pattern date falls in your selected window (up to 365 days)
 - **Signal** column: **BUY** when CMP is within 2% of buy price (`0.98 ×` breakout close); otherwise **WAIT**
-- Server-side batch scanning; columns include signal, pattern date, CMP, % vs buy price (green/red), buy price (toggle), 52W stats, ATH, market cap
+- Server-side batch scanning; columns include signal, pattern date, CMP, % vs buy price (green/red), buy price, 52W stats, ATH, market cap
 - Click a row to open **Stock Analysis** (`/analysis?symbol=…`)
 
 ### 3. Market Heatmap
@@ -65,9 +65,9 @@ Research any NSE/BSE symbol with always-on sections and a conditional breakout p
 - Symbol autocomplete (Yahoo Finance search); **shareable URL** `/analysis?symbol=TCS.NS` (`/lookup?symbol=` redirects for old links)
 - **Instrument strip**: name, symbol, CMP, Rescan, Compare, **Copy link**, **Open on Yahoo**
 - **Overview**: session snapshot, key stats, 52W range, ATH, cap tier, sector
-- **SWOT**: rule-based 2×2 grid from market data (not investment advice)
+- **SWOT**: embedded Trendlyne SWOT widget (updates per symbol)
 - **Technicals**: % from 52W high/low, range position, 50-day SMA, RSI (14), **1Y price chart**
-- **Investment checklist** and **DVM scorecard** (Durability / Valuation / Momentum, rule-based 0–100)
+- **Last 5 quarters P&L** — Total Revenue, Pretax Income, Net Income, Basic EPS with green/red vs oldest quarter, and **DVM scorecard** (Durability / Valuation / Momentum, rule-based 0–100)
 - **Company profile**, **financial highlights**, **analyst recommendations**, **recent news** (Yahoo `quoteSummary` modules via analysis bundle)
 - **Breakout panel** (right column on desktop): only when a qualifying breakout is detected — pattern chart, buy/trigger, **BUY/WAIT signal** (BUY when CMP within 2% of buy price), stop-loss, quantity table
 - **No pattern**: compact callout + link to Screener; analysis sections still shown
@@ -200,7 +200,7 @@ KiteView/
 │   │   ├── heatmap/HeatmapPage.tsx
 │   │   ├── lookup/                   # Stock Analysis feature (route /analysis)
 │   │   │   ├── StockAnalysisPage.tsx
-│   │   │   ├── useStockAnalysis.ts, swotEngine.ts, technicalUtils.ts, analysisScores.ts
+│   │   │   ├── useStockAnalysis.ts, technicalUtils.ts, analysisScores.ts
 │   │   │   ├── quoteSnapshot.ts, patternChartCandles.ts, LookupRedirect.tsx
 │   │   │   ├── components/           # Overview, SWOT, technicals, pattern, profile, news, …
 │   │   │   └── QuantityTable.tsx
@@ -267,7 +267,7 @@ Base URL: `http://localhost:3006` in development; your Vercel deployment URL in 
 | POST | `/api/heatmap-batch` | Batch quotes for heatmap. Body: `{ symbols, timeframe }` |
 | POST | `/api/chart-batch` | Batch chart data. Body: `{ symbols, range?, interval? }` → `{ charts }` |
 | POST | `/api/stats-batch` | Batch key stats. Body: `{ symbols }` → `{ stats }` |
-| GET | `/api/lookup-bundle?symbol=` | Chart 1y + max, quote, profile, financials, recommendations, news |
+| GET | `/api/lookup-bundle?symbol=` | Chart 1y + max, quote, profile, financials, recommendations, news, quarterlyResults |
 
 ---
 

@@ -11,7 +11,7 @@ import { LookupInstrumentStrip } from './components/LookupInstrumentStrip';
 import { StockOverviewSection } from './components/StockOverviewSection';
 import { SwotSection } from './components/SwotSection';
 import { TechnicalSection } from './components/TechnicalSection';
-import { ChecklistSection } from './components/ChecklistSection';
+import { QuarterlyResultsSection } from './components/QuarterlyResultsSection';
 import { DvmSection } from './components/DvmSection';
 import { CompanyProfileSection } from './components/CompanyProfileSection';
 import { AnalystSection } from './components/AnalystSection';
@@ -117,9 +117,9 @@ export function StockAnalysisPage() {
                 quoteSnapshot={analysis.quoteSnapshot}
                 stockStats={analysis.stockStats}
               />
-              <SwotSection swot={analysis.swot} />
+              <SwotSection symbol={analysis.symbol} />
               <TechnicalSection technical={analysis.technical} priceSeries={analysis.priceSeries} />
-              <ChecklistSection items={analysis.checklist} />
+              <QuarterlyResultsSection data={analysis.quarterlyResults} />
               <DvmSection dvm={analysis.dvm} />
               <CompanyProfileSection profile={analysis.profile} financials={analysis.financials} />
               <AnalystSection recs={analysis.recommendations} />

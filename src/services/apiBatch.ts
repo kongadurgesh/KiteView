@@ -34,6 +34,7 @@ import type {
   AnalysisNewsItem,
   AnalysisRecommendations,
   FinancialHighlights,
+  QuarterlyResults,
 } from '../types/analysisExtras';
 
 export interface AnalysisBundleResponse {
@@ -44,6 +45,7 @@ export interface AnalysisBundleResponse {
   financials: FinancialHighlights;
   recommendations: AnalysisRecommendations;
   news: AnalysisNewsItem[];
+  quarterlyResults: QuarterlyResults;
 }
 
 /** @deprecated Use AnalysisBundleResponse */

@@ -20,10 +20,17 @@ export function fmtInrCompact(n: number): string {
   return `₹${Math.round(n).toLocaleString('en-IN')}`;
 }
 
+/** Ratios from fundamentals (0.15 → 15%); values already ≥1 or ≤-1 stay as percent points. */
 export function fmtPct(raw: number | null): string {
   if (raw == null || Number.isNaN(raw)) return '—';
   const v = Math.abs(raw) <= 1 ? raw * 100 : raw;
   return `${v.toFixed(2)}%`;
+}
+
+/** Yahoo quote % fields (e.g. regularMarketChangePercent) — already in percent units. */
+export function fmtQuotePct(raw: number | null, decimals = 2): string {
+  if (raw == null || Number.isNaN(raw)) return '—';
+  return fmtSignedPct(raw, decimals);
 }
 
 export function fmtSignedPct(pct: number, decimals = 2): string {
@@ -50,6 +57,21 @@ export function fmtMarketCapCr(cr: number): string {
 export function fmtMarketCap(raw: number | null): string {
   if (raw == null || raw <= 0) return '—';
   return fmtMarketCapCr(raw / 1e7);
+}
+
+/** Per-share amounts (e.g. Basic EPS from Yahoo fundamentals). */
+export function fmtEps(raw: number | null): string {
+  if (raw == null || Number.isNaN(raw)) return '—';
+  return fmtNumber(raw, { min: 2, max: 2 });
+}
+
+/** Large INR amounts (Yahoo fundamentals raw values) → Cr / L. */
+export function fmtFinancialInr(raw: number | null): string {
+  if (raw == null || Number.isNaN(raw)) return '—';
+  const abs = Math.abs(raw);
+  if (abs >= 1e7) return `₹${(raw / 1e7).toFixed(2)} Cr`;
+  if (abs >= 1e5) return `₹${(raw / 1e5).toFixed(2)} L`;
+  return `₹${raw.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 }
 
 /** Share volume: raw count → L / Cr style labels. */

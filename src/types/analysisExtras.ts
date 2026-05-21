@@ -28,3 +28,19 @@ export interface FinancialHighlights {
   returnOnEquity: number | null;
   debtToEquity: number | null;
 }
+
+export type QuarterlyReportBasis = 'consolidated' | 'standalone' | 'unknown';
+
+export interface QuarterlyPeriod {
+  endDate: string;
+  label: string;
+  revenue: number | null;
+  pretaxIncome: number | null;
+  netIncomeCommon: number | null;
+  basicEps: number | null;
+}
+
+export interface QuarterlyResults {
+  basis: QuarterlyReportBasis;
+  periods: QuarterlyPeriod[];
+}

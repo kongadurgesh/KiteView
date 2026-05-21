@@ -60,7 +60,6 @@ export function ScreenerPage() {
   const [error, setError] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>('cmp');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
-  const [showBuyPrices, setShowBuyPrices] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const hasAutoScanned = useRef(false);
 
@@ -324,18 +323,6 @@ export function ScreenerPage() {
 
       {results.length > 0 && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-          <div className="flex items-center justify-end px-4 py-2 border-b border-gray-200 dark:border-gray-800">
-            <button
-              onClick={() => setShowBuyPrices((v) => !v)}
-              className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
-                showBuyPrices
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-              }`}
-            >
-              {showBuyPrices ? 'Hide Buy Prices' : 'Show Buy Prices'}
-            </button>
-          </div>
           <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
             <table className="w-full text-sm min-w-[720px]">
               <thead className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-800">
@@ -345,9 +332,7 @@ export function ScreenerPage() {
                   <SortHeader label="Pattern date" k="patternDate" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="CMP" k="cmp" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="% vs Buy" k="distBuy" current={sortKey} dir={sortDir} onSort={toggleSort} />
-                  {showBuyPrices && (
-                    <SortHeader label="Buy Price" k="buyPrice" current={sortKey} dir={sortDir} onSort={toggleSort} />
-                  )}
+                  <SortHeader label="Buy Price" k="buyPrice" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="52W Low" k="52wLow" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="Dist Low" k="distLow" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="52W High" k="52wHigh" current={sortKey} dir={sortDir} onSort={toggleSort} />
@@ -385,11 +370,9 @@ export function ScreenerPage() {
                     }`}>
                       {fmtDistPct(r.currentPrice, r.match.buyPrice)}
                     </td>
-                    {showBuyPrices && (
-                      <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">
-                        {fmtNumber(r.match.buyPrice)}
-                      </td>
-                    )}
+                    <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">
+                      {fmtNumber(r.match.buyPrice)}
+                    </td>
                     <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300 text-xs">
                       {r.fiftyTwoWeekLow ? fmtNumber(r.fiftyTwoWeekLow) : '—'}
                     </td>
