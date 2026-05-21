@@ -1,11 +1,5 @@
 import { getYahooCrumb } from './lib/yahooCrumb.js';
-import {
-  fetchQuoteSummary,
-  parseProfile,
-  parseFinancial,
-  parseRecommendations,
-  parseNews,
-} from './lib/analysisBundleParse.js';
+import { fetchAnalysisExtras, normalizeQuarterlyResults } from './lib/analysisBundleParse.js';
 
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -34,35 +28,6 @@ async function fetchQuote(symbol) {
   }
 }
 
-async function fetchAnalysisExtras(symbol) {
-  try {
-    const { crumb, cookie } = await getYahooCrumb();
-    const data = await fetchQuoteSummary(
-      symbol,
-      'assetProfile,financialData,recommendationTrend',
-      crumb,
-      cookie,
-    );
-    const result = data?.quoteSummary?.result?.[0] ?? {};
-    const newsData = await fetchQuoteSummary(symbol, 'news', crumb, cookie);
-    const newsResult = newsData?.quoteSummary?.result?.[0] ?? {};
-
-    return {
-      profile: parseProfile(result.assetProfile ?? {}),
-      financials: parseFinancial(result.financialData ?? {}),
-      recommendations: parseRecommendations(result.recommendationTrend ?? {}),
-      news: parseNews(newsResult ?? {}),
-    };
-  } catch {
-    return {
-      profile: parseProfile({}),
-      financials: parseFinancial({}),
-      recommendations: parseRecommendations({}),
-      news: [],
-    };
-  }
-}
-
 export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -77,7 +42,7 @@ export default async function handler(req, res) {
     fetchChart(symbol, '1y', '1d'),
     fetchChart(symbol, 'max', '1d'),
     fetchQuote(symbol),
-    fetchAnalysisExtras(symbol),
+    fetchAnalysisExtras(symbol, getYahooCrumb),
   ]);
 
   return res.status(200).json({
@@ -88,5 +53,6 @@ export default async function handler(req, res) {
     financials: extras.financials,
     recommendations: extras.recommendations,
     news: extras.news,
+    quarterlyResults: normalizeQuarterlyResults(extras.quarterlyResults),
   });
 }

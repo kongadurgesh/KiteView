@@ -59,6 +59,21 @@ export function fmtMarketCap(raw: number | null): string {
   return fmtMarketCapCr(raw / 1e7);
 }
 
+/** Per-share amounts (e.g. Basic EPS from Yahoo fundamentals). */
+export function fmtEps(raw: number | null): string {
+  if (raw == null || Number.isNaN(raw)) return '—';
+  return fmtNumber(raw, { min: 2, max: 2 });
+}
+
+/** Large INR amounts (Yahoo fundamentals raw values) → Cr / L. */
+export function fmtFinancialInr(raw: number | null): string {
+  if (raw == null || Number.isNaN(raw)) return '—';
+  const abs = Math.abs(raw);
+  if (abs >= 1e7) return `₹${(raw / 1e7).toFixed(2)} Cr`;
+  if (abs >= 1e5) return `₹${(raw / 1e5).toFixed(2)} L`;
+  return `₹${raw.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+}
+
 /** Share volume: raw count → L / Cr style labels. */
 export function fmtVolume(v: number | null): string {
   if (v == null || v <= 0) return '—';
