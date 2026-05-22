@@ -158,10 +158,10 @@ export default async function handler(req, res) {
         if (!chart || chart.candles.length < 3) return null;
 
         const match = historical
-          ? detectPatternInRange(chart.candles, 10000, fromDate, toDate)
+          ? detectPatternInRange(chart.candles, 0, fromDate, toDate)
           : (() => {
               const lastDate = chart.candles[chart.candles.length - 1].date;
-              const m = detectPattern(chart.candles, 10000);
+              const m = detectPattern(chart.candles, 0);
               return m && m.candle3.date === lastDate ? m : null;
             })();
 
