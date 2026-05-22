@@ -225,12 +225,15 @@ export function useStockAnalysis() {
         normalizeQuarterlyResults(bundle.quarterlyResults ?? emptyQuarterly),
       );
 
+      const statsMc = statsMap[norm]?.marketCap;
       const mcCr =
         stockInfo.marketCap > 0
           ? stockInfo.marketCap
           : r?.marketCap
             ? r.marketCap / 1e7
-            : 0;
+            : statsMc
+              ? statsMc / 1e7
+              : 0;
       setMarketCapCr(mcCr);
 
       setQuoteSnapshot(parseQuoteSnapshot(bundle.quote));

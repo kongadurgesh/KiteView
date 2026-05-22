@@ -1,6 +1,9 @@
 import { Candle, PatternMatch, PatternName } from '../types';
 import { calculateBuyPrice, calculateBuyTriggerPrice } from './buyPrice';
 
+/** Same floor as screener universe (market cap > ₹1,000 Cr). */
+const MIN_MARKET_CAP_CR = 1000;
+
 function isRedCandle(c: Candle): boolean {
   return c.close < c.open;
 }
@@ -93,7 +96,7 @@ function tryMatchAt(i: number, candles: Candle[]): PatternMatch | null {
 }
 
 export function detectPattern(candles: Candle[], marketCapCr: number): PatternMatch | null {
-  if (marketCapCr > 0 && marketCapCr < 5000) return null;
+  if (marketCapCr > 0 && marketCapCr < MIN_MARKET_CAP_CR) return null;
   for (let i = candles.length - 3; i >= 0; i--) {
     const m = tryMatchAt(i, candles);
     if (m) return m;
@@ -108,7 +111,7 @@ export function detectPatternInRange(
   fromDate: string,
   toDate: string,
 ): PatternMatch | null {
-  if (marketCapCr > 0 && marketCapCr < 5000) return null;
+  if (marketCapCr > 0 && marketCapCr < MIN_MARKET_CAP_CR) return null;
   for (let i = candles.length - 3; i >= 0; i--) {
     const m = tryMatchAt(i, candles);
     if (!m) continue;

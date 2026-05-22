@@ -1,5 +1,8 @@
 /** Shared pattern detection for screener-scan (mirrors src/utils/patternDetector.ts). */
 
+/** Same floor as screener universe (market cap > ₹1,000 Cr). */
+const MIN_MARKET_CAP_CR = 1000;
+
 function isRedCandle(c) { return c.close < c.open; }
 function isGreenCandle(c) { return c.close > c.open; }
 function isHaramiCandle(c1, c2) {
@@ -41,7 +44,7 @@ function tryMatchAt(i, candles) {
 }
 
 export function detectPattern(candles, marketCapCr) {
-  if (marketCapCr > 0 && marketCapCr < 5000) return null;
+  if (marketCapCr > 0 && marketCapCr < MIN_MARKET_CAP_CR) return null;
   for (let i = candles.length - 3; i >= 0; i--) {
     const m = tryMatchAt(i, candles);
     if (m) return m;
@@ -51,7 +54,7 @@ export function detectPattern(candles, marketCapCr) {
 
 /** Most recent pattern (walk from end) whose breakout bar is in [fromDate, toDate]. */
 export function detectPatternInRange(candles, marketCapCr, fromDate, toDate) {
-  if (marketCapCr > 0 && marketCapCr < 5000) return null;
+  if (marketCapCr > 0 && marketCapCr < MIN_MARKET_CAP_CR) return null;
   for (let i = candles.length - 3; i >= 0; i--) {
     const m = tryMatchAt(i, candles);
     if (!m) continue;
