@@ -1,5 +1,5 @@
-import { detectPattern, detectPatternInRange } from './lib/patternDetect.js';
-import { fetchTrendlyneSwotCounts } from './lib/trendlyneSwot.js';
+import { detectPattern, detectPatternInRange } from '../patternDetect.js';
+import { fetchTrendlyneSwotCounts } from '../trendlyneSwot.js';
 
 let cachedCrumb = null;
 let cachedCookie = null;

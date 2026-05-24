@@ -144,7 +144,7 @@ Author profile, investing philosophy, and linked P&L proof spreadsheets.
 | Layer | Role |
 |---|---|
 | **`server.js`** | Express proxy on port **3006** (local dev) |
-| **`api/`** | Vercel serverless functions (production) |
+| **`api/`** | Single Vercel serverless function routing all `/api/*` |
 
 Yahoo Finance calls are proxied server-side for CORS and crumb/cookie auth (`getYahooCrumb()`, 10-minute cache).
 
@@ -172,17 +172,14 @@ Yahoo Finance calls are proxied server-side for CORS and crumb/cookie auth (`get
 
 ```
 KiteView/
-├── api/                              # Vercel serverless (mirrors server.js routes)
-│   ├── chart/[symbol].js
-│   ├── quote/[symbol].js
-│   ├── profile/[symbol].js
-│   ├── stats/[symbol].js
-│   ├── search.js
-│   ├── screener-list.js
-│   ├── screener-scan.js
-│   ├── heatmap-batch.js
-│   ├── watchlist-snapshot.js
-│   └── lib/yahooCrumb.js
+├── api/                              # Vercel: single catch-all serverless function
+│   ├── [...path].js                  # Routes all /api/* to handlers below
+│   └── lib/
+│       ├── handlers/                 # chart, quote, screener-scan, lookup-bundle, …
+│       ├── patternDetect.js
+│       ├── trendlyneSwot.js
+│       ├── watchlistSnapshot.js
+│       └── yahooCrumb.js
 ├── src/
 │   ├── main.tsx                      # App entry
 │   ├── index.css                     # Tailwind + component layer (.card, .btn-primary, …)
@@ -372,8 +369,8 @@ Runs `tsc -b` then Vite; output in `dist/`.
 
 Configured for **Vercel**:
 
-- `vercel.json` routes `/api/*` to `api/` functions; all other paths serve the SPA
-- `api/` handlers mirror `server.js` for production
+- `vercel.json` serves the SPA; all `/api/*` requests hit one serverless function (`api/[...path].js`)
+- `server.js` mirrors the same routes for local dev (`npm run proxy` / `npm start`)
 - Analytics and Speed Insights enabled in `src/app/App.tsx`
 
 ```bash
