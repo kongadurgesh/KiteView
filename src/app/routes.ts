@@ -8,6 +8,7 @@ export const PAGE_PATHS: Record<Page, string> = {
   analysis: '/analysis',
   compare: '/compare',
   portfolio: '/portfolio',
+  watchlist: '/watchlist',
   about: '/about',
 };
 

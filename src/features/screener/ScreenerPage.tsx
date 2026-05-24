@@ -12,6 +12,7 @@ import {
   ScreenerProgress,
   ScreenerStock,
 } from '../../utils/screener';
+import { AddToWatchlistButton } from '../watchlist/components/AddToWatchlistButton';
 
 type ScanMode = 'today' | 'range';
 type SortKey =
@@ -27,7 +28,8 @@ type SortKey =
   | '52wHigh'
   | 'distLow'
   | 'distHigh'
-  | 'ath';
+  | 'ath'
+  | 'swot';
 type SortDir = 'asc' | 'desc';
 
 function SignalBadge({ signal }: { signal: 'BUY' | 'WAIT' }) {
@@ -180,6 +182,14 @@ export function ScreenerPage() {
           break;
         }
         case 'ath': cmp = a.allTimeHigh - b.allTimeHigh; break;
+        case 'swot': {
+          const score = (r: ScreenerResult) =>
+            r.swotStrengths != null && r.swotWeaknesses != null
+              ? r.swotStrengths - r.swotWeaknesses
+              : -Infinity;
+          cmp = score(a) - score(b);
+          break;
+        }
       }
       return sortDir === 'asc' ? cmp : -cmp;
     });
@@ -189,7 +199,7 @@ export function ScreenerPage() {
   const pct = progress.total > 0 ? Math.round((progress.scanned / progress.total) * 100) : 0;
 
   return (
-    <PageLayout className="max-w-7xl mt-6" title={PAGE_COPY.screener.title} description={PAGE_COPY.screener.description}>
+    <PageLayout className="w-full max-w-none mt-6" title={PAGE_COPY.screener.title} description={PAGE_COPY.screener.description}>
       <div className="w-full space-y-6">
       <div className="card p-6">
         <SectionHeader
@@ -323,8 +333,8 @@ export function ScreenerPage() {
 
       {results.length > 0 && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-          <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
-            <table className="w-full text-sm min-w-[720px]">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[1280px]">
               <thead className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-800">
                 <tr>
                   <SortHeader label="Stock" k="name" current={sortKey} dir={sortDir} onSort={toggleSort} align="left" />
@@ -339,6 +349,10 @@ export function ScreenerPage() {
                   <SortHeader label="Dist High" k="distHigh" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="ATH" k="ath" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="Market Cap" k="mcap" current={sortKey} dir={sortDir} onSort={toggleSort} />
+                  <SortHeader label="SWOT" k="swot" current={sortKey} dir={sortDir} onSort={toggleSort} />
+                  <th className="p-3 text-right font-medium text-xs uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                    Watchlist
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -394,6 +408,25 @@ export function ScreenerPage() {
                     </td>
                     <td className="p-3 text-right font-mono text-gray-500 dark:text-gray-400 text-xs">
                       {r.marketCapCr ? fmtMarketCapCr(r.marketCapCr) : '—'}
+                    </td>
+                    <td className="p-3 text-right font-mono text-xs">
+                      {r.swotStrengths != null && r.swotWeaknesses != null ? (
+                        <span className={r.swotStrengths >= r.swotWeaknesses ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}>
+                          {r.swotStrengths}/{r.swotWeaknesses}
+                        </span>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                    <td className="p-3 text-right" onClick={(e) => e.stopPropagation()}>
+                      <AddToWatchlistButton
+                        symbol={r.symbol}
+                        shortName={r.shortName}
+                        thesis={{
+                          entryBuyPrice: r.match.buyPrice,
+                          patternDate: r.match.candle3.date,
+                        }}
+                      />
                     </td>
                   </tr>
                 ))}

@@ -15,8 +15,9 @@
   - [Stock Analysis](#4-stock-analysis)
   - [Stock Comparison](#5-stock-comparison)
   - [Portfolio Management](#6-portfolio-management)
-  - [About](#7-about)
-  - [Dark Mode & Layout](#8-dark-mode--layout)
+  - [Watchlist](#7-watchlist)
+  - [About](#8-about)
+  - [Dark Mode & Layout](#9-dark-mode--layout)
 - [Technical Architecture](#technical-architecture)
 - [Project Structure](#project-structure)
 - [Routes](#routes)
@@ -34,7 +35,7 @@
 
 Landing page with quick navigation into every major tool.
 
-- Card grid for Screener, Heatmap, Stock Analysis, Compare, Portfolio, and About
+- Card grid for Screener, Heatmap, Stock Analysis, Compare, Portfolio, Watchlist, and About
 - Lightweight animated previews (respects `prefers-reduced-motion`)
 - Flat, minimal UI using shared design tokens
 
@@ -45,7 +46,7 @@ Scans the NSE universe (market cap > ₹1,000 Cr) for breakout stocks.
 - **Today** mode: patterns on the latest trading session (auto-scan or manual)
 - **Date range** mode: historical scan — finds the latest breakout whose pattern date falls in your selected window (up to 365 days)
 - **Signal** column: **BUY** when CMP is within 2% of buy price (`0.98 ×` breakout close); otherwise **WAIT**
-- Server-side batch scanning; columns include signal, pattern date, CMP, % vs buy price (green/red), buy price, 52W stats, ATH, market cap
+- Server-side batch scanning; columns include signal, pattern date, CMP, % vs buy price (green/red), buy price, 52W stats, ATH, market cap, **SWOT (S/W)**, **+ Watchlist**
 - Click a row to open **Stock Analysis** (`/analysis?symbol=…`)
 
 ### 3. Market Heatmap
@@ -63,7 +64,7 @@ Treemap of NSE stocks sized by market cap and colored by performance.
 Research any NSE/BSE symbol with always-on sections and a conditional breakout panel.
 
 - Symbol autocomplete (Yahoo Finance search); **shareable URL** `/analysis?symbol=TCS.NS` (`/lookup?symbol=` redirects for old links)
-- **Instrument strip**: name, symbol, CMP, Rescan, Compare, **Copy link**, **Open on Yahoo**
+- **Instrument strip**: name, symbol, CMP, Rescan, Compare, **Copy link**, **Open on Yahoo**, **+ Watchlist**
 - **Overview**: session snapshot, key stats, 52W range, ATH, cap tier, sector
 - **SWOT**: embedded Trendlyne SWOT widget (updates per symbol)
 - **Technicals**: % from 52W high/low, range position, 50-day SMA, RSI (14), **1Y price chart**
@@ -97,11 +98,22 @@ Transaction-based portfolio tracker with analytics.
 - **Risk dashboard**: HHI diversification, beta, volatility, Sharpe, max drawdown, sector/stock/market-cap allocation donuts (click a cap slice to see holdings)
 - Persisted in `localStorage`
 
-### 7. About
+### 7. Watchlist
+
+Research lists with live snapshots and optional browser alerts (stored in `localStorage`).
+
+- **Multiple lists**: create, rename, delete; default list on first visit
+- **Add from Analysis or Screener**: seeds entry buy price and pattern date when a breakout is present
+- **Live table** via `POST /api/watchlist-snapshot`: CMP, 1D %, BUY/WAIT, buy price, pattern date, SWOT S/W, pattern-today flag
+- **Thesis panel** per row: note, target/stop, entry buy price, pattern date; alert toggles (BUY window, SWOT flip, pattern today)
+- **Refresh** on load, manual button, and every 5 minutes while the tab is visible
+- **Browser notifications** when alerts fire on refresh (optional; requires permission)
+
+### 8. About
 
 Author profile, investing philosophy, and linked P&L proof spreadsheets.
 
-### 8. Dark Mode & Layout
+### 9. Dark Mode & Layout
 
 - **Theme**: Light / dark toggle on the sidebar (class-based, persisted in `localStorage`)
 - **Shell**: Collapsible sidebar, mobile slide-out drawer, top **market ticker** (Nifty, Sensex, Bank Nifty, Nifty IT)
@@ -169,12 +181,14 @@ KiteView/
 │   ├── screener-list.js
 │   ├── screener-scan.js
 │   ├── heatmap-batch.js
+│   ├── watchlist-snapshot.js
 │   └── lib/yahooCrumb.js
 ├── src/
 │   ├── main.tsx                      # App entry
 │   ├── index.css                     # Tailwind + component layer (.card, .btn-primary, …)
 │   ├── types.ts                      # Shared TypeScript types
 │   ├── types/stockStats.ts           # Key stats DTO (Compare + Analysis)
+│   ├── types/watchlist.ts            # Watchlist + snapshot types
 │   ├── types/analysisExtras.ts       # Profile, news, recommendations, financials
 │   ├── app/
 │   │   ├── App.tsx                   # Route definitions
@@ -208,6 +222,11 @@ KiteView/
 │   │   ├── portfolio/
 │   │   │   ├── PortfolioPage.tsx
 │   │   │   └── components/           # Modals, charts, risk, history
+│   │   ├── watchlist/
+│   │   │   ├── WatchlistPage.tsx
+│   │   │   ├── WatchlistProvider.tsx
+│   │   │   ├── watchlistStore.ts, watchlistAlerts.ts
+│   │   │   └── components/AddToWatchlistButton.tsx
 │   │   └── about/AboutPage.tsx
 │   ├── content/pageCopy.ts           # Page titles, descriptions, static copy
 │   ├── lib/
@@ -245,6 +264,7 @@ KiteView/
 | `/lookup` | Redirects to `/analysis` (preserves `?symbol=`) |
 | `/compare` | Stock Comparison (`?symbol=` optional) |
 | `/portfolio` | Portfolio |
+| `/watchlist` | Watchlist |
 | `/about` | About |
 
 Unknown paths redirect to `/`. Vercel serves `index.html` for all non-API routes (SPA fallback in `vercel.json`).
@@ -268,6 +288,8 @@ Base URL: `http://localhost:3006` in development; your Vercel deployment URL in 
 | POST | `/api/chart-batch` | Batch chart data. Body: `{ symbols, range?, interval? }` → `{ charts }` |
 | POST | `/api/stats-batch` | Batch key stats. Body: `{ symbols }` → `{ stats }` |
 | GET | `/api/lookup-bundle?symbol=` | Chart 1y + max, quote, profile, financials, recommendations, news, quarterlyResults |
+| POST | `/api/watchlist-snapshot` | Watchlist live data. Body: `{ symbols }` (max 50) → `{ snapshots }` per symbol: CMP, signal, pattern, SWOT |
+| POST | `/api/swot-batch` | Trendlyne SWOT counts. Body: `{ symbols }` (max 50) → `{ swot }` with strengths/weaknesses per symbol |
 
 ---
 

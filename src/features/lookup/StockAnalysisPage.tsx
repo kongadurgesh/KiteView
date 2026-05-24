@@ -100,6 +100,14 @@ export function StockAnalysisPage() {
             onCompare={() => compareStock(analysis.symbol)}
             onCopyLink={copyPageLink}
             onOpenYahoo={openYahoo}
+            watchlistThesis={
+              analysis.match
+                ? {
+                    entryBuyPrice: analysis.match.buyPrice,
+                    patternDate: analysis.match.candle3.date,
+                  }
+                : undefined
+            }
           />
         )}
 

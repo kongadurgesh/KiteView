@@ -13,6 +13,8 @@
     { "src": "/api/chart-batch", "dest": "/api/chart-batch.js" },
     { "src": "/api/stats-batch", "dest": "/api/stats-batch.js" },
     { "src": "/api/lookup-bundle", "dest": "/api/lookup-bundle.js" },
+    { "src": "/api/watchlist-snapshot", "dest": "/api/watchlist-snapshot.js" },
+    { "src": "/api/swot-batch", "dest": "/api/swot-batch.js" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]

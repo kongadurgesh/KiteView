@@ -1,8 +1,10 @@
 import { PatternMatch } from '../types';
 import { getTradeSignal, type TradeSignal } from '../lib/tradeSignal';
+import { fetchSwotBatch } from '../services/apiBatch';
 
 const PROXY_BASE = import.meta.env.DEV ? 'http://localhost:3006' : '';
 const CHUNK_SIZE = 50;
+const SWOT_BATCH_SIZE = 50;
 
 export interface ScreenerStock {
   symbol: string;
@@ -21,6 +23,8 @@ export interface ScreenerResult {
   allTimeHigh: number;
   sector: string;
   signal: TradeSignal;
+  swotStrengths: number | null;
+  swotWeaknesses: number | null;
 }
 
 export interface ScreenerProgress {
@@ -90,6 +94,22 @@ async function scanChunkOnServer(
   return data.results ?? [];
 }
 
+async function enrichScreenerSwot(results: Omit<ScreenerResult, 'signal'>[]): Promise<void> {
+  const missing = results.filter((r) => r.swotStrengths == null || r.swotWeaknesses == null);
+  if (missing.length === 0) return;
+
+  for (let i = 0; i < missing.length; i += SWOT_BATCH_SIZE) {
+    const batch = missing.slice(i, i + SWOT_BATCH_SIZE);
+    const swotMap = await fetchSwotBatch(batch.map((r) => r.symbol));
+    for (const row of batch) {
+      const counts = swotMap[row.symbol];
+      if (!counts) continue;
+      row.swotStrengths = counts.strengths;
+      row.swotWeaknesses = counts.weaknesses;
+    }
+  }
+}
+
 function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
@@ -112,6 +132,7 @@ export async function runScreener(
     const symbols = chunk.map((s) => s.symbol);
 
     const results = await scanChunkOnServer(symbols, options);
+    await enrichScreenerSwot(results);
 
     for (const r of results) {
       const stock = symbolToStock.get(r.symbol);
@@ -122,6 +143,8 @@ export async function runScreener(
       const full: ScreenerResult = {
         ...r,
         signal: getTradeSignal(r.currentPrice, r.match.buyPrice),
+        swotStrengths: r.swotStrengths ?? null,
+        swotWeaknesses: r.swotWeaknesses ?? null,
       };
       found++;
       onResult(full);

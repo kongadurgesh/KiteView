@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AppShell } from '../components/layout/AppShell';
 import { PersistentOutlet } from './PersistentOutlet';
+import { WatchlistProvider } from '../features/watchlist/WatchlistProvider';
 import { initTheme, getTheme, toggleTheme } from '../utils/theme';
 
 export function AppLayout() {
@@ -33,7 +34,9 @@ export function AppLayout() {
       onMobileMenuOpen={setMobileMenuOpen}
       mainScrollRef={mainScrollRef}
     >
-      <PersistentOutlet scrollContainerRef={mainScrollRef} />
+      <WatchlistProvider>
+        <PersistentOutlet scrollContainerRef={mainScrollRef} />
+      </WatchlistProvider>
     </AppShell>
   );
 }
