@@ -1,5 +1,6 @@
 import { Button } from '../../../components/ui';
 import { fmtInr } from '../../../lib/format';
+import { AddToWatchlistButton } from '../../watchlist/components/AddToWatchlistButton';
 
 interface LookupInstrumentStripProps {
   stockName: string;
@@ -11,6 +12,10 @@ interface LookupInstrumentStripProps {
   onCompare: () => void;
   onCopyLink: () => void;
   onOpenYahoo: () => void;
+  watchlistThesis?: {
+    entryBuyPrice?: number | null;
+    patternDate?: string | null;
+  };
 }
 
 export function LookupInstrumentStrip({
@@ -23,6 +28,7 @@ export function LookupInstrumentStrip({
   onCompare,
   onCopyLink,
   onOpenYahoo,
+  watchlistThesis,
 }: LookupInstrumentStripProps) {
   return (
     <div className="card w-full p-4 sm:p-5">
@@ -50,6 +56,11 @@ export function LookupInstrumentStrip({
           <Button variant="secondary" size="sm" type="button" disabled={!symbol} onClick={onOpenYahoo}>
             Yahoo
           </Button>
+          <AddToWatchlistButton
+            symbol={symbol}
+            shortName={stockName || symbol}
+            thesis={watchlistThesis}
+          />
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { getYahooCrumb } from './lib/yahooCrumb.js';
+import { getYahooCrumb } from '../yahooCrumb.js';
 
 const CONCURRENCY = 30;
 

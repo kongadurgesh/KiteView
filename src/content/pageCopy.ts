@@ -4,7 +4,7 @@ export const PAGE_COPY = {
   overview: {
     title: 'KiteView',
     description:
-      'A single workspace to scan for breakout patterns, inspect a symbol, read the market heatmap, compare names, and track a portfolio.',
+      'A single workspace to scan for breakout patterns, inspect a symbol, track watchlists, read the market heatmap, compare names, and track a portfolio.',
   },
   screener: {
     title: 'Live Screener',
@@ -39,6 +39,12 @@ export const PAGE_COPY = {
     description:
       'Track BUY and SELL transactions, live P&L, performance vs indices, and risk metrics. Import holdings from Excel or CSV.',
   },
+  watchlist: {
+    title: 'Watchlist',
+    description:
+      'Track symbols you are researching: live CMP, BUY/WAIT signal, breakout pattern, SWOT health, thesis notes, and browser alerts.',
+    empty: 'No symbols yet. Add names from Stock Analysis or the Screener using + Watchlist.',
+  },
   about: {
     title: 'About',
     description: 'Author profile, investing philosophy, and verified P&L track record.',
@@ -70,6 +76,10 @@ export const PAGE_COPY = {
     portfolio: {
       title: 'Portfolio',
       blurb: 'Holdings, P&L, performance vs indices, and risk analytics.',
+    },
+    watchlist: {
+      title: 'Watchlist',
+      blurb: 'Research lists with signals, SWOT, thesis notes, and alerts.',
     },
     about: {
       title: 'About',

@@ -1,5 +1,5 @@
-import { getYahooCrumb } from './lib/yahooCrumb.js';
-import { fetchAnalysisExtras, normalizeQuarterlyResults } from './lib/analysisBundleParse.js';
+import { getYahooCrumb } from '../yahooCrumb.js';
+import { fetchAnalysisExtras, normalizeQuarterlyResults } from '../analysisBundleParse.js';
 
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');

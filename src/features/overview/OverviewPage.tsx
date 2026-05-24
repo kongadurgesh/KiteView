@@ -173,6 +173,25 @@ function PortfolioPreview({ animated }: { animated: boolean }) {
   );
 }
 
+function WatchlistPreview({ animated }: { animated: boolean }) {
+  return (
+    <div className={`${PREVIEW_ROOT} ${animated ? 'ov-anim' : ''}`}>
+      <div className="absolute inset-0 rounded-lg bg-white/70 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800" />
+      <div className="absolute left-2 right-2 top-3 space-y-2">
+        {['BUY', 'WAIT', 'BUY'].map((sig, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded ${sig === 'BUY' ? 'bg-emerald-600 text-white' : 'bg-amber-200 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300'}`}>
+              {sig}
+            </span>
+            <div className="h-2 flex-1 rounded bg-gray-200 dark:bg-gray-800 ov-shimmer" style={{ animationDelay: `${i * 120}ms` }} />
+            <span className="text-amber-400 text-[10px]">★</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function AboutPreview({ animated }: { animated: boolean }) {
   return (
     <div className={`${PREVIEW_ROOT} ${animated ? 'ov-anim' : ''}`}>
@@ -266,6 +285,15 @@ export function OverviewPage() {
             blurb={cards.portfolio.blurb}
             action={<OpenButton label="Open" onClick={() => goToPage('portfolio')} />}
             preview={<PortfolioPreview animated={animated} />}
+          />
+        </motion.div>
+
+        <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
+          <OverviewCard
+            title={cards.watchlist.title}
+            blurb={cards.watchlist.blurb}
+            action={<OpenButton label="Open" onClick={() => goToPage('watchlist')} />}
+            preview={<WatchlistPreview animated={animated} />}
           />
         </motion.div>
 

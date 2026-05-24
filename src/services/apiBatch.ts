@@ -1,5 +1,14 @@
 const PROXY_BASE = import.meta.env.DEV ? 'http://localhost:3006' : '';
 
+import type {
+  AnalysisProfile,
+  AnalysisNewsItem,
+  AnalysisRecommendations,
+  FinancialHighlights,
+  QuarterlyResults,
+} from '../types/analysisExtras';
+import type { WatchlistSnapshot } from '../types/watchlist';
+
 async function postJson<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${PROXY_BASE}${path}`, {
     method: 'POST',
@@ -29,13 +38,28 @@ export async function fetchStatsBatch<T>(symbols: string[]): Promise<Record<stri
   const data = await postJson<{ stats: Record<string, T> }>('/api/stats-batch', { symbols });
   return data.stats ?? {};
 }
-import type {
-  AnalysisProfile,
-  AnalysisNewsItem,
-  AnalysisRecommendations,
-  FinancialHighlights,
-  QuarterlyResults,
-} from '../types/analysisExtras';
+
+export async function fetchWatchlistSnapshot(
+  symbols: string[],
+): Promise<Record<string, WatchlistSnapshot>> {
+  if (symbols.length === 0) return {};
+  const data = await postJson<{ snapshots: Record<string, WatchlistSnapshot> }>(
+    '/api/watchlist-snapshot',
+    { symbols },
+  );
+  return data.snapshots ?? {};
+}
+
+export interface SwotCounts {
+  strengths: number;
+  weaknesses: number;
+}
+
+export async function fetchSwotBatch(symbols: string[]): Promise<Record<string, SwotCounts>> {
+  if (symbols.length === 0) return {};
+  const data = await postJson<{ swot: Record<string, SwotCounts> }>('/api/swot-batch', { symbols });
+  return data.swot ?? {};
+}
 
 export interface AnalysisBundleResponse {
   chart1y: unknown;

@@ -1,4 +1,5 @@
-import { detectPattern, detectPatternInRange } from './lib/patternDetect.js';
+import { detectPattern, detectPatternInRange } from '../patternDetect.js';
+import { fetchTrendlyneSwotCounts } from '../trendlyneSwot.js';
 
 let cachedCrumb = null;
 let cachedCookie = null;
@@ -186,9 +187,12 @@ export default async function handler(req, res) {
 
   if (matches.length > 0) {
     const matchSymbols = matches.map((m) => m.symbol);
-    const [sectorMap, ...athValues] = await Promise.all([
+    const [sectorMap, ...athAndSwot] = await Promise.all([
       fetchSectorBatch(matchSymbols),
-      ...matchSymbols.map((s) => fetchATH(s)),
+      ...matchSymbols.map(async (s) => {
+        const [ath, swot] = await Promise.all([fetchATH(s), fetchTrendlyneSwotCounts(s)]);
+        return { ath, swot };
+      }),
     ]);
     for (let j = 0; j < matches.length; j++) {
       const info = sectorMap[matches[j].symbol];
@@ -196,7 +200,10 @@ export default async function handler(req, res) {
         matches[j].sector = info.sector;
         matches[j].marketCapCr = info.marketCapCr;
       }
-      matches[j].allTimeHigh = athValues[j] ?? 0;
+      const extra = athAndSwot[j];
+      matches[j].allTimeHigh = extra?.ath ?? 0;
+      matches[j].swotStrengths = extra?.swot?.strengths ?? null;
+      matches[j].swotWeaknesses = extra?.swot?.weaknesses ?? null;
     }
   }
 
