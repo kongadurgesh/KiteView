@@ -1,4 +1,4 @@
-const PROXY_BASE = import.meta.env.DEV ? 'http://localhost:3006' : '';
+import { API_BASE } from '../lib/apiBase';
 
 import type {
   AnalysisProfile,
@@ -10,7 +10,7 @@ import type {
 import type { WatchlistSnapshot } from '../types/watchlist';
 
 async function postJson<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${PROXY_BASE}${path}`, {
+  const res = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -76,7 +76,7 @@ export interface AnalysisBundleResponse {
 export type LookupBundleResponse = AnalysisBundleResponse;
 
 export async function fetchAnalysisBundle(symbol: string): Promise<AnalysisBundleResponse> {
-  const url = `${PROXY_BASE}/api/lookup-bundle?symbol=${encodeURIComponent(symbol)}`;
+  const url = `${API_BASE}/api/lookup-bundle?symbol=${encodeURIComponent(symbol)}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Analysis bundle failed (HTTP ${res.status})`);
   return res.json() as Promise<AnalysisBundleResponse>;

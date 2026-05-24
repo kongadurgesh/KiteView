@@ -15,7 +15,7 @@ interface ImportExcelModalProps {
   onClose: () => void;
 }
 
-const PROXY_BASE = import.meta.env.DEV ? 'http://localhost:3006' : '';
+import { API_BASE } from '../../../lib/apiBase';
 
 const ISIN_HEADERS = ['isin', 'isin_code', 'isin code'];
 const PRICE_HEADERS = ['buy price', 'avg price', 'price', 'buy_price', 'avg_price', 'average price', 'buy avg', 'buy avg.'];
@@ -38,7 +38,7 @@ function detectColumns(headers: string[]): { isinCol: number; priceCol: number; 
 
 async function resolveIsin(isin: string): Promise<{ symbol: string; shortname: string } | null> {
   try {
-    const res = await fetch(`${PROXY_BASE}/api/search?q=${encodeURIComponent(isin)}`);
+    const res = await fetch(`${API_BASE}/api/search?q=${encodeURIComponent(isin)}`);
     const data = await res.json();
     if (Array.isArray(data) && data.length > 0) {
       return { symbol: data[0].symbol, shortname: data[0].shortname };

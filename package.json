@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node server.js & vite",
     "proxy": "node server.js",
     "start": "node server.js & vite",
     "build": "tsc -b && vite build",

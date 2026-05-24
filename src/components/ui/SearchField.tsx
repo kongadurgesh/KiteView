@@ -8,7 +8,7 @@ export interface SearchSuggestion {
   exchange: string;
 }
 
-const PROXY_BASE = import.meta.env.DEV ? 'http://localhost:3006' : '';
+import { API_BASE } from '../../lib/apiBase';
 
 interface SearchFieldProps {
   onSelect: (symbol: string) => void;
@@ -57,7 +57,7 @@ export function SearchField({
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`${PROXY_BASE}/api/search?q=${encodeURIComponent(query)}`);
+        const res = await fetch(`${API_BASE}/api/search?q=${encodeURIComponent(query)}`);
         const data: SearchSuggestion[] = await res.json();
         setSuggestions(data);
         setShowDropdown(true);
