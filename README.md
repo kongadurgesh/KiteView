@@ -43,7 +43,7 @@ Landing page with quick navigation into every major tool.
 
 Scans the NSE universe (market cap > ₹1,000 Cr) for breakout stocks.
 
-- **Today** mode: patterns on the latest trading session (auto-scan or manual)
+- **Today** mode: patterns on the latest trading session
 - **Date range** mode: historical scan — finds the latest breakout whose pattern date falls in your selected window (up to 365 days)
 - **Signal** column: **BUY** when CMP is within 2% of buy price (`0.98 ×` breakout close); otherwise **WAIT**
 - Server-side batch scanning; columns include signal, pattern date, CMP, % vs buy price (green/red), buy price, 52W stats, ATH, market cap, **SWOT (S/W)**, **+ Watchlist**
