@@ -53,7 +53,6 @@ export function ScreenerPage() {
   const [scanMode, setScanMode] = useState<ScanMode>('today');
   const [fromDate, setFromDate] = useState(defaultRange.fromDate);
   const [toDate, setToDate] = useState(defaultRange.toDate);
-  const [autoScan, setAutoScan] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [loadingList, setLoadingList] = useState(false);
   const [stockList, setStockList] = useState<ScreenerStock[]>([]);
@@ -63,7 +62,6 @@ export function ScreenerPage() {
   const [sortKey, setSortKey] = useState<SortKey>('cmp');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const abortRef = useRef<AbortController | null>(null);
-  const hasAutoScanned = useRef(false);
 
   const startScan = useCallback(async (stocks?: ScreenerStock[]) => {
     if (scanning) return;
@@ -126,17 +124,6 @@ export function ScreenerPage() {
   const stopScan = useCallback(() => {
     abortRef.current?.abort();
   }, []);
-
-  useEffect(() => {
-    if (scanMode === 'range') {
-      setAutoScan(false);
-      return;
-    }
-    if (autoScan && !hasAutoScanned.current) {
-      hasAutoScanned.current = true;
-      startScan();
-    }
-  }, [autoScan, startScan, scanMode]);
 
   useEffect(() => {
     setResults([]);
@@ -202,46 +189,7 @@ export function ScreenerPage() {
     <PageLayout className="w-full max-w-none mt-6" title={PAGE_COPY.screener.title} description={PAGE_COPY.screener.description}>
       <div className="w-full space-y-6">
       <div className="card p-6">
-        <SectionHeader
-          title="Scan controls"
-          action={
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => setAutoScan((v) => !v)}
-              disabled={scanMode === 'range'}
-              className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
-                autoScan ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
-              } ${scanMode === 'range' ? 'opacity-40 cursor-not-allowed' : ''}`}
-              title={scanMode === 'range' ? 'Auto-scan only in Today mode' : autoScan ? 'Auto-scan enabled' : 'Auto-scan disabled'}
-            >
-              <span
-                className={`inline-block h-5 w-5 rounded-full bg-white dark:bg-gray-200 transform transition-transform ${
-                  autoScan ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-            <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-              {autoScan ? 'Auto' : 'Manual'}
-            </span>
-
-            {scanning ? (
-              <button
-                onClick={stopScan}
-                className="px-4 py-2 text-sm font-medium rounded-lg border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
-              >
-                Stop Scan
-              </button>
-            ) : (
-              <button
-                onClick={() => startScan()}
-                className="px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-500 transition-colors"
-              >
-                Scan Now
-              </button>
-            )}
-          </div>
-          }
-        />
+        <SectionHeader title="Scan controls" />
 
         <div className="flex flex-wrap items-center gap-3 w-full pt-1">
           <span className="text-xs font-medium text-ink-muted dark:text-ink-dark-muted">Scan</span>
@@ -287,6 +235,22 @@ export function ScreenerPage() {
                 />
               </label>
             </>
+          )}
+
+          {scanning ? (
+            <button
+              onClick={stopScan}
+              className="px-4 py-2 text-sm font-medium rounded-lg border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+            >
+              Stop Scan
+            </button>
+          ) : (
+            <button
+              onClick={() => startScan()}
+              className="px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-500 transition-colors"
+            >
+              Scan Now
+            </button>
           )}
         </div>
 
@@ -439,7 +403,7 @@ export function ScreenerPage() {
       {results.length === 0 && !scanning && progress.total === 0 && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-10 text-center">
           <p className="text-gray-400 dark:text-gray-500 text-sm">
-            Click <strong>Scan Now</strong> or enable <strong>Auto</strong> to start scanning for patterns.
+            Click <strong>Scan Now</strong> to start scanning for patterns.
           </p>
         </div>
       )}
