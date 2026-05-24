@@ -1,9 +1,9 @@
 import { Candle, StockInfo } from '../types';
 
-const PROXY_BASE = import.meta.env.DEV ? 'http://localhost:3006' : '';
+import { API_BASE } from '../lib/apiBase';
 
 export async function fetchStockData(symbol: string): Promise<StockInfo> {
-  const chartUrl = `${PROXY_BASE}/api/chart/${encodeURIComponent(symbol)}?range=1y&interval=1d`;
+  const chartUrl = `${API_BASE}/api/chart/${encodeURIComponent(symbol)}?range=1y&interval=1d`;
   const chartRes = await fetch(chartUrl);
   if (!chartRes.ok) throw new Error(`Failed to fetch chart data (HTTP ${chartRes.status})`);
   const chartData = await chartRes.json();
@@ -55,7 +55,7 @@ export async function fetchStockData(symbol: string): Promise<StockInfo> {
 
 export async function fetchAllTimeHigh(symbol: string): Promise<number> {
   try {
-    const url = `${PROXY_BASE}/api/chart/${encodeURIComponent(symbol)}?range=max&interval=1mo`;
+    const url = `${API_BASE}/api/chart/${encodeURIComponent(symbol)}?range=max&interval=1mo`;
     const res = await fetch(url);
     if (!res.ok) return 0;
     const data = await res.json();
@@ -79,8 +79,8 @@ export interface StockMeta {
 export async function fetchStockMeta(symbol: string): Promise<StockMeta> {
   try {
     const [quoteRes, profileRes] = await Promise.all([
-      fetch(`${PROXY_BASE}/api/quote/${encodeURIComponent(symbol)}`),
-      fetch(`${PROXY_BASE}/api/profile/${encodeURIComponent(symbol)}`),
+      fetch(`${API_BASE}/api/quote/${encodeURIComponent(symbol)}`),
+      fetch(`${API_BASE}/api/profile/${encodeURIComponent(symbol)}`),
     ]);
 
     const quoteData = quoteRes.ok ? await quoteRes.json() : null;
@@ -107,7 +107,7 @@ export async function fetchBatchQuotesDetailed(symbols: string[]): Promise<Recor
   if (symbols.length === 0) return {};
   try {
     const joined = symbols.join(',');
-    const url = `${PROXY_BASE}/api/quote/${encodeURIComponent(joined)}`;
+    const url = `${API_BASE}/api/quote/${encodeURIComponent(joined)}`;
     const res = await fetch(url);
     if (!res.ok) return {};
     const data = await res.json();
@@ -141,7 +141,7 @@ export interface QuoteFull {
 export async function fetchHeatmapBatch(symbols: string[], timeframe: HeatmapTimeframe): Promise<QuoteFull[]> {
   if (symbols.length === 0) return [];
   try {
-    const res = await fetch(`${PROXY_BASE}/api/heatmap-batch`, {
+    const res = await fetch(`${API_BASE}/api/heatmap-batch`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ symbols, timeframe }),

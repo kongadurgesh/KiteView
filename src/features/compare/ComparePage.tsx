@@ -17,7 +17,7 @@ import { PAGE_COPY } from '../../content/pageCopy';
 import { fmtInr, fmtMarketCap, fmtPct, fmtRatio } from '../../lib/format';
 import type { StockStats } from '../../types/stockStats';
 
-const PROXY_BASE = import.meta.env.DEV ? 'http://localhost:3006' : '';
+import { API_BASE } from '../../lib/apiBase';
 
 const BENCHMARK_STRIKE = '#64748b';
 
@@ -209,7 +209,7 @@ export function StockComparePage() {
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`${PROXY_BASE}/api/search?q=${encodeURIComponent(query)}`);
+        const res = await fetch(`${API_BASE}/api/search?q=${encodeURIComponent(query)}`);
         const data: Suggestion[] = await res.json();
         setSuggestions(data);
         setShowDropdown(true);

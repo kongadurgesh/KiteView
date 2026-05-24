@@ -12,7 +12,7 @@ import lookupBundleHandler from '../backend/handlers/lookup-bundle.js';
 import watchlistSnapshotHandler from '../backend/handlers/watchlist-snapshot.js';
 import swotBatchHandler from '../backend/handlers/swot-batch.js';
 
-/** Single Vercel serverless entry — routes all /api/*. */
+/** Single Vercel serverless entry — routes all /api/* (via vercel.json rewrite). */
 const SINGLE = {
   'GET search': searchHandler,
   'GET screener-list': screenerListHandler,
@@ -32,9 +32,25 @@ const WITH_SYMBOL = {
   'GET stats': statsHandler,
 };
 
+function pathSegments(req) {
+  const raw = req.query.path;
+  if (Array.isArray(raw)) return raw.filter(Boolean);
+  if (typeof raw === 'string' && raw.length > 0) {
+    return raw.split('/').filter(Boolean);
+  }
+  try {
+    const host = req.headers?.['x-forwarded-host'] ?? req.headers?.host ?? 'localhost';
+    const u = new URL(req.url ?? '/', `https://${host}`);
+    const rest = u.pathname.replace(/^\/api\/?/, '');
+    return rest ? rest.split('/').filter(Boolean) : [];
+  } catch {
+    return [];
+  }
+}
+
 export default async function handler(req, res) {
-  const segments = req.query.path;
-  if (!Array.isArray(segments) || segments.length === 0) {
+  const segments = pathSegments(req);
+  if (segments.length === 0) {
     return res.status(404).json({ error: 'Not found' });
   }
 

@@ -144,7 +144,7 @@ Author profile, investing philosophy, and linked P&L proof spreadsheets.
 | Layer | Role |
 |---|---|
 | **`server.js`** | Express proxy on port **3006** (local dev) |
-| **`api/`** | One Vercel serverless function (`[...path].js`); logic lives in `backend/` |
+| **`api/`** | One Vercel serverless function (`index.js`); logic lives in `backend/` |
 
 Yahoo Finance calls are proxied server-side for CORS and crumb/cookie auth (`getYahooCrumb()`, 10-minute cache).
 
@@ -173,7 +173,7 @@ Yahoo Finance calls are proxied server-side for CORS and crumb/cookie auth (`get
 ```
 KiteView/
 ├── api/
-│   └── [...path].js                  # Vercel entry — routes all /api/*
+│   └── index.js                      # Vercel entry — all /api/* rewritten here
 ├── backend/
 │   ├── handlers/                     # Route handlers (imported, not separate functions)
 │   ├── patternDetect.js
@@ -270,7 +270,7 @@ Unknown paths redirect to `/`. Vercel serves `index.html` for all non-API routes
 
 ## API Endpoints
 
-Base URL: `http://localhost:3006` in development; your Vercel deployment URL in production.
+Base URL: same-origin `/api` (Vite proxies to port **3006** in dev; Vercel serves the API in production).
 
 | Method | Endpoint | Description |
 |---|---|---|
@@ -342,15 +342,14 @@ npm install
 ### Development
 
 ```bash
-# Proxy (port 3006) + Vite (port 5173)
-npm start
+# API proxy (3006) + Vite (5173) — default for local dev
+npm run dev
 ```
 
-Or separately:
+Or run the proxy alone if Vite is already up:
 
 ```bash
-npm run proxy   # Terminal 1
-npm run dev     # Terminal 2
+npm run proxy
 ```
 
 Open [http://localhost:5173](http://localhost:5173).
@@ -369,7 +368,7 @@ Runs `tsc -b` then Vite; output in `dist/`.
 
 Configured for **Vercel**:
 
-- `vercel.json` serves the SPA; all `/api/*` requests hit one serverless function (`api/[...path].js`)
+- `vercel.json` rewrites non-`/api` paths to the SPA; `/api/*` is handled by the serverless function
 - `server.js` mirrors the same routes for local dev (`npm run proxy` / `npm start`)
 - Analytics and Speed Insights enabled in `src/app/App.tsx`
 

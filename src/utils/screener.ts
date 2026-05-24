@@ -2,7 +2,7 @@ import { PatternMatch } from '../types';
 import { getTradeSignal, type TradeSignal } from '../lib/tradeSignal';
 import { fetchSwotBatch } from '../services/apiBatch';
 
-const PROXY_BASE = import.meta.env.DEV ? 'http://localhost:3006' : '';
+import { API_BASE } from '../lib/apiBase';
 const CHUNK_SIZE = 50;
 const SWOT_BATCH_SIZE = 50;
 
@@ -53,7 +53,7 @@ export async function fetchScreenerList(): Promise<ScreenerStock[]> {
     }
   } catch { /* ignore */ }
 
-  const url = `${PROXY_BASE}/api/screener-list`;
+  const url = `${API_BASE}/api/screener-list`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Failed to fetch screener list (HTTP ${res.status})`);
   const data = await res.json();
@@ -70,7 +70,7 @@ async function scanChunkOnServer(
   symbols: string[],
   options: ScreenerScanOptions,
 ): Promise<Omit<ScreenerResult, 'signal'>[]> {
-  const url = `${PROXY_BASE}/api/screener-scan`;
+  const url = `${API_BASE}/api/screener-scan`;
   const body: {
     symbols: string[];
     mode: ScreenerScanMode;

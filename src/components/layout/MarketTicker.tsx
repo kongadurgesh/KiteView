@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fmtNumber } from '../../lib/format';
 
-const PROXY_BASE = import.meta.env.DEV ? 'http://localhost:3006' : '';
+import { API_BASE } from '../../lib/apiBase';
 
 interface IndexQuote {
   label: string;
@@ -33,7 +33,7 @@ export function MarketTicker({ sidebarExpanded }: MarketTickerProps) {
       try {
         const results = await Promise.all(
           INDICES.map(async (idx) => {
-            const res = await fetch(`${PROXY_BASE}/api/quote/${encodeURIComponent(idx.symbol)}`);
+            const res = await fetch(`${API_BASE}/api/quote/${encodeURIComponent(idx.symbol)}`);
             const data = await res.json();
             const q = data?.quoteResponse?.result?.[0] ?? data;
             return {

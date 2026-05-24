@@ -19,7 +19,7 @@ interface AddTransactionModalProps {
   maxSellQty?: Record<string, number>;
 }
 
-const PROXY_BASE = import.meta.env.DEV ? 'http://localhost:3006' : '';
+import { API_BASE } from '../../../lib/apiBase';
 
 export function AddTransactionModal({ onAdd, onClose, maxSellQty = {} }: AddTransactionModalProps) {
   const [symbolInput, setSymbolInput] = useState('');
@@ -54,7 +54,7 @@ export function AddTransactionModal({ onAdd, onClose, maxSellQty = {} }: AddTran
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`${PROXY_BASE}/api/search?q=${encodeURIComponent(query)}`);
+        const res = await fetch(`${API_BASE}/api/search?q=${encodeURIComponent(query)}`);
         const data: Suggestion[] = await res.json();
         setSuggestions(data);
         setShowSuggestions(data.length > 0);
