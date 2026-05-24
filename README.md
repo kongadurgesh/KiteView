@@ -144,7 +144,7 @@ Author profile, investing philosophy, and linked P&L proof spreadsheets.
 | Layer | Role |
 |---|---|
 | **`server.js`** | Express proxy on port **3006** (local dev) |
-| **`api/`** | Single Vercel serverless function routing all `/api/*` |
+| **`api/`** | One Vercel serverless function (`[...path].js`); logic lives in `backend/` |
 
 Yahoo Finance calls are proxied server-side for CORS and crumb/cookie auth (`getYahooCrumb()`, 10-minute cache).
 
@@ -172,14 +172,14 @@ Yahoo Finance calls are proxied server-side for CORS and crumb/cookie auth (`get
 
 ```
 KiteView/
-├── api/                              # Vercel: single catch-all serverless function
-│   ├── [...path].js                  # Routes all /api/* to handlers below
-│   └── lib/
-│       ├── handlers/                 # chart, quote, screener-scan, lookup-bundle, …
-│       ├── patternDetect.js
-│       ├── trendlyneSwot.js
-│       ├── watchlistSnapshot.js
-│       └── yahooCrumb.js
+├── api/
+│   └── [...path].js                  # Vercel entry — routes all /api/*
+├── backend/
+│   ├── handlers/                     # Route handlers (imported, not separate functions)
+│   ├── patternDetect.js
+│   ├── trendlyneSwot.js
+│   ├── watchlistSnapshot.js
+│   └── yahooCrumb.js
 ├── src/
 │   ├── main.tsx                      # App entry
 │   ├── index.css                     # Tailwind + component layer (.card, .btn-primary, …)

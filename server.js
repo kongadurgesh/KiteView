@@ -1,9 +1,9 @@
 import express from 'express';
 import cors from 'cors';
-import { fetchAnalysisExtras, normalizeQuarterlyResults } from './api/lib/analysisBundleParse.js';
-import { buildWatchlistSnapshots } from './api/lib/watchlistSnapshot.js';
-import screenerScanHandler from './api/lib/handlers/screener-scan.js';
-import swotBatchHandler from './api/lib/handlers/swot-batch.js';
+import { fetchAnalysisExtras, normalizeQuarterlyResults } from './backend/analysisBundleParse.js';
+import { buildWatchlistSnapshots } from './backend/watchlistSnapshot.js';
+import screenerScanHandler from './backend/handlers/screener-scan.js';
+import swotBatchHandler from './backend/handlers/swot-batch.js';
 
 const app = express();
 const PORT = 3006;
