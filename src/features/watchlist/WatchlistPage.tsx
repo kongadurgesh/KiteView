@@ -3,7 +3,7 @@ import { useAppNavigation } from '../../app/navigation';
 import { PageLayout } from '../../components/layout/PageLayout';
 import { Alert, Button, TableSerialCell, TableSerialHeader } from '../../components/ui';
 import { PAGE_COPY } from '../../content/pageCopy';
-import { fmtDistPct, fmtNumber, fmtQuotePct } from '../../lib/format';
+import { fmtDistPct, fmtNumber } from '../../lib/format';
 import { fetchWatchlistSnapshot } from '../../services/apiBatch';
 import type { WatchlistAlerts, WatchlistItem, WatchlistSnapshot, WatchlistThesis } from '../../types/watchlist';
 import { RenameWatchlistModal } from './components/RenameWatchlistModal';
@@ -314,19 +314,17 @@ export function WatchlistPage() {
         {active && active.items.length > 0 && (
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm min-w-[900px]">
+              <table className="w-full text-sm min-w-[760px]">
                 <thead className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-800">
                   <tr>
                     <TableSerialHeader />
                     <th className="p-3 text-left font-semibold">Stock</th>
                     <th className="p-3 text-right font-semibold">CMP</th>
-                    <th className="p-3 text-right font-semibold">1D %</th>
                     <th className="p-3 text-right font-semibold">Signal</th>
                     <th className="p-3 text-right font-semibold">Buy</th>
                     <th className="p-3 text-right font-semibold">% vs Buy</th>
                     <th className="p-3 text-right font-semibold">Pattern</th>
                     <th className="p-3 text-right font-semibold">SWOT</th>
-                    <th className="p-3 text-center font-semibold">Today</th>
                     <th className="p-3 text-right font-semibold">Actions</th>
                   </tr>
                 </thead>
@@ -349,17 +347,6 @@ export function WatchlistPage() {
                           <td className="p-3 text-right font-mono">
                             {snap?.currentPrice ? fmtNumber(snap.currentPrice) : '—'}
                           </td>
-                          <td
-                            className={`p-3 text-right font-mono text-xs ${
-                              snap?.changePercent == null
-                                ? 'text-gray-500'
-                                : snap.changePercent >= 0
-                                  ? 'text-emerald-600 dark:text-emerald-400'
-                                  : 'text-red-600 dark:text-red-400'
-                            }`}
-                          >
-                            {fmtQuotePct(snap?.changePercent ?? null)}
-                          </td>
                           <td className="p-3 text-right">{snap ? <SignalBadge signal={snap.signal} /> : '—'}</td>
                           <td className="p-3 text-right font-mono">
                             {snap?.buyPrice ? fmtNumber(snap.buyPrice) : '—'}
@@ -377,13 +364,6 @@ export function WatchlistPage() {
                               <span className={snap.swotHealthy ? 'text-emerald-600' : 'text-red-600'}>
                                 {snap.swotStrengths}/{snap.swotWeaknesses}
                               </span>
-                            ) : (
-                              '—'
-                            )}
-                          </td>
-                          <td className="p-3 text-center">
-                            {snap?.patternToday ? (
-                              <span className="text-[10px] font-bold uppercase text-emerald-600">Yes</span>
                             ) : (
                               '—'
                             )}
@@ -409,7 +389,7 @@ export function WatchlistPage() {
                         </tr>
                         {isExpanded && (
                           <tr>
-                            <td colSpan={11}>
+                            <td colSpan={9}>
                               <ThesisPanel item={item} onPatch={(patch) => patchItem(item.symbol, patch)} />
                             </td>
                           </tr>

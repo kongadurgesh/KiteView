@@ -60,8 +60,14 @@ export function MarketTicker({ sidebarExpanded }: MarketTickerProps) {
     })),
   );
   const [marquee, setMarquee] = useState(false);
+  const [marqueeAllowed, setMarqueeAllowed] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const delay = setTimeout(() => setMarqueeAllowed(true), 1000);
+    return () => clearTimeout(delay);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -85,7 +91,7 @@ export function MarketTicker({ sidebarExpanded }: MarketTickerProps) {
     if (!container || !track) return;
 
     const check = () => {
-      setMarquee(track.scrollWidth > container.clientWidth + 2);
+      setMarquee(marqueeAllowed && track.scrollWidth > container.clientWidth + 2);
     };
 
     check();
@@ -93,7 +99,7 @@ export function MarketTicker({ sidebarExpanded }: MarketTickerProps) {
     ro.observe(container);
     ro.observe(track);
     return () => ro.disconnect();
-  }, [quotes]);
+  }, [quotes, marqueeAllowed]);
 
   const barClass =
     'h-10 border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/50 shrink-0 overflow-hidden px-4 sm:px-6 lg:pl-[calc(1.5rem+var(--sidebar-offset))] lg:pr-6 lg:transition-[padding-left] lg:duration-200';
