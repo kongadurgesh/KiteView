@@ -2,7 +2,7 @@
   "indexId": "cac",
   "label": "CAC 40",
   "group": "global",
-  "source": "wikipedia-table",
+  "source": "wikipedia",
   "asOf": "2026-05-25",
   "isProxy": false,
   "stocks": [
@@ -204,11 +204,6 @@
     {
       "symbol": "DG.PA",
       "shortName": "Vinci",
-      "marketCap": 0
-    },
-    {
-      "symbol": "DOW.PA",
-      "shortName": "Americas",
       "marketCap": 0
     }
   ]
