@@ -16,8 +16,9 @@
   - [Stock Comparison](#5-stock-comparison)
   - [Portfolio Management](#6-portfolio-management)
   - [Watchlist](#7-watchlist)
-  - [About](#8-about)
-  - [Dark Mode & Layout](#9-dark-mode--layout)
+  - [Indices](#8-indices)
+  - [About](#9-about)
+  - [Dark Mode & Layout](#10-dark-mode--layout)
 - [Technical Architecture](#technical-architecture)
 - [Project Structure](#project-structure)
 - [Routes](#routes)
@@ -35,7 +36,7 @@
 
 Landing page with quick navigation into every major tool.
 
-- Card grid for Screener, Heatmap, Stock Analysis, Compare, Portfolio, Watchlist, and About
+- Card grid for Screener, Heatmap, Stock Analysis, Compare, Portfolio, Watchlist, Indices, and About
 - Lightweight animated previews (respects `prefers-reduced-motion`)
 - Flat, minimal UI using shared design tokens
 
@@ -61,9 +62,9 @@ Treemap of NSE stocks sized by market cap and colored by performance.
 
 ### 4. Stock Analysis
 
-Research any NSE/BSE symbol with always-on sections and a conditional breakout panel.
+Research any Yahoo-listed equity (NSE, BSE, US, and other exchanges) with always-on sections and a conditional breakout panel.
 
-- Symbol autocomplete (Yahoo Finance search); **shareable URL** `/analysis?symbol=TCS.NS` (`/lookup?symbol=` redirects for old links)
+- Symbol autocomplete (global Yahoo Finance search); resolves tickers via `/api/resolve-symbol`; **shareable URL** `/analysis?symbol=AAPL` or `/analysis?symbol=TCS.NS` (`/lookup?symbol=` redirects for old links)
 - **Instrument strip**: name, symbol, CMP, Rescan, Compare, **Copy link**, **Open on Yahoo**, **+ Watchlist**
 - **Overview**: session snapshot, key stats, 52W range, ATH, cap tier, sector
 - **SWOT**: embedded Trendlyne SWOT widget (updates per symbol)
@@ -109,14 +110,25 @@ Research lists with live snapshots and optional browser alerts (stored in `local
 - **Refresh** on load, manual button, and every 5 minutes while the tab is visible
 - **Browser notifications** when alerts fire on refresh (optional; requires permission)
 
-### 8. About
+### 8. Indices
+
+Live benchmark dashboard grouped by asset class (Yahoo Finance quotes, 15s refresh).
+
+- **Indian / Global**: click a card to open **Market Heatmap** with real constituents (Yahoo index components, sector screeners, or regional lists — not NSE cap-ranked proxies)
+- **Heatmap index picker**: grouped **Indian** and **Global** filters; S&P 500, Dow, Nasdaq 100, FTSE, DAX, Nikkei, Hang Seng, sector indices (Bank Nifty, IT, …), and NSE cap slices
+- **Forex**: USD/INR, EUR/USD, GBP/USD, USD/JPY
+- **Commodity**: Gold, silver, crude, natural gas (COMEX futures via Yahoo)
+- **Crypto**: Bitcoin, Ethereum
+- Gift Nifty omitted (no Yahoo ticker; NSE IX futures out of scope)
+
+### 9. About
 
 Author profile, investing philosophy, and linked P&L proof spreadsheets.
 
-### 9. Dark Mode & Layout
+### 10. Dark Mode & Layout
 
 - **Theme**: Light / dark toggle on the sidebar (class-based, persisted in `localStorage`)
-- **Shell**: Collapsible sidebar, mobile slide-out drawer, top **market ticker** (Nifty, Sensex, Bank Nifty, Nifty IT)
+- **Shell**: Collapsible sidebar, mobile slide-out drawer, top **market ticker** (Indian indices, S&P 500, gold, silver, USD/INR) with **marquee scroll** when the bar overflows (pauses on hover; respects reduced motion)
 - **Routing**: Each page has its own URL (React Router); sidebar uses links so refresh and share work
 - **Persistent pages**: Visited routes stay mounted when you navigate away — scan results, analysis, compare symbols, heatmap filters, and scroll position are kept until you refresh the tab
 - **Responsive**: `max-w-7xl` content, horizontal scroll on wide tables, sticky first column where needed
@@ -176,8 +188,10 @@ KiteView/
 │   └── index.js                      # Vercel entry — all /api/* rewritten here
 ├── backend/
 │   ├── handlers/                     # Route handlers (imported, not separate functions)
+│   │   └── index-constituents.js
 │   ├── patternDetect.js
 │   ├── trendlyneSwot.js
+│   ├── heatmapIndexConfig.js
 │   ├── watchlistSnapshot.js
 │   └── yahooCrumb.js
 ├── src/
@@ -224,7 +238,12 @@ KiteView/
 │   │   │   ├── WatchlistProvider.tsx
 │   │   │   ├── watchlistStore.ts, watchlistAlerts.ts
 │   │   │   └── components/AddToWatchlistButton.tsx, RenameWatchlistModal.tsx
+│   │   ├── indices/IndicesPage.tsx
 │   │   └── about/AboutPage.tsx
+│   ├── data/
+│   │   ├── indicesCatalog.ts         # Index symbols by category + ticker subset
+│   │   ├── heatmapIndices.ts         # Heatmap index filter options (shared)
+│   │   └── indexHeatmapLinks.ts      # Indices → heatmap filter mapping
 │   ├── content/pageCopy.ts           # Page titles, descriptions, static copy
 │   ├── lib/
 │   │   ├── format.ts                 # Shared INR, %, mcap, volume, time formatters
@@ -232,6 +251,7 @@ KiteView/
 │   │   └── cn.ts
 │   ├── services/
 │   │   ├── fetchStockData.ts         # Chart, quote, heatmap batch helpers
+│   │   ├── indexQuotes.ts            # Batch index/forex/commodity/crypto quotes
 │   │   └── apiBatch.ts               # Client batch helpers (compare, analysis bundle)
 │   └── utils/                        # Domain logic only
 │       ├── patternDetector.ts
@@ -256,12 +276,13 @@ KiteView/
 |---|---|
 | `/` | Overview |
 | `/screener` | Live Screener |
-| `/heatmap` | Market Heatmap |
+| `/heatmap` | Market Heatmap (`?index=` optional — e.g. from Indices page) |
 | `/analysis` | Stock Analysis (`?symbol=` optional) |
 | `/lookup` | Redirects to `/analysis` (preserves `?symbol=`) |
 | `/compare` | Stock Comparison (`?symbol=` optional) |
 | `/portfolio` | Portfolio |
 | `/watchlist` | Watchlist |
+| `/indices` | Indices |
 | `/about` | About |
 
 Unknown paths redirect to `/`. Vercel serves `index.html` for all non-API routes (SPA fallback in `vercel.json`).
@@ -275,10 +296,12 @@ Base URL: same-origin `/api` (Vite proxies to port **3006** in dev; Vercel serve
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/api/chart/:symbol` | Historical OHLCV. Query: `range`, `interval` |
+| GET | `/api/index-constituents?indexId=` | Index members for heatmap (components, sector/regional screener). Slice indices use client NSE list |
 | GET | `/api/quote/:symbols` | Live quote(s); comma-separated symbols supported |
 | GET | `/api/profile/:symbol` | Sector and industry |
 | GET | `/api/stats/:symbol` | P/E, forward P/E, P/B, beta, 52W change, market cap |
-| GET | `/api/search?q=` | Symbol autocomplete (NSE/BSE) |
+| GET | `/api/search?q=` | Symbol autocomplete (global equities) |
+| GET | `/api/resolve-symbol?q=` | Resolve user input to Yahoo symbol (e.g. `AAPL`, `TCS`) |
 | GET | `/api/screener-list` | NSE universe (cap > ₹1,000 Cr) |
 | POST | `/api/screener-scan` | Pattern scan. Body: `{ symbols, mode: 'today' \| 'historical', fromDate?, toDate? }` — historical requires both dates |
 | POST | `/api/heatmap-batch` | Batch quotes for heatmap. Body: `{ symbols, timeframe }` |
@@ -353,6 +376,8 @@ npm run proxy
 ```
 
 Open [http://localhost:5173](http://localhost:5173).
+
+`npm run dev` and `npm start` stop any existing process on port **3006** first so API route changes take effect. If you see `404` on a new `/api/...` endpoint, restart with `npm run proxy` or `npm start`.
 
 ### Build
 

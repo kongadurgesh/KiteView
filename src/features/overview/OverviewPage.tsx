@@ -192,6 +192,27 @@ function WatchlistPreview({ animated }: { animated: boolean }) {
   );
 }
 
+function IndicesPreview({ animated }: { animated: boolean }) {
+  const chips = [
+    { label: 'Nifty', c: 'text-emerald-600' },
+    { label: 'USD/INR', c: 'text-gray-600 dark:text-gray-400' },
+    { label: 'Gold', c: 'text-amber-600' },
+    { label: 'BTC', c: 'text-orange-500' },
+  ];
+  return (
+    <div className={`${PREVIEW_ROOT} ${animated ? 'ov-anim' : ''}`}>
+      <div className="absolute inset-0 rounded-lg bg-white/70 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 overflow-hidden" />
+      <div className={`absolute inset-x-0 top-1/2 -translate-y-1/2 flex gap-3 px-2 ${animated ? 'ticker-marquee-track' : ''}`} style={animated ? { width: 'max-content' } : undefined}>
+        {[...chips, ...chips].map((chip, i) => (
+          <span key={i} className={`text-[9px] font-semibold whitespace-nowrap ${chip.c}`}>
+            {chip.label} +0.4%
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function AboutPreview({ animated }: { animated: boolean }) {
   return (
     <div className={`${PREVIEW_ROOT} ${animated ? 'ov-anim' : ''}`}>
@@ -294,6 +315,15 @@ export function OverviewPage() {
             blurb={cards.watchlist.blurb}
             action={<OpenButton label="Open" onClick={() => goToPage('watchlist')} />}
             preview={<WatchlistPreview animated={animated} />}
+          />
+        </motion.div>
+
+        <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
+          <OverviewCard
+            title={cards.indices.title}
+            blurb={cards.indices.blurb}
+            action={<OpenButton label="Open" onClick={() => goToPage('indices')} />}
+            preview={<IndicesPreview animated={animated} />}
           />
         </motion.div>
 

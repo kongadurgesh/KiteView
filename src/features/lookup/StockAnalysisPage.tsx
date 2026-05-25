@@ -6,7 +6,6 @@ import { PAGE_COPY } from '../../content/pageCopy';
 import { PageLayout } from '../../components/layout/PageLayout';
 import { Alert, LoadingBlock } from '../../components/ui';
 import { SearchField } from '../../components/ui/SearchField';
-import { normalizeNseSymbol } from '../../lib/nseSymbol';
 import { LookupInstrumentStrip } from './components/LookupInstrumentStrip';
 import { StockOverviewSection } from './components/StockOverviewSection';
 import { SwotSection } from './components/SwotSection';
@@ -29,9 +28,8 @@ export function StockAnalysisPage() {
 
   const syncUrl = useCallback(
     (sym: string) => {
-      const norm = normalizeNseSymbol(sym);
       skipUrlSyncRef.current = true;
-      setSearchParams({ symbol: norm }, { replace: true });
+      setSearchParams({ symbol: sym }, { replace: true });
     },
     [setSearchParams],
   );
@@ -48,8 +46,8 @@ export function StockAnalysisPage() {
 
   const handleSelect = useCallback(
     async (sym: string) => {
-      await analysis.search(sym);
-      syncUrl(sym);
+      const resolved = await analysis.search(sym);
+      if (resolved) syncUrl(resolved);
     },
     [analysis, syncUrl],
   );
@@ -115,6 +113,7 @@ export function StockAnalysisPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full">
             <div className="lg:col-span-2 flex flex-col gap-4">
               <StockOverviewSection
+                symbol={analysis.symbol}
                 currentPrice={analysis.currentPrice}
                 fiftyTwoWeekHigh={analysis.fiftyTwoWeekHigh}
                 fiftyTwoWeekLow={analysis.fiftyTwoWeekLow}

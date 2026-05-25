@@ -4,7 +4,7 @@ export const PAGE_COPY = {
   overview: {
     title: 'KiteView',
     description:
-      'A single workspace to scan for breakout patterns, inspect a symbol, track watchlists, read the market heatmap, compare names, and track a portfolio.',
+      'A single workspace to scan for breakout patterns, inspect a symbol, track watchlists, monitor indices and commodities, read the market heatmap, compare names, and track a portfolio.',
   },
   screener: {
     title: 'Live Screener',
@@ -19,7 +19,7 @@ export const PAGE_COPY = {
   analysis: {
     title: 'Stock Analysis',
     description:
-      'Research any NSE symbol: overview, SWOT (Trendlyne), technicals, last 5 quarters P&L, and a breakout panel when a qualifying pattern is detected.',
+      'Research any listed equity (NSE, BSE, US, and more): overview, technicals, last 5 quarters P&L, and a breakout panel when a qualifying pattern is detected. SWOT (Trendlyne) is shown for NSE/BSE symbols only.',
     patternChartNote:
       'Base, pattern, and breakout bars. Dashed lines = buy trigger and buy price.',
     dvmNote: 'Rule-based Durability, Valuation, Momentum (0–100)',
@@ -44,6 +44,15 @@ export const PAGE_COPY = {
     description:
       'Track symbols you are researching: live CMP, BUY/WAIT signal, breakout pattern, SWOT health, thesis notes, and browser alerts.',
     empty: 'No symbols yet. Add names from Stock Analysis or the Screener using + Watchlist.',
+  },
+  indices: {
+    title: 'Indices',
+    description:
+      'Live quotes for Indian and global indices, forex pairs, commodities, and crypto — grouped by asset class with 15-second refresh.',
+    indianHeatmapHint:
+      'Click an index to open its heatmap with real constituents (Yahoo index components or sector screen for NSE names).',
+    globalHeatmapHint:
+      'Click a benchmark to open its heatmap with index members or regional large-cap lists (S&P 500, Nikkei, FTSE, etc.).',
   },
   about: {
     title: 'About',
@@ -80,6 +89,10 @@ export const PAGE_COPY = {
     watchlist: {
       title: 'Watchlist',
       blurb: 'Research lists with signals, SWOT, thesis notes, and alerts.',
+    },
+    indices: {
+      title: 'Indices',
+      blurb: 'Indian, global, forex, commodity, and crypto benchmarks in one dashboard.',
     },
     about: {
       title: 'About',

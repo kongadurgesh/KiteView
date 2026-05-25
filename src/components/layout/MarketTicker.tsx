@@ -1,93 +1,115 @@
-import { useEffect, useState } from 'react';
-import { fmtNumber } from '../../lib/format';
-
-import { API_BASE } from '../../lib/apiBase';
-
-interface IndexQuote {
-  label: string;
-  symbol: string;
-  price: number;
-  change: number;
-  changePct: number;
-}
-
-const INDICES = [
-  { label: 'NIFTY 50', symbol: '^NSEI' },
-  { label: 'SENSEX', symbol: '^BSESN' },
-  { label: 'BANK NIFTY', symbol: '^NSEBANK' },
-  { label: 'NIFTY IT', symbol: '^CNXIT' },
-];
+import { useEffect, useRef, useState } from 'react';
+import { TICKER_INDICES } from '../../data/indicesCatalog';
+import { fmtQuotePct } from '../../lib/format';
+import {
+  fetchIndexQuotes,
+  formatIndexChange,
+  formatIndexPrice,
+  INDEX_QUOTE_REFRESH_MS,
+  type IndexQuote,
+} from '../../services/indexQuotes';
 
 interface MarketTickerProps {
   sidebarExpanded?: boolean;
 }
 
+function TickerItem({ q }: { q: IndexQuote }) {
+  const isUp = (q.change ?? 0) >= 0;
+  const hasData = q.price != null;
+
+  return (
+    <div className="flex items-center gap-2 whitespace-nowrap shrink-0 px-3 sm:px-4">
+      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{q.instrument.label}</span>
+      <span className="text-xs font-mono text-gray-800 dark:text-gray-200">
+        {hasData ? formatIndexPrice(q) : '—'}
+      </span>
+      {hasData && (
+        <span
+          className={`text-xs font-mono font-medium ${
+            isUp ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
+          }`}
+        >
+          {formatIndexChange(q)} ({fmtQuotePct(q.changePct)})
+        </span>
+      )}
+    </div>
+  );
+}
+
+function TickerTrack({ quotes, ariaHidden }: { quotes: IndexQuote[]; ariaHidden?: boolean }) {
+  return (
+    <div
+      className="flex items-center shrink-0"
+      aria-hidden={ariaHidden}
+    >
+      {quotes.map((q) => (
+        <TickerItem key={`${ariaHidden ? 'dup-' : ''}${q.instrument.id}`} q={q} />
+      ))}
+    </div>
+  );
+}
+
 export function MarketTicker({ sidebarExpanded }: MarketTickerProps) {
   const sidebarOffset = sidebarExpanded ? '8.5rem' : '0px';
-  const [quotes, setQuotes] = useState<IndexQuote[]>([]);
+  const [quotes, setQuotes] = useState<IndexQuote[]>(() =>
+    TICKER_INDICES.map((instrument) => ({
+      instrument,
+      price: null,
+      change: null,
+      changePct: null,
+    })),
+  );
+  const [marquee, setMarquee] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function fetchQuotes() {
-      try {
-        const results = await Promise.all(
-          INDICES.map(async (idx) => {
-            const res = await fetch(`${API_BASE}/api/quote/${encodeURIComponent(idx.symbol)}`);
-            const data = await res.json();
-            const q = data?.quoteResponse?.result?.[0] ?? data;
-            return {
-              label: idx.label,
-              symbol: idx.symbol,
-              price: q.regularMarketPrice ?? 0,
-              change: q.regularMarketChange ?? 0,
-              changePct: q.regularMarketChangePercent ?? 0,
-            } as IndexQuote;
-          })
-        );
-        if (!cancelled) setQuotes(results);
-      } catch {
-        // silently fail -- ticker is non-critical
-      }
+    async function load() {
+      const results = await fetchIndexQuotes(TICKER_INDICES);
+      if (!cancelled) setQuotes(results);
     }
 
-    fetchQuotes();
-    const interval = setInterval(fetchQuotes, 15_000);
-    return () => { cancelled = true; clearInterval(interval); };
+    void load();
+    const interval = setInterval(load, INDEX_QUOTE_REFRESH_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, []);
 
+  useEffect(() => {
+    const container = containerRef.current;
+    const track = trackRef.current;
+    if (!container || !track) return;
+
+    const check = () => {
+      setMarquee(track.scrollWidth > container.clientWidth + 2);
+    };
+
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(container);
+    ro.observe(track);
+    return () => ro.disconnect();
+  }, [quotes]);
+
   const barClass =
-    'h-10 border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/50 flex items-center overflow-x-auto shrink-0 px-4 sm:px-6 lg:pl-[calc(1.5rem+var(--sidebar-offset))] lg:pr-6 lg:transition-[padding-left] lg:duration-200';
+    'h-10 border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/50 shrink-0 overflow-hidden px-4 sm:px-6 lg:pl-[calc(1.5rem+var(--sidebar-offset))] lg:pr-6 lg:transition-[padding-left] lg:duration-200';
 
   const barStyle = { ['--sidebar-offset' as string]: sidebarOffset };
 
-  if (quotes.length === 0) {
-    return (
-      <div className={barClass} style={barStyle}>
-        <div className="flex gap-4 sm:gap-8">
-          {INDICES.map((idx) => (
-            <span key={idx.symbol} className="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">{idx.label} --</span>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={barClass} style={barStyle}>
-      <div className="flex gap-4 sm:gap-8">
-        {quotes.map((q) => {
-          const isUp = q.change >= 0;
-          return (
-            <div key={q.symbol} className="flex items-center gap-2 whitespace-nowrap">
-              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{q.label}</span>
-              <span className="text-xs font-mono text-gray-800 dark:text-gray-200">{fmtNumber(q.price)}</span>
-              <span className={`text-xs font-mono font-medium ${isUp ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
-                {isUp ? '+' : ''}{fmtNumber(q.change)} ({isUp ? '+' : ''}{q.changePct.toFixed(2)}%)
-              </span>
-            </div>
-          );
-        })}
+      <div ref={containerRef} className="h-full w-full overflow-hidden flex items-center">
+        <div
+          ref={trackRef}
+          className={`flex items-center h-full ${marquee ? 'ticker-marquee-track' : ''}`}
+        >
+          <TickerTrack quotes={quotes} />
+          {marquee && <TickerTrack quotes={quotes} ariaHidden />}
+        </div>
       </div>
     </div>
   );

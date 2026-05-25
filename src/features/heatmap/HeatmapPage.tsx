@@ -1,32 +1,14 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useMatch } from 'react-router-dom';
+import { useMatch, useSearchParams } from 'react-router-dom';
 import { useAppNavigation } from '../../app/navigation';
 import { fetchScreenerList, ScreenerStock } from '../../utils/screener';
+import { HEATMAP_INDICES, heatmapIndicesByGroup, getHeatmapIndexOption, isHeatmapIndexId, usesRemoteConstituents } from '../../data/heatmapIndices';
+import { fetchIndexConstituents } from '../../services/indexConstituents';
 import { PageLayout } from '../../components/layout/PageLayout';
 import { SectionHeader } from '../../components/ui';
 import { PAGE_COPY } from '../../content/pageCopy';
 import { fmtInrCompact, fmtTime } from '../../lib/format';
 import { fetchHeatmapBatch, HeatmapTimeframe, QuoteFull } from '../../utils/fetchStockData';
-
-interface IndexOption {
-  id: string;
-  label: string;
-  start: number;
-  end: number;
-}
-
-const INDICES: IndexOption[] = [
-  { id: 'nifty50', label: 'Nifty 50', start: 0, end: 50 },
-  { id: 'sensex30', label: 'Sensex 30', start: 0, end: 30 },
-  { id: 'niftynext50', label: 'Nifty Next 50', start: 50, end: 100 },
-  { id: 'nifty100', label: 'Nifty 100', start: 0, end: 100 },
-  { id: 'niftymidcap50', label: 'Nifty Midcap 50', start: 100, end: 150 },
-  { id: 'niftymidcap100', label: 'Nifty Midcap 100', start: 100, end: 200 },
-  { id: 'nifty200', label: 'Nifty 200', start: 0, end: 200 },
-  { id: 'nifty500', label: 'Nifty 500', start: 0, end: 500 },
-  { id: 'niftysmallcap100', label: 'Nifty Smallcap 100', start: 200, end: 300 },
-  { id: 'all', label: 'All Stocks', start: 0, end: Infinity },
-];
 
 const TIMEFRAME_OPTIONS: { key: HeatmapTimeframe; label: string }[] = [
   { key: '1d', label: '1D' },
@@ -165,7 +147,10 @@ function squarify(items: QuoteFull[], width: number, height: number): TreemapRec
 export function HeatmapPage() {
   const { viewStock } = useAppNavigation();
   const isActive = useMatch({ path: '/heatmap', end: true }) != null;
+  const [searchParams, setSearchParams] = useSearchParams();
   const [allStocks, setAllStocks] = useState<ScreenerStock[]>([]);
+  const [remoteStocks, setRemoteStocks] = useState<ScreenerStock[]>([]);
+  const [constituentsLoading, setConstituentsLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState('nifty50');
   const [timeframe, setTimeframe] = useState<HeatmapTimeframe>('1d');
   const [loading, setLoading] = useState(true);
@@ -177,11 +162,65 @@ export function HeatmapPage() {
   const cache = useRef(new Map<string, QuoteFull>());
   const runId = useRef(0);
 
+  useEffect(() => {
+    const fromUrl = searchParams.get('index');
+    if (fromUrl && isHeatmapIndexId(fromUrl) && fromUrl !== selectedIndex) {
+      setSelectedIndex(fromUrl);
+    }
+  }, [searchParams, selectedIndex]);
+
+  const handleIndexChange = useCallback(
+    (id: string) => {
+      setSelectedIndex(id);
+      if (isHeatmapIndexId(id)) {
+        setSearchParams({ index: id }, { replace: true });
+      }
+    },
+    [setSearchParams],
+  );
+
+  const selectedOption = getHeatmapIndexOption(selectedIndex) ?? HEATMAP_INDICES[0];
+
   const currentStocks = useMemo(() => {
-    if (allStocks.length === 0) return [];
-    const idx = INDICES.find((i) => i.id === selectedIndex) ?? INDICES[0];
-    return allStocks.slice(idx.start, Math.min(idx.end, allStocks.length));
-  }, [allStocks, selectedIndex]);
+    if (selectedOption.source.type === 'slice') {
+      if (allStocks.length === 0) return [];
+      const end = selectedOption.source.end === Infinity
+        ? allStocks.length
+        : selectedOption.source.end;
+      return allStocks.slice(selectedOption.source.start, Math.min(end, allStocks.length));
+    }
+    return remoteStocks;
+  }, [allStocks, remoteStocks, selectedOption]);
+
+  useEffect(() => {
+    if (selectedOption.source.type === 'slice') {
+      setRemoteStocks([]);
+      setConstituentsLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setConstituentsLoading(true);
+    setError(null);
+
+    (async () => {
+      try {
+        const stocks = await fetchIndexConstituents(selectedIndex);
+        if (!cancelled) setRemoteStocks(stocks);
+      } catch (err) {
+        if (!cancelled) {
+          setRemoteStocks([]);
+          setError(err instanceof Error ? err.message : 'Failed to load index constituents');
+        }
+      } finally {
+        if (!cancelled) setConstituentsLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedIndex, selectedOption.source.type]);
 
   const cacheKey = useCallback((symbol: string, tf: HeatmapTimeframe) => `${symbol}:${tf}`, []);
 
@@ -189,6 +228,12 @@ export function HeatmapPage() {
     const id = ++runId.current;
     setLoading(true);
     setError(null);
+
+    if (stocks.length === 0) {
+      setDisplayQuotes([]);
+      setLoading(false);
+      return;
+    }
 
     const needed = force
       ? stocks
@@ -309,13 +354,23 @@ export function HeatmapPage() {
               <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Index</label>
               <select
                 value={selectedIndex}
-                onChange={(e) => setSelectedIndex(e.target.value)}
-                className="rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 text-sm font-medium text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={(e) => handleIndexChange(e.target.value)}
+                className="rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 text-sm font-medium text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 max-w-[220px]"
               >
-                {INDICES.map((idx) => (
-                  <option key={idx.id} value={idx.id}>{idx.label}</option>
-                ))}
+                <optgroup label="Indian">
+                  {heatmapIndicesByGroup('indian').map((idx) => (
+                    <option key={idx.id} value={idx.id}>{idx.label}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Global">
+                  {heatmapIndicesByGroup('global').map((idx) => (
+                    <option key={idx.id} value={idx.id}>{idx.label}</option>
+                  ))}
+                </optgroup>
               </select>
+              {usesRemoteConstituents(selectedOption) && constituentsLoading && (
+                <span className="text-xs text-gray-500 dark:text-gray-400">Loading constituents…</span>
+              )}
             </div>
 
             <div className="h-5 w-px bg-gray-300 dark:bg-gray-700 hidden sm:block" />

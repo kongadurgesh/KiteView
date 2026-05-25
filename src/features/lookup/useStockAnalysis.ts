@@ -12,7 +12,8 @@ import type {
 import { fetchAnalysisBundle, fetchStatsBatch } from '../../services/apiBatch';
 import { detectPattern } from '../../utils/patternDetector';
 import type { StockInfo } from '../../types';
-import { normalizeNseSymbol } from '../../lib/nseSymbol';
+import { isIndianSymbol } from '../../lib/nseSymbol';
+import { resolveYahooSymbol } from '../../services/yahooSymbol';
 import { parseQuoteSnapshot, type QuoteSnapshot } from './quoteSnapshot';
 import { getPatternChartWindow, type PatternChartBar } from './patternChartCandles';
 import { buildTechnicalSummary, candlesToChartSeries } from './technicalUtils';
@@ -174,7 +175,7 @@ export function useStockAnalysis() {
   const [quarterlyResults, setQuarterlyResults] = useState<QuarterlyResults>(emptyQuarterly);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const search = useCallback(async (sym: string) => {
+  const search = useCallback(async (sym: string): Promise<string | null> => {
     setIsLoading(true);
     setError(null);
     setMatch(null);
@@ -191,15 +192,31 @@ export function useStockAnalysis() {
     setStockName('');
     setCurrentPrice(0);
     setHasSearched(true);
+    setSymbol('');
 
-    const norm = normalizeNseSymbol(sym);
-    setSymbol(norm);
+    let norm: string;
+    try {
+      const resolved = await resolveYahooSymbol(sym);
+      if (!resolved) {
+        setError('Symbol not found. Try the company name or full ticker (e.g. AAPL, TCS.NS).');
+        return null;
+      }
+      norm = resolved;
+      setSymbol(norm);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not resolve symbol');
+      return null;
+    }
 
     try {
       const [bundle, statsMap] = await Promise.all([
         fetchAnalysisBundle(norm),
         fetchStatsBatch<StockStats>([norm]),
       ]);
+      const statsKey =
+        statsMap[norm] != null
+          ? norm
+          : Object.keys(statsMap).find((k) => k.toUpperCase() === norm.toUpperCase()) ?? norm;
 
       const stockInfo = parseStockInfo(bundle.chart1y, norm);
       const ath = parseAth(bundle.chartMax);
@@ -225,19 +242,21 @@ export function useStockAnalysis() {
         normalizeQuarterlyResults(bundle.quarterlyResults ?? emptyQuarterly),
       );
 
-      const statsMc = statsMap[norm]?.marketCap;
-      const mcCr =
-        stockInfo.marketCap > 0
+      const statsMc = statsMap[statsKey]?.marketCap;
+      const indian = isIndianSymbol(norm);
+      const mcCr = indian
+        ? stockInfo.marketCap > 0
           ? stockInfo.marketCap
           : r?.marketCap
             ? r.marketCap / 1e7
             : statsMc
               ? statsMc / 1e7
-              : 0;
+              : 0
+        : 0;
       setMarketCapCr(mcCr);
 
       setQuoteSnapshot(parseQuoteSnapshot(bundle.quote));
-      setStockStats(statsMap[norm] ?? null);
+      setStockStats(statsMap[statsKey] ?? null);
 
       const result = detectPattern(stockInfo.candles, mcCr);
       if (result) {
@@ -248,8 +267,10 @@ export function useStockAnalysis() {
         setNoMatch(true);
         setPatternChartBars([]);
       }
+      return norm;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+      return null;
     } finally {
       setIsLoading(false);
     }

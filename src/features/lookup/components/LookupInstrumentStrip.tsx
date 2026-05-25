@@ -1,5 +1,5 @@
 import { Button } from '../../../components/ui';
-import { fmtInr } from '../../../lib/format';
+import { fmtMoney } from '../../../lib/format';
 import { AddToWatchlistButton } from '../../watchlist/components/AddToWatchlistButton';
 
 interface LookupInstrumentStripProps {
@@ -40,7 +40,7 @@ export function LookupInstrumentStrip({
           </h2>
           <p className="font-mono text-sm text-ink-muted dark:text-ink-dark-muted mt-0.5">{symbol}</p>
           <p className="text-xl font-mono font-semibold tabular-nums text-ink-primary dark:text-ink-dark-primary mt-2">
-            {currentPrice > 0 ? fmtInr(currentPrice) : isLoading ? '…' : '—'}
+            {currentPrice > 0 ? fmtMoney(currentPrice, symbol) : isLoading ? '…' : '—'}
           </p>
         </div>
         <div className="flex flex-wrap gap-2 shrink-0">

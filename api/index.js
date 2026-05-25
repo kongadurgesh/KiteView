@@ -3,6 +3,7 @@ import quoteHandler from '../backend/handlers/quote.js';
 import profileHandler from '../backend/handlers/profile.js';
 import statsHandler from '../backend/handlers/stats.js';
 import searchHandler from '../backend/handlers/search.js';
+import resolveSymbolHandler from '../backend/handlers/resolve-symbol.js';
 import screenerListHandler from '../backend/handlers/screener-list.js';
 import screenerScanHandler from '../backend/handlers/screener-scan.js';
 import chartBatchHandler from '../backend/handlers/chart-batch.js';
@@ -11,10 +12,12 @@ import heatmapBatchHandler from '../backend/handlers/heatmap-batch.js';
 import lookupBundleHandler from '../backend/handlers/lookup-bundle.js';
 import watchlistSnapshotHandler from '../backend/handlers/watchlist-snapshot.js';
 import swotBatchHandler from '../backend/handlers/swot-batch.js';
+import indexConstituentsHandler from '../backend/handlers/index-constituents.js';
 
 /** Single Vercel serverless entry — routes all /api/* (via vercel.json rewrite). */
 const SINGLE = {
   'GET search': searchHandler,
+  'GET resolve-symbol': resolveSymbolHandler,
   'GET screener-list': screenerListHandler,
   'POST screener-scan': screenerScanHandler,
   'POST chart-batch': chartBatchHandler,
@@ -23,6 +26,7 @@ const SINGLE = {
   'GET lookup-bundle': lookupBundleHandler,
   'POST watchlist-snapshot': watchlistSnapshotHandler,
   'POST swot-batch': swotBatchHandler,
+  'GET index-constituents': indexConstituentsHandler,
 };
 
 const WITH_SYMBOL = {

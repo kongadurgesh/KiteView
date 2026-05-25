@@ -54,9 +54,29 @@ export function fmtMarketCapCr(cr: number): string {
   return `${cr.toLocaleString('en-IN', { maximumFractionDigits: 0 })} Cr`;
 }
 
-export function fmtMarketCap(raw: number | null): string {
+export function fmtMarketCapIntl(raw: number): string {
+  if (raw >= 1e12) return `$${(raw / 1e12).toFixed(2)}T`;
+  if (raw >= 1e9) return `$${(raw / 1e9).toFixed(2)}B`;
+  if (raw >= 1e6) return `$${(raw / 1e6).toFixed(2)}M`;
+  return `$${raw.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+}
+
+export function fmtMarketCap(raw: number | null, indian = true): string {
   if (raw == null || raw <= 0) return '—';
+  if (!indian) return fmtMarketCapIntl(raw);
   return fmtMarketCapCr(raw / 1e7);
+}
+
+/** Price with currency inferred from Yahoo symbol suffix. */
+export function fmtMoney(n: number, symbol: string): string {
+  if (!n || n <= 0) return '—';
+  if (/\.(NS|BO)$/i.test(symbol)) return fmtInr(n);
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(n);
 }
 
 /** Per-share amounts (e.g. Basic EPS from Yahoo fundamentals). */

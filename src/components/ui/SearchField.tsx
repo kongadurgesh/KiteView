@@ -23,7 +23,7 @@ interface SearchFieldProps {
 export function SearchField({
   onSelect,
   isLoading = false,
-  placeholder = 'Search stock (e.g. RELIANCE, TCS)',
+  placeholder = 'Search stock (e.g. TCS, AAPL, MSFT)',
   submitLabel = 'Scan',
   loadingLabel = 'Scanning…',
   maxWidth = 'max-w-lg',
@@ -83,8 +83,16 @@ export function SearchField({
     const trimmed = input.trim();
     if (!trimmed) return;
     setShowDropdown(false);
-    const finalSymbol = trimmed.includes('.') ? trimmed : `${trimmed}.NS`;
-    onSelect(finalSymbol);
+    if (activeIdx >= 0 && suggestions[activeIdx]) {
+      selectSymbol(suggestions[activeIdx].symbol);
+      return;
+    }
+    const exact = suggestions.find((s) => s.symbol.toUpperCase() === trimmed.toUpperCase());
+    if (exact) {
+      selectSymbol(exact.symbol);
+      return;
+    }
+    onSelect(trimmed);
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -144,7 +152,7 @@ export function SearchField({
                   <span className="font-semibold text-ink-primary dark:text-ink-dark-primary">{s.symbol}</span>
                   <span className="ml-2 text-ink-muted text-xs">{s.shortname}</span>
                 </div>
-                <span className="text-xs text-ink-muted">{s.exchange === 'NSI' ? 'NSE' : 'BSE'}</span>
+                <span className="text-xs text-ink-muted">{formatExchangeLabel(s.exchange)}</span>
               </li>
             ))
           )}
@@ -152,4 +160,18 @@ export function SearchField({
       )}
     </div>
   );
+}
+
+function formatExchangeLabel(exchange: string): string {
+  const labels: Record<string, string> = {
+    NSI: 'NSE',
+    BSE: 'BSE',
+    NYQ: 'NYSE',
+    NMS: 'Nasdaq',
+    NGM: 'Nasdaq',
+    ASE: 'AMEX',
+    PCX: 'NYSE Arca',
+    YHD: 'NYSE',
+  };
+  return labels[exchange] || exchange || '';
 }

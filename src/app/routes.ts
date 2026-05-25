@@ -9,6 +9,7 @@ export const PAGE_PATHS: Record<Page, string> = {
   compare: '/compare',
   portfolio: '/portfolio',
   watchlist: '/watchlist',
+  indices: '/indices',
   about: '/about',
 };
 
@@ -37,4 +38,9 @@ export const lookupPath = analysisPath;
 
 export function comparePath(symbol: string): string {
   return `${PAGE_PATHS.compare}?symbol=${encodeURIComponent(symbol)}`;
+}
+
+export function heatmapPath(indexId?: string): string {
+  if (!indexId) return PAGE_PATHS.heatmap;
+  return `${PAGE_PATHS.heatmap}?index=${encodeURIComponent(indexId)}`;
 }
