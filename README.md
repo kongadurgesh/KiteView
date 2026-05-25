@@ -36,7 +36,7 @@
 
 Landing page with quick navigation into every major tool.
 
-- Card grid for Screener, Heatmap, Stock Analysis, Compare, Portfolio, Watchlist, Indices, and About
+- Clickable tool cards (whole card navigates) with animated previews for Screener, Heatmap, Stock Analysis, Compare, Portfolio, Watchlist, Indices, and About
 - Lightweight animated previews (respects `prefers-reduced-motion`)
 - Flat, minimal UI using shared design tokens
 
