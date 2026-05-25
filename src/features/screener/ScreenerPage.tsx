@@ -13,6 +13,7 @@ import {
   ScreenerStock,
 } from '../../utils/screener';
 import { AddToWatchlistButton } from '../watchlist/components/AddToWatchlistButton';
+import { TableSerialCell, TableSerialHeader } from '../../components/ui';
 
 type ScanMode = 'today' | 'range';
 type SortKey =
@@ -301,7 +302,8 @@ export function ScreenerPage() {
             <table className="w-full text-sm min-w-[1280px]">
               <thead className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-800">
                 <tr>
-                  <SortHeader label="Stock" k="name" current={sortKey} dir={sortDir} onSort={toggleSort} align="left" />
+                  <TableSerialHeader sticky />
+                  <SortHeader label="Stock" k="name" current={sortKey} dir={sortDir} onSort={toggleSort} align="left" stickyAfterSerial />
                   <SortHeader label="Signal" k="signal" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="Pattern date" k="patternDate" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="CMP" k="cmp" current={sortKey} dir={sortDir} onSort={toggleSort} />
@@ -320,13 +322,14 @@ export function ScreenerPage() {
                 </tr>
               </thead>
               <tbody>
-                {sortedResults.map((r) => (
+                {sortedResults.map((r, rowIndex) => (
                   <tr
                     key={r.symbol}
                     className="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
                     onClick={() => viewStock(r.symbol)}
                   >
-                    <td className="p-3 text-left sticky left-0 z-10 bg-white dark:bg-gray-900 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)] dark:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.3)]">
+                    <TableSerialCell index={rowIndex} sticky />
+                    <td className="p-3 text-left sticky left-11 z-10 bg-white dark:bg-gray-900 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)] dark:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.3)]">
                       <p className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[180px]">{r.shortName}</p>
                       <p className="text-[11px] text-gray-400 dark:text-gray-500">{r.symbol}</p>
                     </td>
@@ -412,15 +415,20 @@ export function ScreenerPage() {
   );
 }
 
-function SortHeader({ label, k, current, dir, onSort, align = 'right' }: {
+function SortHeader({ label, k, current, dir, onSort, align = 'right', stickyAfterSerial }: {
   label: string; k: SortKey; current: SortKey; dir: SortDir;
   onSort: (key: SortKey) => void; align?: 'left' | 'right';
+  stickyAfterSerial?: boolean;
 }) {
   const isActive = current === k;
   return (
     <th
       className={`p-3 font-medium text-xs uppercase tracking-wider cursor-pointer select-none whitespace-nowrap
-        ${align === 'left' ? 'text-left sticky left-0 z-10 bg-gray-100 dark:bg-gray-800 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)] dark:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.3)]' : 'text-right'}
+        ${align === 'left'
+          ? stickyAfterSerial
+            ? 'text-left sticky left-11 z-10 bg-gray-100 dark:bg-gray-800 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)] dark:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.3)]'
+            : 'text-left sticky left-0 z-10 bg-gray-100 dark:bg-gray-800 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)] dark:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.3)]'
+          : 'text-right'}
         ${isActive ? 'text-blue-600' : 'text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400'}`}
       onClick={() => onSort(k)}
     >

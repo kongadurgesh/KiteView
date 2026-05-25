@@ -47,7 +47,7 @@ Scans the NSE universe (market cap > ₹1,000 Cr) for breakout stocks.
 - **Today** mode: patterns on the latest trading session
 - **Date range** mode: historical scan — finds the latest breakout whose pattern date falls in your selected window (up to 365 days)
 - **Signal** column: **BUY** when CMP is within 2% of buy price (`0.98 ×` breakout close); otherwise **WAIT**
-- Server-side batch scanning; columns include signal, pattern date, CMP, % vs buy price (green/red), buy price, 52W stats, ATH, market cap, **SWOT (S/W)**, **+ Watchlist**
+- Server-side batch scanning; **#** row index plus signal, pattern date, CMP, % vs buy price (green/red), buy price, 52W stats, ATH, market cap, **SWOT (S/W)**, **+ Watchlist**
 - Click a row to open **Stock Analysis** (`/analysis?symbol=…`)
 
 ### 3. Market Heatmap
@@ -95,7 +95,7 @@ Transaction-based portfolio tracker with analytics.
 - **Import**: `.xlsx`, `.xls`, or `.csv` (ISIN, buy price, quantity) via `xlsx`
 - **Positions**: avg buy, qty, invested, live value, P&L (₹ and %)
 - **Live prices**: batch quotes for all holdings
-- **Sortable** positions table
+- **Sortable** positions table with **#** row index; expanded row shows numbered transaction history
 - **Performance chart**: portfolio vs Nifty 50, Bank Nifty, Midcap 50, Nifty 200 (normalized or absolute; 1M–ALL)
 - **Risk dashboard**: HHI diversification, beta, volatility, Sharpe, max drawdown, sector/stock/market-cap allocation donuts (click a cap slice to see holdings)
 - Persisted in `localStorage`
@@ -106,7 +106,7 @@ Research lists with live snapshots and optional browser alerts (stored in `local
 
 - **Multiple lists**: create, rename, delete; default list on first visit
 - **Add from Analysis or Screener**: seeds entry buy price and pattern date when a breakout is present
-- **Live table** via `POST /api/watchlist-snapshot`: CMP, 1D %, BUY/WAIT, buy price, pattern date, SWOT S/W, pattern-today flag
+- **Live table** via `POST /api/watchlist-snapshot`: **#** row index, CMP, 1D %, BUY/WAIT, buy price, pattern date, SWOT S/W, pattern-today flag
 - **Thesis panel** per row: note, target/stop, entry buy price, pattern date; alert toggles (BUY window, SWOT flip, pattern today)
 - **Refresh** on load, manual button, and every 5 minutes while the tab is visible
 - **Browser notifications** when alerts fire on refresh (optional; requires permission)

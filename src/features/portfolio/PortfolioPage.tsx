@@ -10,6 +10,7 @@ import { ImportExcelModal } from './components/ImportExcelModal';
 import { TransactionHistory } from './components/TransactionHistory';
 import { PerformanceChart } from './components/PerformanceChart';
 import { RiskDashboard } from './components/RiskDashboard';
+import { TableSerialCell, TableSerialHeader } from '../../components/ui';
 type SortKey = 'name' | 'qty' | 'avgBuy' | 'cmp' | 'invested' | 'current' | 'pnl' | 'pnlPct' | 'todayPnl' | 'todayPnlPct';
 type SortDir = 'asc' | 'desc';
 
@@ -274,7 +275,8 @@ export function PortfolioPage() {
             <table className="w-full text-sm min-w-[960px]">
               <thead className="bg-gray-100 dark:bg-gray-700/50 border-b border-gray-300 dark:border-gray-700">
                 <tr>
-                  <SortHeader label="Name" sortKey="name" current={sortKey} dir={sortDir} onSort={toggleSort} align="left" />
+                  <TableSerialHeader sticky className="bg-gray-100 dark:bg-gray-700/50" />
+                  <SortHeader label="Name" sortKey="name" current={sortKey} dir={sortDir} onSort={toggleSort} align="left" stickyAfterSerial />
                   <SortHeader label="Qty" sortKey="qty" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="Avg Buy" sortKey="avgBuy" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="CMP" sortKey="cmp" current={sortKey} dir={sortDir} onSort={toggleSort} />
@@ -288,11 +290,12 @@ export function PortfolioPage() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map(({ pos, cmp, currentValue, unrealized, unrealizedPct, todayPnl: rowTodayPnl, todayPnlPct: rowTodayPnlPct, isClosed }) => {
+                {rows.map(({ pos, cmp, currentValue, unrealized, unrealizedPct, todayPnl: rowTodayPnl, todayPnlPct: rowTodayPnlPct, isClosed }, rowIndex) => {
                   const isExpanded = expandedSymbol === pos.symbol;
                   return (
                     <PositionTableRow
                       key={pos.symbol}
+                      rowIndex={rowIndex}
                       pos={pos}
                       cmp={cmp}
                       currentValue={currentValue}
@@ -352,7 +355,8 @@ function CollapsibleSection({ title, children, defaultOpen = true }: {
   );
 }
 
-function PositionTableRow({ pos, cmp, currentValue, unrealized, unrealizedPct, todayPnl, todayPnlPct, isClosed, isExpanded, loadingPrices, onToggle, onRemove }: {
+function PositionTableRow({ rowIndex, pos, cmp, currentValue, unrealized, unrealizedPct, todayPnl, todayPnlPct, isClosed, isExpanded, loadingPrices, onToggle, onRemove }: {
+  rowIndex: number;
   pos: Position; cmp: number; currentValue: number; unrealized: number; unrealizedPct: number;
   todayPnl: number; todayPnlPct: number;
   isClosed: boolean; isExpanded: boolean; loadingPrices: boolean;
@@ -367,7 +371,8 @@ function PositionTableRow({ pos, cmp, currentValue, unrealized, unrealizedPct, t
         className={`border-b border-gray-300 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${isClosed ? 'opacity-50' : ''}`}
         onClick={onToggle}
       >
-        <td className="p-3 text-left sticky left-0 z-10 bg-gray-100 dark:bg-gray-800 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)] dark:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.3)]">
+        <TableSerialCell index={rowIndex} sticky rowBg="bg-gray-100 dark:bg-gray-800" />
+        <td className="p-3 text-left sticky left-11 z-10 bg-gray-100 dark:bg-gray-800 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)] dark:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.3)]">
           <p className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[160px]">{pos.stockName}</p>
           <p className="text-[11px] text-gray-400 dark:text-gray-500">{pos.symbol}</p>
           {isClosed && (
@@ -410,7 +415,7 @@ function PositionTableRow({ pos, cmp, currentValue, unrealized, unrealizedPct, t
       </tr>
       {isExpanded && (
         <tr>
-          <td colSpan={11} className="p-0">
+          <td colSpan={12} className="p-0">
             <TransactionHistory transactions={pos.transactions} />
           </td>
         </tr>
@@ -419,15 +424,20 @@ function PositionTableRow({ pos, cmp, currentValue, unrealized, unrealizedPct, t
   );
 }
 
-function SortHeader({ label, sortKey, current, dir, onSort, align = 'right' }: {
+function SortHeader({ label, sortKey, current, dir, onSort, align = 'right', stickyAfterSerial }: {
   label: string; sortKey: SortKey; current: SortKey; dir: SortDir;
   onSort: (key: SortKey) => void; align?: 'left' | 'right';
+  stickyAfterSerial?: boolean;
 }) {
   const isActive = current === sortKey;
   return (
     <th
       className={`p-3 font-medium text-xs uppercase tracking-wider cursor-pointer select-none whitespace-nowrap
-        ${align === 'left' ? 'text-left sticky left-0 z-10 bg-gray-100 dark:bg-gray-700/50 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)]' : 'text-right'}
+        ${align === 'left'
+          ? stickyAfterSerial
+            ? 'text-left sticky left-11 z-10 bg-gray-100 dark:bg-gray-700/50 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)]'
+            : 'text-left sticky left-0 z-10 bg-gray-100 dark:bg-gray-700/50 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)]'
+          : 'text-right'}
         ${isActive ? 'text-blue-600' : 'text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400'}`}
       onClick={() => onSort(sortKey)}
     >
