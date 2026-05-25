@@ -1,0 +1,60 @@
+{
+  "indexId": "niftyit",
+  "label": "Nifty IT",
+  "group": "indian",
+  "source": "niftyindices",
+  "asOf": "2026-05-25",
+  "isProxy": false,
+  "stocks": [
+    {
+      "symbol": "COFORGE.NS",
+      "shortName": "Coforge Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HCLTECH.NS",
+      "shortName": "HCL Technologies Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "INFY.NS",
+      "shortName": "Infosys Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LTM.NS",
+      "shortName": "LTM Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MPHASIS.NS",
+      "shortName": "MphasiS Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "OFSS.NS",
+      "shortName": "Oracle Financial Services Software Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PERSISTENT.NS",
+      "shortName": "Persistent Systems Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TCS.NS",
+      "shortName": "Tata Consultancy Services Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TECHM.NS",
+      "shortName": "Tech Mahindra Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WIPRO.NS",
+      "shortName": "Wipro Ltd.",
+      "marketCap": 0
+    }
+  ]
+}

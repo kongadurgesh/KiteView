@@ -1,0 +1,110 @@
+{
+  "indexId": "niftypharma",
+  "label": "Nifty Pharma",
+  "group": "indian",
+  "source": "niftyindices",
+  "asOf": "2026-05-25",
+  "isProxy": false,
+  "stocks": [
+    {
+      "symbol": "ABBOTINDIA.NS",
+      "shortName": "Abbott India Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AJANTPHARM.NS",
+      "shortName": "Ajanta Pharmaceuticals Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ALKEM.NS",
+      "shortName": "Alkem Laboratories Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AUROPHARMA.NS",
+      "shortName": "Aurobindo Pharma Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BIOCON.NS",
+      "shortName": "Biocon Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CIPLA.NS",
+      "shortName": "Cipla Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DIVISLAB.NS",
+      "shortName": "Divi's Laboratories Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DRREDDY.NS",
+      "shortName": "Dr. Reddy's Laboratories Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GLAND.NS",
+      "shortName": "Gland Pharma Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GLENMARK.NS",
+      "shortName": "Glenmark Pharmaceuticals Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "IPCALAB.NS",
+      "shortName": "Ipca Laboratories Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "JBCHEPHARM.NS",
+      "shortName": "J.B. Chemicals & Pharmaceuticals Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LAURUSLABS.NS",
+      "shortName": "Laurus Labs Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LUPIN.NS",
+      "shortName": "Lupin Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MANKIND.NS",
+      "shortName": "Mankind Pharma Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PPLPHARMA.NS",
+      "shortName": "Piramal Pharma Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SUNPHARMA.NS",
+      "shortName": "Sun Pharmaceutical Industries Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TORNTPHARM.NS",
+      "shortName": "Torrent Pharmaceuticals Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WOCKPHARMA.NS",
+      "shortName": "Wockhardt Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ZYDUSLIFE.NS",
+      "shortName": "Zydus Lifesciences Ltd.",
+      "marketCap": 0
+    }
+  ]
+}

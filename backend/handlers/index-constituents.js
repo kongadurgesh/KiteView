@@ -1,43 +1,17 @@
 import { getYahooCrumb } from '../yahooCrumb.js';
 import { getHeatmapIndexDef } from '../heatmapIndexConfig.js';
+import { loadBundledConstituents, resolveBundledConstituents } from '../bundledConstituents.js';
 
 const CACHE_TTL_MS = 60 * 60 * 1000;
 const cache = new Map();
 
-function dedupeSymbols(symbols) {
-  const seen = new Set();
-  const out = [];
-  for (const s of symbols) {
-    const sym = s?.trim();
-    if (!sym || seen.has(sym)) continue;
-    seen.add(sym);
-    out.push(sym);
-  }
-  return out;
-}
-
-async function fetchComponents(symbol, { crumb, cookie, ua }) {
-  const url = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=components&crumb=${encodeURIComponent(crumb)}`;
-  const response = await fetch(url, {
-    headers: { 'User-Agent': ua, Cookie: cookie },
-  });
-  if (!response.ok) return [];
-  const data = await response.json();
-  return dedupeSymbols(data?.quoteSummary?.result?.[0]?.components?.components ?? []);
-}
-
-async function fetchScreenerStocks(
-  { region, sector, limit, nsOnly },
-  { crumb, cookie, ua },
-) {
+async function fetchScreenerProxy({ region, limit }, creds) {
+  const { crumb, cookie, ua } = creds;
   const minCap = region === 'us' ? 500_000_000 : 5_000_000_000;
   const operands = [
     { operator: 'eq', operands: ['region', region] },
     { operator: 'gt', operands: ['intradaymarketcap', minCap] },
   ];
-  if (sector) {
-    operands.push({ operator: 'eq', operands: ['sector', sector] });
-  }
 
   const stocks = [];
   let offset = 0;
@@ -69,13 +43,11 @@ async function fetchScreenerStocks(
 
     for (const q of quotes) {
       if (!q.symbol) continue;
-      if (nsOnly && !q.symbol.endsWith('.NS')) continue;
-      if (q.symbol.endsWith('.BO')) continue;
       stocks.push({
         symbol: q.symbol,
         shortName: q.shortName || q.longName || q.symbol,
         marketCap: q.marketCap ?? 0,
-      });
+                    });
       if (stocks.length >= limit) break;
     }
 
@@ -91,7 +63,9 @@ async function enrichWithQuotes(stocks, creds) {
   if (stocks.length === 0) return [];
   const { crumb, cookie, ua } = creds;
   const symbols = stocks.map((s) => (typeof s === 'string' ? s : s.symbol));
+  const bySymbol = new Map(stocks.map((s) => [typeof s === 'string' ? s : s.symbol, s]));
   const out = [];
+
   for (let i = 0; i < symbols.length; i += 50) {
     const batch = symbols.slice(i, i + 50).join(',');
     const url = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(batch)}&crumb=${encodeURIComponent(crumb)}`;
@@ -99,48 +73,67 @@ async function enrichWithQuotes(stocks, creds) {
       headers: { 'User-Agent': ua, Cookie: cookie },
     });
     const data = await response.json();
-    const rows = data?.quoteResponse?.result ?? [];
-    for (const r of rows) {
+    for (const r of data?.quoteResponse?.result ?? []) {
       if (!r.symbol) continue;
+      const base = bySymbol.get(r.symbol);
       out.push({
         symbol: r.symbol,
-        shortName: r.shortName || r.longName || r.symbol,
-        marketCap: r.marketCap ?? 0,
+        shortName: r.shortName || r.longName || base?.shortName || r.symbol,
+        marketCap: r.marketCap ?? base?.marketCap ?? 0,
       });
     }
+  }
+
+  if (out.length === 0) {
+    return stocks.map((s) =>
+      typeof s === 'string'
+        ? { symbol: s, shortName: s, marketCap: 0 }
+        : { symbol: s.symbol, shortName: s.shortName ?? s.symbol, marketCap: s.marketCap ?? 0 },
+    );
   }
   return out;
 }
 
-async function resolveConstituents(def, nseSliceStocks) {
+async function resolveConstituents(def) {
   const creds = await getYahooCrumb();
-  const ua =
+  creds.ua =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-  creds.ua = ua;
 
   const { source } = def;
 
-  if (source.type === 'slice') {
-    const end = source.end === Infinity ? nseSliceStocks.length : source.end;
-    return nseSliceStocks.slice(source.start, Math.min(end, nseSliceStocks.length));
-  }
-
-  if (source.type === 'components') {
-    let symbols = await fetchComponents(source.symbol, creds);
-    if (symbols.length < 8 && source.fallbackSlice && nseSliceStocks.length > 0) {
-      const [start, end] = source.fallbackSlice;
-      return nseSliceStocks.slice(start, Math.min(end, nseSliceStocks.length));
+  if (source.type === 'bundled') {
+    const bundle = loadBundledConstituents(def.id) ?? (await resolveBundledConstituents(def.id));
+    if (!bundle?.stocks?.length) {
+      throw new Error(`No bundled constituents for ${def.id}`);
     }
-    if (symbols.length === 0) return [];
-    const partial = symbols.map((symbol) => ({ symbol, shortName: symbol, marketCap: 0 }));
-    return enrichWithQuotes(partial, creds);
+    const enriched = await enrichWithQuotes(bundle.stocks, creds);
+    return {
+      indexId: def.id,
+      label: bundle.label ?? def.label,
+      group: bundle.group ?? def.group,
+      source: bundle.source ?? 'bundled',
+      asOf: bundle.asOf ?? null,
+      isProxy: false,
+      stocks: enriched,
+      total: enriched.length,
+    };
   }
 
-  if (source.type === 'screener') {
-    return fetchScreenerStocks(source, creds);
+  if (source.type === 'proxy') {
+    const stocks = await fetchScreenerProxy(source, creds);
+    return {
+      indexId: def.id,
+      label: def.label,
+      group: def.group,
+      source: 'proxy-screener',
+      asOf: new Date().toISOString().slice(0, 10),
+      isProxy: true,
+      stocks,
+      total: stocks.length,
+    };
   }
 
-  return [];
+  return null;
 }
 
 export default async function handler(req, res) {
@@ -169,14 +162,10 @@ export default async function handler(req, res) {
   }
 
   try {
-    const stocks = await resolveConstituents(def, []);
-    const payload = {
-      indexId: def.id,
-      label: def.label,
-      group: def.group,
-      stocks,
-      total: stocks.length,
-    };
+    const payload = await resolveConstituents(def);
+    if (!payload) {
+      return res.status(500).json({ error: 'Unsupported index source' });
+    }
     cache.set(cacheKey, { data: payload, expires: Date.now() + CACHE_TTL_MS });
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.status(200).json(payload);

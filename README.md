@@ -55,6 +55,7 @@ Scans the NSE universe (market cap > ₹1,000 Cr) for breakout stocks.
 Treemap of NSE stocks sized by market cap and colored by performance.
 
 - Custom squarified treemap (no external treemap library)
+- Tiles show **company name** (when space allows), change %, and price on larger cells
 - Timeframes: **1D**, **1W**, **1M**, **1Y**
 - Color scale: red (down) → gray (flat) → green (up)
 - Sector filter; click a tile to jump to **Stock Analysis** (`/analysis?symbol=…`)
@@ -115,7 +116,10 @@ Research lists with live snapshots and optional browser alerts (stored in `local
 
 Live benchmark dashboard grouped by asset class (Yahoo Finance quotes, 15s refresh).
 
-- **Indian / Global**: click a card to open **Market Heatmap** with real constituents (Yahoo index components, sector screeners, or regional lists — not NSE cap-ranked proxies)
+- **Indian / Global**: click a card to open **Market Heatmap** with **official index constituents** (not Yahoo’s ~30-component subset)
+- **Constituent sources**: [Nifty Indices](https://www.niftyindices.com) CSVs (Indian), GitHub S&P 500 dataset (US), Wikipedia tables (Dow, Nasdaq 100, FTSE, DAX, CAC, ASX, Sensex). **Yahoo Finance** is used only for live quotes/market cap on heatmap tiles
+- **Approximate indices**: Nikkei 225, Hang Seng, Russell 2000, KOSPI — labeled “approx” (regional cap-ranked proxy until a free full list is wired)
+- **Refresh bundled lists**: `npm run refresh-constituents` → writes `data/constituents/*.json` (commit after refresh)
 - **Heatmap index picker**: grouped **Indian** and **Global** filters; S&P 500, Dow, Nasdaq 100, FTSE, DAX, Nikkei, Hang Seng, sector indices (Bank Nifty, IT, …), and NSE cap slices
 - **Forex**: USD/INR, EUR/USD, GBP/USD, USD/JPY
 - **Commodity**: Gold, silver, crude, natural gas (COMEX futures via Yahoo)
@@ -193,6 +197,14 @@ KiteView/
 │   ├── patternDetect.js
 │   ├── trendlyneSwot.js
 │   ├── heatmapIndexConfig.js
+│   ├── constituentFetchers.js        # Nifty Indices / CSV / Wikipedia fetchers
+│   ├── constituentRefreshConfig.js
+│   ├── bundledConstituents.js
+│   └── constituentSymbol.js          # Exchange ticker → Yahoo symbol
+├── data/
+│   └── constituents/                 # Bundled index member lists (refresh via npm script)
+├── scripts/
+│   └── refresh-constituents.mjs
 │   ├── watchlistSnapshot.js
 │   └── yahooCrumb.js
 ├── src/
@@ -297,7 +309,7 @@ Base URL: same-origin `/api` (Vite proxies to port **3006** in dev; Vercel serve
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/api/chart/:symbol` | Historical OHLCV. Query: `range`, `interval` |
-| GET | `/api/index-constituents?indexId=` | Index members for heatmap (components, sector/regional screener). Slice indices use client NSE list |
+| GET | `/api/index-constituents?indexId=` | Index members for heatmap from bundled lists (+ Yahoo quote enrichment). Slice indices use client NSE list; proxy indices return approximate regional lists |
 | GET | `/api/quote/:symbols` | Live quote(s); comma-separated symbols supported |
 | GET | `/api/profile/:symbol` | Sector and industry |
 | GET | `/api/stats/:symbol` | P/E, forward P/E, P/B, beta, 52W change, market cap |

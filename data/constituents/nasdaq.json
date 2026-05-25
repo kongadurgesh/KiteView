@@ -1,0 +1,540 @@
+{
+  "indexId": "nasdaq",
+  "label": "Nasdaq 100",
+  "group": "global",
+  "source": "wikipedia-table",
+  "asOf": "2026-05-25",
+  "isProxy": false,
+  "stocks": [
+    {
+      "symbol": "ADBE",
+      "shortName": "Adobe Inc.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AMD",
+      "shortName": "Advanced Micro Devices",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ABNB",
+      "shortName": "Airbnb",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ALNY",
+      "shortName": "Alnylam Pharmaceuticals",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GOOGL",
+      "shortName": "Alphabet Inc. (Class A)",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GOOG",
+      "shortName": "Alphabet Inc. (Class C)",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AMZN",
+      "shortName": "Amazon",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AEP",
+      "shortName": "American Electric Power",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AMGN",
+      "shortName": "Amgen",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ADI",
+      "shortName": "Analog Devices",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AAPL",
+      "shortName": "Apple Inc.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AMAT",
+      "shortName": "Applied Materials",
+      "marketCap": 0
+    },
+    {
+      "symbol": "APP",
+      "shortName": "AppLovin",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ARM",
+      "shortName": "Arm Holdings",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ASML",
+      "shortName": "ASML Holding",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ADSK",
+      "shortName": "Autodesk",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ADP",
+      "shortName": "Automatic Data Processing",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AXON",
+      "shortName": "Axon Enterprise",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BKR",
+      "shortName": "Baker Hughes",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BKNG",
+      "shortName": "Booking Holdings",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AVGO",
+      "shortName": "Broadcom",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CDNS",
+      "shortName": "Cadence Design Systems",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CHTR",
+      "shortName": "Charter Communications",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CTAS",
+      "shortName": "Cintas",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CSCO",
+      "shortName": "Cisco",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CCEP",
+      "shortName": "Coca-Cola Europacific Partners",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CTSH",
+      "shortName": "Cognizant",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CMCSA",
+      "shortName": "Comcast",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CEG",
+      "shortName": "Constellation Energy",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CPRT",
+      "shortName": "Copart",
+      "marketCap": 0
+    },
+    {
+      "symbol": "COST",
+      "shortName": "Costco",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CRWD",
+      "shortName": "CrowdStrike",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CSX",
+      "shortName": "CSX Corporation",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DDOG",
+      "shortName": "Datadog",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DXCM",
+      "shortName": "DexCom",
+      "marketCap": 0
+    },
+    {
+      "symbol": "FANG",
+      "shortName": "Diamondback Energy",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DASH",
+      "shortName": "DoorDash",
+      "marketCap": 0
+    },
+    {
+      "symbol": "EA",
+      "shortName": "Electronic Arts",
+      "marketCap": 0
+    },
+    {
+      "symbol": "EXC",
+      "shortName": "Exelon",
+      "marketCap": 0
+    },
+    {
+      "symbol": "FAST",
+      "shortName": "Fastenal",
+      "marketCap": 0
+    },
+    {
+      "symbol": "FER",
+      "shortName": "Ferrovial",
+      "marketCap": 0
+    },
+    {
+      "symbol": "FTNT",
+      "shortName": "Fortinet",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GEHC",
+      "shortName": "GE HealthCare",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GILD",
+      "shortName": "Gilead Sciences",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HON",
+      "shortName": "Honeywell",
+      "marketCap": 0
+    },
+    {
+      "symbol": "IDXX",
+      "shortName": "Idexx Laboratories",
+      "marketCap": 0
+    },
+    {
+      "symbol": "INSM",
+      "shortName": "Insmed Incorporated",
+      "marketCap": 0
+    },
+    {
+      "symbol": "INTC",
+      "shortName": "Intel",
+      "marketCap": 0
+    },
+    {
+      "symbol": "INTU",
+      "shortName": "Intuit",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ISRG",
+      "shortName": "Intuitive Surgical",
+      "marketCap": 0
+    },
+    {
+      "symbol": "KDP",
+      "shortName": "Keurig Dr Pepper",
+      "marketCap": 0
+    },
+    {
+      "symbol": "KLAC",
+      "shortName": "KLA Corporation",
+      "marketCap": 0
+    },
+    {
+      "symbol": "KHC",
+      "shortName": "Kraft Heinz",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LRCX",
+      "shortName": "Lam Research",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LIN",
+      "shortName": "Linde plc",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LITE",
+      "shortName": "Lumentum",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MAR",
+      "shortName": "Marriott International",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MRVL",
+      "shortName": "Marvell Technology",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MELI",
+      "shortName": "Mercado Libre",
+      "marketCap": 0
+    },
+    {
+      "symbol": "META",
+      "shortName": "Meta Platforms",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MCHP",
+      "shortName": "Microchip Technology",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MU",
+      "shortName": "Micron Technology",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MSFT",
+      "shortName": "Microsoft",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MSTR",
+      "shortName": "MicroStrategy",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MDLZ",
+      "shortName": "Mondelez International",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MPWR",
+      "shortName": "Monolithic Power Systems",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MNST",
+      "shortName": "Monster Beverage",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NFLX",
+      "shortName": "Netflix, Inc.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NVDA",
+      "shortName": "Nvidia",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NXPI",
+      "shortName": "NXP Semiconductors",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ORLY",
+      "shortName": "O'Reilly Automotive",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ODFL",
+      "shortName": "Old Dominion Freight Line",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PCAR",
+      "shortName": "Paccar",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PLTR",
+      "shortName": "Palantir Technologies",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PANW",
+      "shortName": "Palo Alto Networks",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PAYX",
+      "shortName": "Paychex",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PYPL",
+      "shortName": "PayPal",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PDD",
+      "shortName": "PDD Holdings",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PEP",
+      "shortName": "PepsiCo",
+      "marketCap": 0
+    },
+    {
+      "symbol": "QCOM",
+      "shortName": "Qualcomm",
+      "marketCap": 0
+    },
+    {
+      "symbol": "REGN",
+      "shortName": "Regeneron Pharmaceuticals",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ROP",
+      "shortName": "Roper Technologies",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ROST",
+      "shortName": "Ross Stores",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SNDK",
+      "shortName": "Sandisk",
+      "marketCap": 0
+    },
+    {
+      "symbol": "STX",
+      "shortName": "Seagate Technology",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SHOP",
+      "shortName": "Shopify",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SBUX",
+      "shortName": "Starbucks",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SNPS",
+      "shortName": "Synopsys",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TMUS",
+      "shortName": "T-Mobile US",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TTWO",
+      "shortName": "Take-Two Interactive",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TSLA",
+      "shortName": "Tesla, Inc.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TXN",
+      "shortName": "Texas Instruments",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TRI",
+      "shortName": "Thomson Reuters",
+      "marketCap": 0
+    },
+    {
+      "symbol": "VRSK",
+      "shortName": "Verisk Analytics",
+      "marketCap": 0
+    },
+    {
+      "symbol": "VRTX",
+      "shortName": "Vertex Pharmaceuticals",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WMT",
+      "shortName": "Walmart",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WBD",
+      "shortName": "Warner Bros. Discovery",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WDC",
+      "shortName": "Western Digital",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WDAY",
+      "shortName": "Workday, Inc.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "XEL",
+      "shortName": "Xcel Energy",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ZS",
+      "shortName": "Zscaler",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DATE",
+      "shortName": "Added",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MAY",
+      "shortName": "LITE",
+      "marketCap": 0
+    },
+    {
+      "symbol": "APRIL",
+      "shortName": "SNDK",
+      "marketCap": 0
+    },
+    {
+      "symbol": "JANUARY",
+      "shortName": "WMT",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DECEMBER",
+      "shortName": "ALNY",
+      "marketCap": 0
+    }
+  ]
+}

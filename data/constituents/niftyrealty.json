@@ -1,0 +1,60 @@
+{
+  "indexId": "niftyrealty",
+  "label": "Nifty Realty",
+  "group": "indian",
+  "source": "niftyindices",
+  "asOf": "2026-05-25",
+  "isProxy": false,
+  "stocks": [
+    {
+      "symbol": "ABREL.NS",
+      "shortName": "Aditya Birla Real Estate Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ANANTRAJ.NS",
+      "shortName": "Anant Raj Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BRIGADE.NS",
+      "shortName": "Brigade Enterprises Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DLF.NS",
+      "shortName": "DLF Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GODREJPROP.NS",
+      "shortName": "Godrej Properties Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LODHA.NS",
+      "shortName": "Lodha Developers Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "OBEROIRLTY.NS",
+      "shortName": "Oberoi Realty Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PHOENIXLTD.NS",
+      "shortName": "Phoenix Mills Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PRESTIGE.NS",
+      "shortName": "Prestige Estates Projects Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SOBHA.NS",
+      "shortName": "Sobha Ltd.",
+      "marketCap": 0
+    }
+  ]
+}

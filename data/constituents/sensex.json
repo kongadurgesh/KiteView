@@ -1,0 +1,160 @@
+{
+  "indexId": "sensex",
+  "label": "Sensex 30",
+  "group": "indian",
+  "source": "wikipedia-table",
+  "asOf": "2026-05-25",
+  "isProxy": false,
+  "stocks": [
+    {
+      "symbol": "ADANIPORTS.NS",
+      "shortName": "Adani Ports & SEZ",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ASIANPAINT.NS",
+      "shortName": "Asian Paints",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AXISBANK.NS",
+      "shortName": "Axis Bank",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BAJFINANCE.NS",
+      "shortName": "Bajaj Finance",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BAJAJFINSV.NS",
+      "shortName": "Bajaj Finserv",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BEL.NS",
+      "shortName": "Bharat Electronics",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BHARTIARTL.NS",
+      "shortName": "Bharti Airtel",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ETERNAL.NS",
+      "shortName": "Eternal",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HCLTECH.NS",
+      "shortName": "HCLTech",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HDFCBANK.NS",
+      "shortName": "HDFC Bank",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HINDUNILVR.NS",
+      "shortName": "Hindustan Unilever",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ICICIBANK.NS",
+      "shortName": "ICICI Bank",
+      "marketCap": 0
+    },
+    {
+      "symbol": "INDIGO.NS",
+      "shortName": "IndiGo",
+      "marketCap": 0
+    },
+    {
+      "symbol": "INFY.NS",
+      "shortName": "Infosys",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ITC.NS",
+      "shortName": "ITC",
+      "marketCap": 0
+    },
+    {
+      "symbol": "KOTAKBANK.NS",
+      "shortName": "Kotak Mahindra Bank",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LT.NS",
+      "shortName": "Larsen & Toubro",
+      "marketCap": 0
+    },
+    {
+      "symbol": "M&M.NS",
+      "shortName": "Mahindra & Mahindra",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MARUTI.NS",
+      "shortName": "Maruti Suzuki",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NTPC.NS",
+      "shortName": "NTPC",
+      "marketCap": 0
+    },
+    {
+      "symbol": "POWERGRID.NS",
+      "shortName": "Power Grid",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RELIANCE.NS",
+      "shortName": "Reliance Industries",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SBIN.NS",
+      "shortName": "State Bank of India",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SUNPHARMA.NS",
+      "shortName": "Sun Pharma",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TCS.NS",
+      "shortName": "Tata Consultancy Services",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TATASTEEL.NS",
+      "shortName": "Tata Steel",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TECHM.NS",
+      "shortName": "Tech Mahindra",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TITAN.NS",
+      "shortName": "Titan Company",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TRENT.NS",
+      "shortName": "Trent",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ULTRACEMCO.NS",
+      "shortName": "UltraTech Cement",
+      "marketCap": 0
+    }
+  ]
+}

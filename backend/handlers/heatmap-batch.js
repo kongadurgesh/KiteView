@@ -57,7 +57,7 @@ function pctFromChartPayload(data, symbol) {
   return {
     changePercent: ((last - first) / first) * 100,
     regularMarketPrice: meta.regularMarketPrice ?? last,
-    shortName: meta.shortName || meta.symbol || symbol,
+    shortName: meta.longName || meta.shortName || meta.symbol || symbol,
   };
 }
 
@@ -82,7 +82,7 @@ async function fetchQuotesBatch(symbols) {
     for (const r of data?.quoteResponse?.result ?? []) {
       if (!r.symbol) continue;
       out[r.symbol] = {
-        shortName: r.shortName ?? r.symbol,
+        shortName: r.longName ?? r.shortName ?? r.symbol,
         regularMarketPrice: r.regularMarketPrice ?? 0,
         changePercent: r.regularMarketChangePercent ?? 0,
         marketCap: r.marketCap ?? 0,

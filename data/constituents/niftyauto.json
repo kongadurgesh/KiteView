@@ -1,0 +1,85 @@
+{
+  "indexId": "niftyauto",
+  "label": "Nifty Auto",
+  "group": "indian",
+  "source": "niftyindices",
+  "asOf": "2026-05-25",
+  "isProxy": false,
+  "stocks": [
+    {
+      "symbol": "ASHOKLEY.NS",
+      "shortName": "Ashok Leyland Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BAJAJ-AUTO.NS",
+      "shortName": "Bajaj Auto Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BHARATFORG.NS",
+      "shortName": "Bharat Forge Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BOSCHLTD.NS",
+      "shortName": "Bosch Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "EICHERMOT.NS",
+      "shortName": "Eicher Motors Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "EXIDEIND.NS",
+      "shortName": "Exide Industries Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HEROMOTOCO.NS",
+      "shortName": "Hero MotoCorp Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "M&M.NS",
+      "shortName": "Mahindra & Mahindra Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MARUTI.NS",
+      "shortName": "Maruti Suzuki India Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MOTHERSON.NS",
+      "shortName": "Samvardhana Motherson International Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SONACOMS.NS",
+      "shortName": "Sona BLW Precision Forgings Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TVSMOTOR.NS",
+      "shortName": "TVS Motor Company Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TMPV.NS",
+      "shortName": "Tata Motors Passenger Vehicles Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TIINDIA.NS",
+      "shortName": "Tube Investments of India Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "UNOMINDA.NS",
+      "shortName": "UNO Minda Ltd.",
+      "marketCap": 0
+    }
+  ]
+}

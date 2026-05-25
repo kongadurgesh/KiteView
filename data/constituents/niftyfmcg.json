@@ -1,0 +1,85 @@
+{
+  "indexId": "niftyfmcg",
+  "label": "Nifty FMCG",
+  "group": "indian",
+  "source": "niftyindices",
+  "asOf": "2026-05-25",
+  "isProxy": false,
+  "stocks": [
+    {
+      "symbol": "BRITANNIA.NS",
+      "shortName": "Britannia Industries Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "COLPAL.NS",
+      "shortName": "Colgate Palmolive (India) Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DABUR.NS",
+      "shortName": "Dabur India Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "EMAMILTD.NS",
+      "shortName": "Emami Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GODREJCP.NS",
+      "shortName": "Godrej Consumer Products Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HINDUNILVR.NS",
+      "shortName": "Hindustan Unilever Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ITC.NS",
+      "shortName": "ITC Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MARICO.NS",
+      "shortName": "Marico Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NESTLEIND.NS",
+      "shortName": "Nestle India Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PATANJALI.NS",
+      "shortName": "Patanjali Foods Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RADICO.NS",
+      "shortName": "Radico Khaitan Ltd",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TATACONSUM.NS",
+      "shortName": "Tata Consumer Products Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "UBL.NS",
+      "shortName": "United Breweries Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "UNITDSPR.NS",
+      "shortName": "United Spirits Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "VBL.NS",
+      "shortName": "Varun Beverages Ltd.",
+      "marketCap": 0
+    }
+  ]
+}
