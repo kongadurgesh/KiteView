@@ -74,6 +74,10 @@ export const PAGE_COPY = {
       title: 'Heatmap',
       blurb: 'Treemap by market cap with 1D / 1W / 1M / 1Y color.',
     },
+    indices: {
+      title: 'Indices',
+      blurb: 'Indian, global, forex, commodity, and crypto benchmarks in one dashboard.',
+    },
     analysis: {
       title: 'Analysis',
       blurb: 'Trendlyne SWOT, quarterly results, technicals, and conditional breakout levels.',
@@ -82,17 +86,13 @@ export const PAGE_COPY = {
       title: 'Compare',
       blurb: 'Normalized performance, index overlay, and a ranked metric grid.',
     },
-    portfolio: {
-      title: 'Portfolio',
-      blurb: 'Holdings, P&L, performance vs indices, and risk analytics.',
-    },
     watchlist: {
       title: 'Watchlist',
       blurb: 'Research lists with signals, SWOT, thesis notes, and alerts.',
     },
-    indices: {
-      title: 'Indices',
-      blurb: 'Indian, global, forex, commodity, and crypto benchmarks in one dashboard.',
+    portfolio: {
+      title: 'Portfolio',
+      blurb: 'Holdings, P&L, performance vs indices, and risk analytics.',
     },
     about: {
       title: 'About',
