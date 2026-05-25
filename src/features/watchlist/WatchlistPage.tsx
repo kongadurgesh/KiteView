@@ -6,6 +6,7 @@ import { PAGE_COPY } from '../../content/pageCopy';
 import { fmtDistPct, fmtNumber, fmtQuotePct } from '../../lib/format';
 import { fetchWatchlistSnapshot } from '../../services/apiBatch';
 import type { WatchlistAlerts, WatchlistItem, WatchlistSnapshot, WatchlistThesis } from '../../types/watchlist';
+import { RenameWatchlistModal } from './components/RenameWatchlistModal';
 import { useWatchlists } from './WatchlistProvider';
 import { evaluateWatchlistAlerts, requestNotificationPermission } from './watchlistAlerts';
 
@@ -153,6 +154,7 @@ export function WatchlistPage() {
   );
   const [newListName, setNewListName] = useState('');
   const [showNewList, setShowNewList] = useState(false);
+  const [showRenameModal, setShowRenameModal] = useState(false);
 
   const symbolsKey = active?.items.map((i) => i.symbol).join(',') ?? '';
 
@@ -280,14 +282,7 @@ export function WatchlistPage() {
               </Button>
             )}
             {active && (
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => {
-                  const name = window.prompt('Rename list', active.name);
-                  if (name?.trim()) renameList(active.id, name.trim());
-                }}
-              >
+              <Button size="sm" variant="secondary" onClick={() => setShowRenameModal(true)}>
                 Rename
               </Button>
             )}
@@ -426,6 +421,17 @@ export function WatchlistPage() {
           </div>
         )}
       </div>
+
+      {showRenameModal && active && (
+        <RenameWatchlistModal
+          currentName={active.name}
+          onSave={(name) => {
+            renameList(active.id, name);
+            setShowRenameModal(false);
+          }}
+          onClose={() => setShowRenameModal(false)}
+        />
+      )}
     </PageLayout>
   );
 }

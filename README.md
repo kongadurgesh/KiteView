@@ -223,7 +223,7 @@ KiteView/
 │   │   │   ├── WatchlistPage.tsx
 │   │   │   ├── WatchlistProvider.tsx
 │   │   │   ├── watchlistStore.ts, watchlistAlerts.ts
-│   │   │   └── components/AddToWatchlistButton.tsx
+│   │   │   └── components/AddToWatchlistButton.tsx, RenameWatchlistModal.tsx
 │   │   └── about/AboutPage.tsx
 │   ├── content/pageCopy.ts           # Page titles, descriptions, static copy
 │   ├── lib/
