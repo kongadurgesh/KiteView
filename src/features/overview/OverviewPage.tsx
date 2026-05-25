@@ -367,11 +367,11 @@ const TOOL_NAV: {
 }[] = [
   { key: 'screener', page: 'screener', accent: 'blue', preview: (a) => <ScreenerPreview animated={a} />, wide: true },
   { key: 'heatmap', page: 'heatmap', accent: 'teal', preview: (a) => <HeatmapPreview animated={a} /> },
+  { key: 'indices', page: 'indices', accent: 'sky', preview: (a) => <IndicesPreview animated={a} /> },
   { key: 'analysis', page: 'analysis', accent: 'violet', preview: (a) => <LookupPreview animated={a} /> },
   { key: 'compare', page: 'compare', accent: 'amber', preview: (a) => <ComparePreview animated={a} /> },
-  { key: 'portfolio', page: 'portfolio', accent: 'emerald', preview: (a) => <PortfolioPreview animated={a} /> },
   { key: 'watchlist', page: 'watchlist', accent: 'rose', preview: (a) => <WatchlistPreview animated={a} /> },
-  { key: 'indices', page: 'indices', accent: 'sky', preview: (a) => <IndicesPreview animated={a} /> },
+  { key: 'portfolio', page: 'portfolio', accent: 'emerald', preview: (a) => <PortfolioPreview animated={a} /> },
   { key: 'about', page: 'about', accent: 'slate', preview: (a) => <AboutPreview animated={a} /> },
 ];
 
