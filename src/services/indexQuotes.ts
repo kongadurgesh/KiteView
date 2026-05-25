@@ -19,6 +19,41 @@ interface YahooQuoteRow {
   regularMarketChangePercent?: number;
 }
 
+/** Yahoo v7 quote often returns 0% change for some European indices while price is valid. */
+function quoteChangeStale(
+  price: number | null,
+  change: number | null,
+  changePct: number | null,
+): boolean {
+  if (price == null || price <= 0) return false;
+  return (change ?? 0) === 0 && (changePct ?? 0) === 0;
+}
+
+async function fetchDayChangeFromChart(
+  symbol: string,
+): Promise<{ change: number; changePct: number } | null> {
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/chart/${encodeURIComponent(symbol)}?range=5d&interval=1d`,
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const closes =
+      (data?.chart?.result?.[0]?.indicators?.quote?.[0]?.close as (number | null)[] | undefined)?.filter(
+        (c): c is number => c != null && !Number.isNaN(c),
+      ) ?? [];
+    if (closes.length < 2) return null;
+    const last = closes[closes.length - 1];
+    const prev = closes[closes.length - 2];
+    if (!prev) return null;
+    const change = last - prev;
+    const changePct = (change / prev) * 100;
+    return { change, changePct };
+  } catch {
+    return null;
+  }
+}
+
 export function formatIndexPrice(q: IndexQuote): string {
   if (q.price == null) return '—';
   const opts = indexPriceDecimals(q.instrument.category);
@@ -56,7 +91,7 @@ export async function fetchIndexQuotes(instruments: IndexInstrument[]): Promise<
       if (row.symbol) quoteBySymbol.set(row.symbol, row);
     }
 
-    return instruments.map((instrument) => {
+    const quotes: IndexQuote[] = instruments.map((instrument) => {
       const q = quoteBySymbol.get(instrument.symbol);
       return {
         instrument,
@@ -65,6 +100,20 @@ export async function fetchIndexQuotes(instruments: IndexInstrument[]): Promise<
         changePct: q?.regularMarketChangePercent ?? null,
       };
     });
+
+    const stale = quotes.filter((q) => quoteChangeStale(q.price, q.change, q.changePct));
+    if (stale.length === 0) return quotes;
+
+    await Promise.all(
+      stale.map(async (q) => {
+        const fromChart = await fetchDayChangeFromChart(q.instrument.symbol);
+        if (!fromChart || fromChart.changePct === 0) return;
+        q.change = fromChart.change;
+        q.changePct = fromChart.changePct;
+      }),
+    );
+
+    return quotes;
   } catch {
     return instruments.map((instrument) => ({
       instrument,

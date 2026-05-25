@@ -80,9 +80,13 @@ export function fmtMoney(n: number, symbol: string): string {
 }
 
 /** Per-share amounts (e.g. Basic EPS from Yahoo fundamentals). */
-export function fmtEps(raw: number | null): string {
+export function fmtEps(raw: number | null, indian = true): string {
   if (raw == null || Number.isNaN(raw)) return '—';
-  return fmtNumber(raw, { min: 2, max: 2 });
+  const v = raw.toLocaleString(indian ? 'en-IN' : 'en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  return indian ? v : `$${v}`;
 }
 
 /** Large INR amounts (Yahoo fundamentals raw values) → Cr / L. */
@@ -92,6 +96,27 @@ export function fmtFinancialInr(raw: number | null): string {
   if (abs >= 1e7) return `₹${(raw / 1e7).toFixed(2)} Cr`;
   if (abs >= 1e5) return `₹${(raw / 1e5).toFixed(2)} L`;
   return `₹${raw.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+}
+
+/** Large USD amounts (Yahoo fundamentals raw values) → K / M / B / T. */
+export function fmtFinancialUsd(raw: number | null): string {
+  if (raw == null || Number.isNaN(raw)) return '—';
+  const sign = raw < 0 ? '-' : '';
+  const abs = Math.abs(raw);
+  if (abs >= 1e12) return `${sign}$${(abs / 1e12).toFixed(2)}T`;
+  if (abs >= 1e9) return `${sign}$${(abs / 1e9).toFixed(2)}B`;
+  if (abs >= 1e6) return `${sign}$${(abs / 1e6).toFixed(2)}M`;
+  if (abs >= 1e3) return `${sign}$${(abs / 1e3).toFixed(2)}K`;
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(raw);
+}
+
+/** Quarterly P&L line items — INR (Cr/L) for NSE/BSE, USD otherwise. */
+export function fmtFinancialAmount(raw: number | null, indian = true): string {
+  return indian ? fmtFinancialInr(raw) : fmtFinancialUsd(raw);
 }
 
 /** Share volume: raw count → L / Cr style labels. */

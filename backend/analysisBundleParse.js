@@ -203,9 +203,17 @@ async function fetchFundamentalsQuarterlyForRegion(symbol, cookie, region) {
   return parseFundamentalsTimeSeriesResponse(data);
 }
 
+function fundamentalsRegionsForSymbol(symbol) {
+  const s = (symbol ?? '').toUpperCase();
+  if (/\.(NS|BO)$/.test(s)) return ['IN', 'US'];
+  if (s.endsWith('.L')) return ['GB', 'US'];
+  if (/\.(DE|PA|AS|MI|SW)$/.test(s)) return ['DE', 'US', 'GB'];
+  return ['US', 'IN', 'GB'];
+}
+
 export async function fetchFundamentalsQuarterly(symbol, cookie = null) {
   try {
-    for (const region of ['IN', 'US']) {
+    for (const region of fundamentalsRegionsForSymbol(symbol)) {
       const periods = await fetchFundamentalsQuarterlyForRegion(symbol, cookie, region);
       if (periods.length) return { periods };
     }

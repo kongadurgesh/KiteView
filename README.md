@@ -71,6 +71,7 @@ Research any Yahoo-listed equity (NSE, BSE, US, and other exchanges) with always
 - **Technicals**: % from 52W high/low, range position, 50-day SMA, RSI (14), **1Y price chart**
 - **Last 5 quarters P&L** — Total Revenue, Pretax Income, Net Income, Basic EPS with green/red vs oldest quarter, and **DVM scorecard** (Durability / Valuation / Momentum, rule-based 0–100)
 - **Company profile**, **financial highlights**, **analyst recommendations**, **recent news** (Yahoo `quoteSummary` modules via analysis bundle)
+- **Quarterly results** table: INR (Cr/L) for NSE/BSE; USD (K/M/B/T) for global symbols
 - **Breakout panel** (right column on desktop): only when a qualifying breakout is detected — pattern chart, buy/trigger, **BUY/WAIT signal** (BUY when CMP within 2% of buy price), stop-loss, quantity table
 - **No pattern**: compact callout + link to Screener; analysis sections still shown
 - Buy price = `0.98 ×` breakout close; buy trigger = `0.985 ×` breakout close; **BUY** when `CMP ≤ buy price × 1.02`
