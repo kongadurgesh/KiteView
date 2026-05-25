@@ -106,7 +106,7 @@ Research lists with live snapshots and optional browser alerts (stored in `local
 
 - **Multiple lists**: create, rename, delete; default list on first visit
 - **Add from Analysis or Screener**: seeds entry buy price and pattern date when a breakout is present
-- **Live table** via `POST /api/watchlist-snapshot`: **#** row index, CMP, 1D %, BUY/WAIT, buy price, pattern date, SWOT S/W, pattern-today flag
+- **Live table** via `POST /api/watchlist-snapshot`: **#** row index, CMP, BUY/WAIT, buy price, pattern date, SWOT S/W
 - **Thesis panel** per row: note, target/stop, entry buy price, pattern date; alert toggles (BUY window, SWOT flip, pattern today)
 - **Refresh** on load, manual button, and every 5 minutes while the tab is visible
 - **Browser notifications** when alerts fire on refresh (optional; requires permission)
@@ -129,7 +129,7 @@ Author profile, investing philosophy, and linked P&L proof spreadsheets.
 ### 10. Dark Mode & Layout
 
 - **Theme**: Light / dark toggle on the sidebar (class-based, persisted in `localStorage`)
-- **Shell**: Collapsible sidebar, mobile slide-out drawer, top **market ticker** (Indian indices, S&P 500, gold, silver, USD/INR) with **marquee scroll** when the bar overflows (pauses on hover; respects reduced motion)
+- **Shell**: Collapsible sidebar, mobile slide-out drawer, top **market ticker** (Indian indices, S&P 500, gold, silver, USD/INR) with **marquee scroll** when the bar overflows (1s delay on tab load; pauses on hover; respects reduced motion)
 - **Routing**: Each page has its own URL (React Router); sidebar uses links so refresh and share work
 - **Persistent pages**: Visited routes stay mounted when you navigate away — scan results, analysis, compare symbols, heatmap filters, and scroll position are kept until you refresh the tab
 - **Responsive**: `max-w-7xl` content, horizontal scroll on wide tables, sticky first column where needed

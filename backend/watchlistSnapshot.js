@@ -1,5 +1,19 @@
-import { detectPattern } from './patternDetect.js';
+import { detectPattern, detectPatternInRange } from './patternDetect.js';
 import { fetchTrendlyneSwotCounts } from './trendlyneSwot.js';
+
+function dayChangePercent(candles) {
+  if (!candles?.length || candles.length < 2) return null;
+  const last = candles[candles.length - 1].close;
+  const prev = candles[candles.length - 2].close;
+  if (!prev) return null;
+  return ((last - prev) / prev) * 100;
+}
+
+function patternOnLatestSession(candles) {
+  if (!candles?.length || candles.length < 3) return false;
+  const lastDate = candles[candles.length - 1].date;
+  return detectPatternInRange(candles, 0, lastDate, lastDate) != null;
+}
 
 function parseChartResult(result, symbol) {
   const timestamps = result.timestamp ?? [];
@@ -25,9 +39,9 @@ function parseChartResult(result, symbol) {
   const meta = result.meta ?? {};
   return {
     candles,
-    currentPrice: meta.regularMarketPrice ?? 0,
+    currentPrice: meta.regularMarketPrice ?? candles[candles.length - 1]?.close ?? 0,
     shortName: meta.shortName || meta.symbol || symbol,
-    changePercent: meta.regularMarketChangePercent ?? null,
+    changePercent: dayChangePercent(candles) ?? meta.regularMarketChangePercent ?? null,
   };
 }
 
@@ -59,9 +73,9 @@ export async function buildWatchlistSnapshot(symbol) {
   if (!chart) return null;
 
   const match = detectPattern(chart.candles, 0);
-  const lastDate = chart5d?.candles?.[chart5d.candles.length - 1]?.date ?? null;
-  const patternToday =
-    match != null && lastDate != null && match.candle3.date === lastDate;
+  const candles5d = chart5d?.candles ?? [];
+  const candles1y = chart1y?.candles ?? chart.candles;
+  const patternToday = patternOnLatestSession(candles5d) || patternOnLatestSession(candles1y);
 
   const buyPrice = match?.buyPrice ?? null;
   const cmp = chart5d?.currentPrice ?? chart.currentPrice ?? 0;
@@ -71,7 +85,12 @@ export async function buildWatchlistSnapshot(symbol) {
     symbol,
     shortName: chart.shortName,
     currentPrice: cmp,
-    changePercent: chart5d?.changePercent ?? chart.changePercent ?? null,
+    changePercent:
+      dayChangePercent(candles5d)
+      ?? dayChangePercent(candles1y)
+      ?? chart5d?.changePercent
+      ?? chart.changePercent
+      ?? null,
     signal,
     buyPrice,
     patternName: match?.patternName ?? null,
