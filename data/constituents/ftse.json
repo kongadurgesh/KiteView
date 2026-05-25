@@ -2,7 +2,7 @@
   "indexId": "ftse",
   "label": "FTSE 100",
   "group": "global",
-  "source": "wikipedia-table",
+  "source": "wikipedia",
   "asOf": "2026-05-25",
   "isProxy": false,
   "stocks": [
@@ -507,53 +507,8 @@
       "marketCap": 0
     },
     {
-      "symbol": "BANK.L",
-      "shortName": "Currency, governance, regulation",
-      "marketCap": 0
-    },
-    {
-      "symbol": "ECONOMIC.L",
-      "shortName": "Recurrent",
-      "marketCap": 0
-    },
-    {
       "symbol": "ENGLAND.L",
       "shortName": "Nations, regions, cities",
-      "marketCap": 0
-    },
-    {
-      "symbol": "BELFAST.L",
-      "shortName": "Northern Ireland",
-      "marketCap": 0
-    },
-    {
-      "symbol": "ABERDEEN.L",
-      "shortName": "Scotland",
-      "marketCap": 0
-    },
-    {
-      "symbol": "AGRICULTURE.L",
-      "shortName": "Wales",
-      "marketCap": 0
-    },
-    {
-      "symbol": "BILLIONAIRES.L",
-      "shortName": "People and labour",
-      "marketCap": 0
-    },
-    {
-      "symbol": "RESOURCE.L",
-      "shortName": "Sectors",
-      "marketCap": 0
-    },
-    {
-      "symbol": "BALTIC.L",
-      "shortName": "Financial services",
-      "marketCap": 0
-    },
-    {
-      "symbol": "EDUCATION.L",
-      "shortName": "Other",
       "marketCap": 0
     }
   ]

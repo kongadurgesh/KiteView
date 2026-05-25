@@ -2,7 +2,7 @@
   "indexId": "dax",
   "label": "DAX",
   "group": "global",
-  "source": "wikipedia-table",
+  "source": "wikipedia",
   "asOf": "2026-05-25",
   "isProxy": false,
   "stocks": [
@@ -217,11 +217,6 @@
       "marketCap": 0
     },
     {
-      "symbol": "NIXDORF.DE",
-      "shortName": "Merged with Siemens to form Siemens-Nixdorf",
-      "marketCap": 0
-    },
-    {
       "symbol": "18.09.1995.DE",
       "shortName": "SAP",
       "marketCap": 0
@@ -229,6 +224,226 @@
     {
       "symbol": "22.07.1996.DE",
       "shortName": "METRO",
+      "marketCap": 0
+    },
+    {
+      "symbol": "23.09.1996.DE",
+      "shortName": "Münchener Rück",
+      "marketCap": 0
+    },
+    {
+      "symbol": "18.11.1996.DE",
+      "shortName": "Deutsche Telekom",
+      "marketCap": 0
+    },
+    {
+      "symbol": "22.06.1998.DE",
+      "shortName": "Adidas",
+      "marketCap": 0
+    },
+    {
+      "symbol": "21.12.1998.DE",
+      "shortName": "DaimlerChrysler (now Daimler )",
+      "marketCap": 0
+    },
+    {
+      "symbol": "22.03.1999.DE",
+      "shortName": "Degussa-Hüls",
+      "marketCap": 0
+    },
+    {
+      "symbol": "25.03.1999.DE",
+      "shortName": "ThyssenKrupp",
+      "marketCap": 0
+    },
+    {
+      "symbol": "20.09.1999.DE",
+      "shortName": "Fresenius&#160;Medical&#160;Care",
+      "marketCap": 0
+    },
+    {
+      "symbol": "14.02.2000.DE",
+      "shortName": "Epcos",
+      "marketCap": 0
+    },
+    {
+      "symbol": "19.06.2000.DE",
+      "shortName": "E.ON",
+      "marketCap": 0
+    },
+    {
+      "symbol": "VIAG.DE",
+      "shortName": "VIAG",
+      "marketCap": 0
+    },
+    {
+      "symbol": "18.12.2000.DE",
+      "shortName": "Degussa",
+      "marketCap": 0
+    },
+    {
+      "symbol": "19.03.2001.DE",
+      "shortName": "Deutsche Post",
+      "marketCap": 0
+    },
+    {
+      "symbol": "23.07.2001.DE",
+      "shortName": "MLP Vz.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "23.09.2002.DE",
+      "shortName": "Altana",
+      "marketCap": 0
+    },
+    {
+      "symbol": "23.12.2002.DE",
+      "shortName": "Deutsche Börse",
+      "marketCap": 0
+    },
+    {
+      "symbol": "22.09.2003.DE",
+      "shortName": "Continental",
+      "marketCap": 0
+    },
+    {
+      "symbol": "31.01.2005.DE",
+      "shortName": "Lanxess",
+      "marketCap": 0
+    },
+    {
+      "symbol": "01.02.2005.DE",
+      "shortName": "01.02.2005",
+      "marketCap": 0
+    },
+    {
+      "symbol": "19.12.2005.DE",
+      "shortName": "Hypo Real Estate",
+      "marketCap": 0
+    },
+    {
+      "symbol": "18.09.2006.DE",
+      "shortName": "Postbank",
+      "marketCap": 0
+    },
+    {
+      "symbol": "18.06.2007.DE",
+      "shortName": "Merck",
+      "marketCap": 0
+    },
+    {
+      "symbol": "22.09.2008.DE",
+      "shortName": "K+S",
+      "marketCap": 0
+    },
+    {
+      "symbol": "22.12.2008.DE",
+      "shortName": "Beiersdorf",
+      "marketCap": 0
+    },
+    {
+      "symbol": "23.03.2009.DE",
+      "shortName": "Hannover Re",
+      "marketCap": 0
+    },
+    {
+      "symbol": "21.09.2009.DE",
+      "shortName": "Infineon Technologies",
+      "marketCap": 0
+    },
+    {
+      "symbol": "21.06.2010.DE",
+      "shortName": "HeidelbergCement",
+      "marketCap": 0
+    },
+    {
+      "symbol": "24.09.2012.DE",
+      "shortName": "Continental",
+      "marketCap": 0
+    },
+    {
+      "symbol": "21.09.2015.DE",
+      "shortName": "Vonovia",
+      "marketCap": 0
+    },
+    {
+      "symbol": "21.03.2016.DE",
+      "shortName": "ProSiebenSat.1 Media",
+      "marketCap": 0
+    },
+    {
+      "symbol": "19.03.2018.DE",
+      "shortName": "Covestro",
+      "marketCap": 0
+    },
+    {
+      "symbol": "24.09.2018.DE",
+      "shortName": "Wirecard",
+      "marketCap": 0
+    },
+    {
+      "symbol": "16.09.2021.DE",
+      "shortName": "Vitesco",
+      "marketCap": 0
+    },
+    {
+      "symbol": "17.09.2021.DE",
+      "shortName": "17.09.2021",
+      "marketCap": 0
+    },
+    {
+      "symbol": "20.09.2021.DE",
+      "shortName": "Airbus",
+      "marketCap": 0
+    },
+    {
+      "symbol": "29.10.2021.DE",
+      "shortName": "Beiersdorf",
+      "marketCap": 0
+    },
+    {
+      "symbol": "10.12.2021.DE",
+      "shortName": "Daimler Truck",
+      "marketCap": 0
+    },
+    {
+      "symbol": "13.12.2021.DE",
+      "shortName": "13.12.2021",
+      "marketCap": 0
+    },
+    {
+      "symbol": "21.03.2022.DE",
+      "shortName": "Daimler Truck",
+      "marketCap": 0
+    },
+    {
+      "symbol": "20.06.2022.DE",
+      "shortName": "Beiersdorf",
+      "marketCap": 0
+    },
+    {
+      "symbol": "19.09.2022.DE",
+      "shortName": "Siemens Energy",
+      "marketCap": 0
+    },
+    {
+      "symbol": "19.12.2022.DE",
+      "shortName": "Porsche",
+      "marketCap": 0
+    },
+    {
+      "symbol": "27.02.2023.DE",
+      "shortName": "Commerzbank",
+      "marketCap": 0
+    },
+    {
+      "symbol": "20.03.2023.DE",
+      "shortName": "Rheinmetall",
+      "marketCap": 0
+    },
+    {
+      "symbol": "27.12.2024.DE",
+      "shortName": "Fresenius Medical Care",
       "marketCap": 0
     }
   ]

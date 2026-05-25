@@ -2,7 +2,7 @@
   "indexId": "nasdaq",
   "label": "Nasdaq 100",
   "group": "global",
-  "source": "wikipedia-table",
+  "source": "wikipedia",
   "asOf": "2026-05-25",
   "isProxy": false,
   "stocks": [
@@ -522,18 +522,148 @@
       "marketCap": 0
     },
     {
-      "symbol": "APRIL",
-      "shortName": "SNDK",
+      "symbol": "JUNE",
+      "shortName": "GEHC",
       "marketCap": 0
     },
     {
-      "symbol": "JANUARY",
-      "shortName": "WMT",
+      "symbol": "JULY",
+      "shortName": "KHC",
       "marketCap": 0
     },
     {
-      "symbol": "DECEMBER",
-      "shortName": "ALNY",
+      "symbol": "EXCHANGES",
+      "shortName": "Nasdaq BX Canada GEMX ISE MRX Nasdaq NOM PHLX PSX Nasdaq Baltic Riga Tallinn Vilnius Nasdaq Nordic Copenhagen First North Helsinki Iceland Stockholm",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MAIN",
+      "shortName": "Nasdaq 100 Composite Nasdaq Baltic Baltic 10 Nasdaq Nordic Copenhagen 25 Helsinki 25 Iceland 15 Nordic 40 Stockholm 30",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GLOBAL",
+      "shortName": "Equities",
+      "marketCap": 0
+    },
+    {
+      "symbol": "COMMODITIES",
+      "shortName": "Bloomberg Commodity Index S&P GSCI Deutsche Bank Liquid Commodity Index NCDEX Commodity Index Refinitiv Equal Weight Commodity Index Refinitiv/CoreCommodity CRB Index Rogers International Commodity Index Standard & Poor's Commodity Index",
+      "marketCap": 0
+    },
+    {
+      "symbol": "REGIONAL",
+      "shortName": "Asia",
+      "marketCap": 0
+    },
+    {
+      "symbol": "EUROPE",
+      "shortName": "EURO STOXX 50 STOXX Europe 600 FTSEurofirst 300 Index FTSEurofirst Euro Supersector Indices S&P Europe 350 CECEEUR",
+      "marketCap": 0
+    },
+    {
+      "symbol": "OTHER",
+      "shortName": "MSCI EAFE MSCI GCC",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ELECTRONICS",
+      "shortName": "PHLX Semiconductor Sector TecDax",
+      "marketCap": 0
+    },
+    {
+      "symbol": "METALS",
+      "shortName": "HUI Gold Index Philadelphia Gold and Silver Index",
+      "marketCap": 0
+    },
+    {
+      "symbol": "REAL",
+      "shortName": "CBV Real Estate Index",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WATER",
+      "shortName": "Palisades Water Index",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AMERICAS",
+      "shortName": "US",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CANADA",
+      "shortName": "S&P/TSX 60 S&P/TSX Composite Index",
+      "marketCap": 0
+    },
+    {
+      "symbol": "FRANCE",
+      "shortName": "CAC 40 CAC Next 20 CAC Mid 60 CAC Small CAC All-Tradable SBF 120",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ASIA",
+      "shortName": "China",
+      "marketCap": 0
+    },
+    {
+      "symbol": "INDIA",
+      "shortName": "BSE SENSEX NIFTY 50 NIFTY Next 50 NIFTY 500 GIFT Nifty",
+      "marketCap": 0
+    },
+    {
+      "symbol": "JAPAN",
+      "shortName": "Nikkei 225 TOPIX S&P/TOPIX 150",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SOUTH",
+      "shortName": "KOSPI KOSPI 200 KOSDAQ",
+      "marketCap": 0
+    },
+    {
+      "symbol": "OCEANIA",
+      "shortName": "Australia",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NEW",
+      "shortName": "S&P/NZX 50 Index",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AFRICA",
+      "shortName": "EGX 30 JSE Top 40 MADEX NSE 30",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MEXICO",
+      "shortName": "Indice de Precios y Cotizaciones",
+      "marketCap": 0
+    },
+    {
+      "symbol": "COLOMBIA",
+      "shortName": "COLCAP Indice General de la Bolsa de Valores de Colombia",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BRAZIL",
+      "shortName": "Índice Bovespa",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CHILE",
+      "shortName": "Índice de Precios Selectivo de Acciones",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ARGENTINA",
+      "shortName": "MERVAL",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PERU",
+      "shortName": "S&P/BVL Peru General Index",
       "marketCap": 0
     }
   ]

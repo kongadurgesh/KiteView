@@ -2,7 +2,7 @@
   "indexId": "dow",
   "label": "Dow Jones",
   "group": "global",
-  "source": "wikipedia-table",
+  "source": "wikipedia",
   "asOf": "2026-05-25",
   "isProxy": false,
   "stocks": [
@@ -159,26 +159,6 @@
     {
       "symbol": "NET",
       "shortName": "Year",
-      "marketCap": 0
-    },
-    {
-      "symbol": "THE",
-      "shortName": "Newspapers",
-      "marketCap": 0
-    },
-    {
-      "symbol": "BALONNE",
-      "shortName": "Regional",
-      "marketCap": 0
-    },
-    {
-      "symbol": "SKY",
-      "shortName": "Channels",
-      "marketCap": 0
-    },
-    {
-      "symbol": "AGENDA",
-      "shortName": "Current",
       "marketCap": 0
     }
   ]
