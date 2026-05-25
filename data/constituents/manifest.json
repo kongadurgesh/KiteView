@@ -1,0 +1,187 @@
+{
+  "asOf": "2026-05-25",
+  "indices": [
+    {
+      "indexId": "nifty50",
+      "count": 50,
+      "source": "niftyindices",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "niftynext50",
+      "count": 54,
+      "source": "niftyindices",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "nifty100",
+      "count": 104,
+      "source": "niftyindices",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "nifty200",
+      "count": 204,
+      "source": "niftyindices",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "midcap50",
+      "count": 50,
+      "source": "niftyindices",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "niftymidcap100",
+      "count": 100,
+      "source": "niftyindices",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "nifty500",
+      "count": 504,
+      "source": "niftyindices",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "smallcap",
+      "count": 100,
+      "source": "niftyindices",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "niftysmallcap100",
+      "count": 100,
+      "source": "niftyindices",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "banknifty",
+      "count": 14,
+      "source": "niftyindices",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "niftyit",
+      "count": 10,
+      "source": "niftyindices",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "niftyauto",
+      "count": 15,
+      "source": "niftyindices",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "niftyfmcg",
+      "count": 15,
+      "source": "niftyindices",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "niftymetal",
+      "count": 19,
+      "source": "niftyindices",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "niftyenergy",
+      "count": 40,
+      "source": "niftyindices",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "niftyrealty",
+      "count": 10,
+      "source": "niftyindices",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "niftypharma",
+      "count": 20,
+      "source": "niftyindices",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "niftypsu",
+      "count": 12,
+      "source": "niftyindices",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "sensex",
+      "count": 30,
+      "source": "wikipedia-table",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "sp500",
+      "count": 503,
+      "source": "csv",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "nasdaq",
+      "count": 106,
+      "source": "wikipedia-table",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "dow",
+      "count": 35,
+      "source": "wikipedia-table",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "ftse",
+      "count": 110,
+      "source": "wikipedia-table",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "dax",
+      "count": 45,
+      "source": "wikipedia-table",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "cac",
+      "count": 41,
+      "source": "wikipedia-table",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    },
+    {
+      "indexId": "asx",
+      "count": 219,
+      "source": "wikipedia-table",
+      "asOf": "2026-05-25",
+      "isProxy": false
+    }
+  ]
+}

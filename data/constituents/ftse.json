@@ -1,0 +1,560 @@
+{
+  "indexId": "ftse",
+  "label": "FTSE 100",
+  "group": "global",
+  "source": "wikipedia-table",
+  "asOf": "2026-05-25",
+  "isProxy": false,
+  "stocks": [
+    {
+      "symbol": "III.L",
+      "shortName": "3i",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ADM.L",
+      "shortName": "Admiral Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AAF.L",
+      "shortName": "Airtel Africa",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ALW.L",
+      "shortName": "Alliance Witan",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AAL.L",
+      "shortName": "Anglo American plc",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ANTO.L",
+      "shortName": "Antofagasta plc",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ABF.L",
+      "shortName": "Associated British Foods",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AZN.L",
+      "shortName": "AstraZeneca",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AUTO.L",
+      "shortName": "Autotrader Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AV.L",
+      "shortName": "Aviva",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BAB.L",
+      "shortName": "Babcock International",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BA.L",
+      "shortName": "BAE Systems",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BARC.L",
+      "shortName": "Barclays",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BTRW.L",
+      "shortName": "Barratt Redrow",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BEZ.L",
+      "shortName": "Beazley",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BKG.L",
+      "shortName": "Berkeley Group Holdings",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BP.L",
+      "shortName": "BP",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BATS.L",
+      "shortName": "British American Tobacco",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BLND.L",
+      "shortName": "British Land",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BT.A.L",
+      "shortName": "BT Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BNZL.L",
+      "shortName": "Bunzl",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BRBY.L",
+      "shortName": "Burberry Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CNA.L",
+      "shortName": "Centrica",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CCEP.L",
+      "shortName": "Coca-Cola Europacific Partners",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CCH.L",
+      "shortName": "Coca-Cola HBC",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CPG.L",
+      "shortName": "Compass Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CTEC.L",
+      "shortName": "Convatec",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CRDA.L",
+      "shortName": "Croda International",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DCC.L",
+      "shortName": "DCC plc",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DGE.L",
+      "shortName": "Diageo",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DPLM.L",
+      "shortName": "Diploma",
+      "marketCap": 0
+    },
+    {
+      "symbol": "EDV.L",
+      "shortName": "Endeavour Mining",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ENT.L",
+      "shortName": "Entain",
+      "marketCap": 0
+    },
+    {
+      "symbol": "EXPN.L",
+      "shortName": "Experian",
+      "marketCap": 0
+    },
+    {
+      "symbol": "FCIT.L",
+      "shortName": "F & C Investment Trust",
+      "marketCap": 0
+    },
+    {
+      "symbol": "FRES.L",
+      "shortName": "Fresnillo plc",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GAW.L",
+      "shortName": "Games Workshop",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GLEN.L",
+      "shortName": "Glencore",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GSK.L",
+      "shortName": "GSK plc",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HLN.L",
+      "shortName": "Haleon",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HLMA.L",
+      "shortName": "Halma plc",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HSX.L",
+      "shortName": "Hiscox",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HWDN.L",
+      "shortName": "Howdens Joinery",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HSBA.L",
+      "shortName": "HSBC",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ICG.L",
+      "shortName": "ICG",
+      "marketCap": 0
+    },
+    {
+      "symbol": "IGG.L",
+      "shortName": "IG Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "IHG.L",
+      "shortName": "IHG Hotels & Resorts",
+      "marketCap": 0
+    },
+    {
+      "symbol": "IMI.L",
+      "shortName": "IMI",
+      "marketCap": 0
+    },
+    {
+      "symbol": "IMB.L",
+      "shortName": "Imperial Brands",
+      "marketCap": 0
+    },
+    {
+      "symbol": "INF.L",
+      "shortName": "Informa",
+      "marketCap": 0
+    },
+    {
+      "symbol": "IAG.L",
+      "shortName": "International Airlines Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ITRK.L",
+      "shortName": "Intertek",
+      "marketCap": 0
+    },
+    {
+      "symbol": "JD.L",
+      "shortName": "JD Sports",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BGEO.L",
+      "shortName": "Lion Finance Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "KGF.L",
+      "shortName": "Kingfisher plc",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LAND.L",
+      "shortName": "Land Securities",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LGEN.L",
+      "shortName": "Legal & General",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LLOY.L",
+      "shortName": "Lloyds Banking Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LMP.L",
+      "shortName": "LondonMetric Property",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LSEG.L",
+      "shortName": "London Stock Exchange Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MNG.L",
+      "shortName": "M&G",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MKS.L",
+      "shortName": "Marks & Spencer",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MRO.L",
+      "shortName": "Melrose Industries",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MTLN.L",
+      "shortName": "Metlen Energy & Metals",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MNDI.L",
+      "shortName": "Mondi",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NG.L",
+      "shortName": "National Grid plc",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NWG.L",
+      "shortName": "NatWest Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NXT.L",
+      "shortName": "Next plc",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PSON.L",
+      "shortName": "Pearson plc",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PSH.L",
+      "shortName": "Pershing Square Holdings",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PSN.L",
+      "shortName": "Persimmon",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PCT.L",
+      "shortName": "Polar Capital Technology Trust",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PRU.L",
+      "shortName": "Prudential plc",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RKT.L",
+      "shortName": "Reckitt",
+      "marketCap": 0
+    },
+    {
+      "symbol": "REL.L",
+      "shortName": "RELX",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RTO.L",
+      "shortName": "Rentokil Initial",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RMV.L",
+      "shortName": "Rightmove",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RIO.L",
+      "shortName": "Rio Tinto",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RR.L",
+      "shortName": "Rolls-Royce Holdings",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SGE.L",
+      "shortName": "Sage Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SBRY.L",
+      "shortName": "Sainsbury's",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SDR.L",
+      "shortName": "Schroders",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SMT.L",
+      "shortName": "Scottish Mortgage Investment Trust",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SGRO.L",
+      "shortName": "Segro",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SVT.L",
+      "shortName": "Severn Trent",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SHEL.L",
+      "shortName": "Shell plc",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SMIN.L",
+      "shortName": "Smiths Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SN.L",
+      "shortName": "Smith & Nephew",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SPX.L",
+      "shortName": "Spirax Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SSE.L",
+      "shortName": "SSE plc",
+      "marketCap": 0
+    },
+    {
+      "symbol": "STAN.L",
+      "shortName": "Standard Chartered",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SDLF.L",
+      "shortName": "Standard Life",
+      "marketCap": 0
+    },
+    {
+      "symbol": "STJ.L",
+      "shortName": "St. James's Place",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TSCO.L",
+      "shortName": "Tesco",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BBOX.L",
+      "shortName": "Tritax Big Box REIT",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ULVR.L",
+      "shortName": "Unilever",
+      "marketCap": 0
+    },
+    {
+      "symbol": "UU.L",
+      "shortName": "United Utilities",
+      "marketCap": 0
+    },
+    {
+      "symbol": "VOD.L",
+      "shortName": "Vodafone Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WEIR.L",
+      "shortName": "Weir Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WTB.L",
+      "shortName": "Whitbread",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BANK.L",
+      "shortName": "Currency, governance, regulation",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ECONOMIC.L",
+      "shortName": "Recurrent",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ENGLAND.L",
+      "shortName": "Nations, regions, cities",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BELFAST.L",
+      "shortName": "Northern Ireland",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ABERDEEN.L",
+      "shortName": "Scotland",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AGRICULTURE.L",
+      "shortName": "Wales",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BILLIONAIRES.L",
+      "shortName": "People and labour",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RESOURCE.L",
+      "shortName": "Sectors",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BALTIC.L",
+      "shortName": "Financial services",
+      "marketCap": 0
+    },
+    {
+      "symbol": "EDUCATION.L",
+      "shortName": "Other",
+      "marketCap": 0
+    }
+  ]
+}

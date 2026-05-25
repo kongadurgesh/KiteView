@@ -1,0 +1,215 @@
+{
+  "indexId": "cac",
+  "label": "CAC 40",
+  "group": "global",
+  "source": "wikipedia-table",
+  "asOf": "2026-05-25",
+  "isProxy": false,
+  "stocks": [
+    {
+      "symbol": "AC.PA",
+      "shortName": "Accor",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AI.PA",
+      "shortName": "Air Liquide",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AIR.PA",
+      "shortName": "Airbus",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MT.AS.PA",
+      "shortName": "ArcelorMittal",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CS.PA",
+      "shortName": "Axa",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BNP.PA",
+      "shortName": "BNP Paribas",
+      "marketCap": 0
+    },
+    {
+      "symbol": "EN.PA",
+      "shortName": "Bouygues",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BVI.PA",
+      "shortName": "Bureau Veritas",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CAP.PA",
+      "shortName": "Capgemini",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CA.PA",
+      "shortName": "Carrefour",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ACA.PA",
+      "shortName": "Crédit Agricole",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BN.PA",
+      "shortName": "Danone",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DSY.PA",
+      "shortName": "Dassault Systèmes",
+      "marketCap": 0
+    },
+    {
+      "symbol": "EDEN.PA",
+      "shortName": "Edenred",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ENGI.PA",
+      "shortName": "Engie",
+      "marketCap": 0
+    },
+    {
+      "symbol": "EL.PA",
+      "shortName": "EssilorLuxottica",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ERF.PA",
+      "shortName": "Eurofins Scientific",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RMS.PA",
+      "shortName": "Hermès",
+      "marketCap": 0
+    },
+    {
+      "symbol": "KER.PA",
+      "shortName": "Kering",
+      "marketCap": 0
+    },
+    {
+      "symbol": "OR.PA",
+      "shortName": "L'Oréal",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LR.PA",
+      "shortName": "Legrand",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MC.PA",
+      "shortName": "LVMH",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ML.PA",
+      "shortName": "Michelin",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ORA.PA",
+      "shortName": "Orange",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RI.PA",
+      "shortName": "Pernod Ricard",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PUB.PA",
+      "shortName": "Publicis",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RNO.PA",
+      "shortName": "Renault",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SAF.PA",
+      "shortName": "Safran",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SGO.PA",
+      "shortName": "Saint-Gobain",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SAN.PA",
+      "shortName": "Sanofi",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SU.PA",
+      "shortName": "Schneider Electric",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GLE.PA",
+      "shortName": "Société Générale",
+      "marketCap": 0
+    },
+    {
+      "symbol": "STLAP.PA",
+      "shortName": "Stellantis",
+      "marketCap": 0
+    },
+    {
+      "symbol": "STMPA.PA",
+      "shortName": "STMicroelectronics",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TEP.PA",
+      "shortName": "Teleperformance",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HO.PA",
+      "shortName": "Thales",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TTE.PA",
+      "shortName": "TotalEnergies",
+      "marketCap": 0
+    },
+    {
+      "symbol": "URW.PA",
+      "shortName": "Unibail-Rodamco-Westfield",
+      "marketCap": 0
+    },
+    {
+      "symbol": "VIE.PA",
+      "shortName": "Veolia",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DG.PA",
+      "shortName": "Vinci",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DOW.PA",
+      "shortName": "Americas",
+      "marketCap": 0
+    }
+  ]
+}

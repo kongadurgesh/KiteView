@@ -1,0 +1,80 @@
+{
+  "indexId": "banknifty",
+  "label": "Bank Nifty",
+  "group": "indian",
+  "source": "niftyindices",
+  "asOf": "2026-05-25",
+  "isProxy": false,
+  "stocks": [
+    {
+      "symbol": "AUBANK.NS",
+      "shortName": "AU Small Finance Bank Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AXISBANK.NS",
+      "shortName": "Axis Bank Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BANKBARODA.NS",
+      "shortName": "Bank of Baroda",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CANBK.NS",
+      "shortName": "Canara Bank",
+      "marketCap": 0
+    },
+    {
+      "symbol": "FEDERALBNK.NS",
+      "shortName": "Federal Bank Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HDFCBANK.NS",
+      "shortName": "HDFC Bank Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ICICIBANK.NS",
+      "shortName": "ICICI Bank Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "IDFCFIRSTB.NS",
+      "shortName": "IDFC First Bank Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "INDUSINDBK.NS",
+      "shortName": "IndusInd Bank Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "KOTAKBANK.NS",
+      "shortName": "Kotak Mahindra Bank Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PNB.NS",
+      "shortName": "Punjab National Bank",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SBIN.NS",
+      "shortName": "State Bank of India",
+      "marketCap": 0
+    },
+    {
+      "symbol": "UNIONBANK.NS",
+      "shortName": "Union Bank of India",
+      "marketCap": 0
+    },
+    {
+      "symbol": "YESBANK.NS",
+      "shortName": "Yes Bank Ltd.",
+      "marketCap": 0
+    }
+  ]
+}

@@ -1,0 +1,1105 @@
+{
+  "indexId": "asx",
+  "label": "ASX 200",
+  "group": "global",
+  "source": "wikipedia-table",
+  "asOf": "2026-05-25",
+  "isProxy": false,
+  "stocks": [
+    {
+      "symbol": "360.AX",
+      "shortName": "Life360",
+      "marketCap": 0
+    },
+    {
+      "symbol": "4DX.AX",
+      "shortName": "4DMedical",
+      "marketCap": 0
+    },
+    {
+      "symbol": "A2M.AX",
+      "shortName": "a2 Milk Company",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AAI.AX",
+      "shortName": "Alcoa",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AFI.AX",
+      "shortName": "Australian Foundation Investment Company",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AGL.AX",
+      "shortName": "AGL Energy",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AIA.AX",
+      "shortName": "Auckland International Airport Limited",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ALD.AX",
+      "shortName": "Ampol",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ALK.AX",
+      "shortName": "Alkane Resources",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ALL.AX",
+      "shortName": "Aristocrat Leisure",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ALQ.AX",
+      "shortName": "ALS",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ALX.AX",
+      "shortName": "Atlas Arteria",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AMC.AX",
+      "shortName": "Amcor",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AMP.AX",
+      "shortName": "AMP",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ANN.AX",
+      "shortName": "Ansell",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ANZ.AX",
+      "shortName": "Australia & New Zealand Banking Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "APA.AX",
+      "shortName": "APA Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "APE.AX",
+      "shortName": "Eagers Automotive",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ARB.AX",
+      "shortName": "ARB Corporation",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ARG.AX",
+      "shortName": "Argo Investments",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ASB.AX",
+      "shortName": "Austal",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ASK.AX",
+      "shortName": "Abacus Storage King",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ASX.AX",
+      "shortName": "ASX",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AUB.AX",
+      "shortName": "AUB Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AZJ.AX",
+      "shortName": "Aurizon",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BEN.AX",
+      "shortName": "Bendigo & Adelaide Bank",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BFL.AX",
+      "shortName": "BSP Financial Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BGA.AX",
+      "shortName": "Bega Cheese",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BGL.AX",
+      "shortName": "Bellevue Gold",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BHP.AX",
+      "shortName": "BHP",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BOQ.AX",
+      "shortName": "Bank of Queensland",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BPT.AX",
+      "shortName": "Beach Energy",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BRG.AX",
+      "shortName": "Breville Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BSL.AX",
+      "shortName": "BlueScope",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BWP.AX",
+      "shortName": "BWP Trust",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BXB.AX",
+      "shortName": "Brambles",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CAR.AX",
+      "shortName": "CAR Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CBA.AX",
+      "shortName": "Commonwealth Bank",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CDA.AX",
+      "shortName": "Codan",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CEN.AX",
+      "shortName": "Contact Energy",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CGF.AX",
+      "shortName": "Challenger",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CHC.AX",
+      "shortName": "Charter Hall",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CIA.AX",
+      "shortName": "Champion Iron",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CIP.AX",
+      "shortName": "Centuria Industrial REIT",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CLW.AX",
+      "shortName": "Charter Hall Long WALE REIT",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CMM.AX",
+      "shortName": "Capricorn Metals",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CNU.AX",
+      "shortName": "Chorus",
+      "marketCap": 0
+    },
+    {
+      "symbol": "COH.AX",
+      "shortName": "Cochlear",
+      "marketCap": 0
+    },
+    {
+      "symbol": "COL.AX",
+      "shortName": "Coles Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CPU.AX",
+      "shortName": "Computershare",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CQR.AX",
+      "shortName": "Charter Hall Retail REIT",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CSC.AX",
+      "shortName": "Capstone Copper",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CSL.AX",
+      "shortName": "CSL",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CTD.AX",
+      "shortName": "Corporate Travel Management",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CWY.AX",
+      "shortName": "Cleanaway",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CYL.AX",
+      "shortName": "Catalyst Metals",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DBI.AX",
+      "shortName": "Dalrymple Bay Infrastructure",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DNL.AX",
+      "shortName": "Dyno Nobel",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DOW.AX",
+      "shortName": "Downer Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DRO.AX",
+      "shortName": "Droneshield",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DRR.AX",
+      "shortName": "Deterra Royalties",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DXS.AX",
+      "shortName": "Dexus",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DYL.AX",
+      "shortName": "Deep Yellow",
+      "marketCap": 0
+    },
+    {
+      "symbol": "EBO.AX",
+      "shortName": "EBOS Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "EDV.AX",
+      "shortName": "Endeavour Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "EMR.AX",
+      "shortName": "Emerald Resources",
+      "marketCap": 0
+    },
+    {
+      "symbol": "EOS.AX",
+      "shortName": "Electro Optic Systems Holdings",
+      "marketCap": 0
+    },
+    {
+      "symbol": "EVN.AX",
+      "shortName": "Evolution Mining",
+      "marketCap": 0
+    },
+    {
+      "symbol": "EVT.AX",
+      "shortName": "EVT",
+      "marketCap": 0
+    },
+    {
+      "symbol": "FBU.AX",
+      "shortName": "Fletcher Building",
+      "marketCap": 0
+    },
+    {
+      "symbol": "FLT.AX",
+      "shortName": "Flight Centre Travel Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "FMG.AX",
+      "shortName": "Fortescue",
+      "marketCap": 0
+    },
+    {
+      "symbol": "FPH.AX",
+      "shortName": "Fisher & Paykel Healthcare",
+      "marketCap": 0
+    },
+    {
+      "symbol": "FRW.AX",
+      "shortName": "Freightways Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GDG.AX",
+      "shortName": "Generation Development Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GGP.AX",
+      "shortName": "Greatland Resources",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GMD.AX",
+      "shortName": "Genesis Minerals",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GMG.AX",
+      "shortName": "Goodman Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GNE.AX",
+      "shortName": "Genesis Energy",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GPT.AX",
+      "shortName": "GPT Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GQG.AX",
+      "shortName": "GQG Partners",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HDN.AX",
+      "shortName": "HomeCo Daily Needs REIT",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HUB.AX",
+      "shortName": "HUB24",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HVN.AX",
+      "shortName": "Harvey Norman",
+      "marketCap": 0
+    },
+    {
+      "symbol": "IAG.AX",
+      "shortName": "Insurance Australia Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "IFL.AX",
+      "shortName": "Insignia Financial",
+      "marketCap": 0
+    },
+    {
+      "symbol": "IFT.AX",
+      "shortName": "Infratil",
+      "marketCap": 0
+    },
+    {
+      "symbol": "IGO.AX",
+      "shortName": "IGO",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ILU.AX",
+      "shortName": "Iluka Resources",
+      "marketCap": 0
+    },
+    {
+      "symbol": "IMD.AX",
+      "shortName": "IMDEX",
+      "marketCap": 0
+    },
+    {
+      "symbol": "JBH.AX",
+      "shortName": "JB Hi-Fi",
+      "marketCap": 0
+    },
+    {
+      "symbol": "JHX.AX",
+      "shortName": "James Hardie",
+      "marketCap": 0
+    },
+    {
+      "symbol": "L1G.AX",
+      "shortName": "L1 Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LLC.AX",
+      "shortName": "Lendlease",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LNW.AX",
+      "shortName": "Light & Wonder",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LOV.AX",
+      "shortName": "Lovisa",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LSF.AX",
+      "shortName": "L1 Long Short Fund",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LTR.AX",
+      "shortName": "Liontown Resources",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LYC.AX",
+      "shortName": "Lynas Rare Earths",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MCY.AX",
+      "shortName": "Mercury NZ",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MEZ.AX",
+      "shortName": "Meridian Energy",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MFF.AX",
+      "shortName": "MFF Capital Investments",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MFG.AX",
+      "shortName": "Magellan Financial Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MGR.AX",
+      "shortName": "Mirvac",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MIN.AX",
+      "shortName": "Mineral Resources",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MND.AX",
+      "shortName": "Monadelphous Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MPL.AX",
+      "shortName": "Medibank",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MQG.AX",
+      "shortName": "Macquarie Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MSB.AX",
+      "shortName": "Mesoblast",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MTS.AX",
+      "shortName": "Metcash",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MXT.AX",
+      "shortName": "Metrics Master Income Trust",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NAB.AX",
+      "shortName": "National Australia Bank",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NEM.AX",
+      "shortName": "Newmont",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NHC.AX",
+      "shortName": "New Hope",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NHF.AX",
+      "shortName": "Nib",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NIC.AX",
+      "shortName": "Nickel Industries",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NSR.AX",
+      "shortName": "National Storage",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NST.AX",
+      "shortName": "Northern Star Resources",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NWH.AX",
+      "shortName": "NRW Holdings",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NWL.AX",
+      "shortName": "Netwealth Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NWS.AX",
+      "shortName": "News Corp Class B",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NXG.AX",
+      "shortName": "Nexgen Energy",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NXT.AX",
+      "shortName": "NextDC",
+      "marketCap": 0
+    },
+    {
+      "symbol": "OBM.AX",
+      "shortName": "Ora Banda Mining",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ORA.AX",
+      "shortName": "Orora",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ORG.AX",
+      "shortName": "Origin Energy",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ORI.AX",
+      "shortName": "Orica",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PDI.AX",
+      "shortName": "Predictive Discovery",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PDN.AX",
+      "shortName": "Paladin Energy",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PLS.AX",
+      "shortName": "PLS Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PME.AX",
+      "shortName": "Pro Medicus",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PMV.AX",
+      "shortName": "Premier Investments",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PNI.AX",
+      "shortName": "Pinnacle Investment Management",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PPT.AX",
+      "shortName": "Perpetual",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PRN.AX",
+      "shortName": "Perenti",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PRU.AX",
+      "shortName": "Perseus Mining",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PXA.AX",
+      "shortName": "Pexa Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "QAN.AX",
+      "shortName": "Qantas",
+      "marketCap": 0
+    },
+    {
+      "symbol": "QBE.AX",
+      "shortName": "QBE Insurance",
+      "marketCap": 0
+    },
+    {
+      "symbol": "QUB.AX",
+      "shortName": "Qube Holdings",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RDX.AX",
+      "shortName": "Redox",
+      "marketCap": 0
+    },
+    {
+      "symbol": "REA.AX",
+      "shortName": "REA Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "REG.AX",
+      "shortName": "Regis Healthcare",
+      "marketCap": 0
+    },
+    {
+      "symbol": "REH.AX",
+      "shortName": "Reece Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RGN.AX",
+      "shortName": "Region Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RHC.AX",
+      "shortName": "Ramsay Health Care",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RIO.AX",
+      "shortName": "Rio Tinto",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RMD.AX",
+      "shortName": "ResMed",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RMS.AX",
+      "shortName": "Ramelius Resources",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RRL.AX",
+      "shortName": "Regis Resources",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RSG.AX",
+      "shortName": "Resolute Mining",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RWC.AX",
+      "shortName": "Reliance Worldwide Corporation",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RYM.AX",
+      "shortName": "Ryman Healthcare",
+      "marketCap": 0
+    },
+    {
+      "symbol": "S32.AX",
+      "shortName": "South32",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SCG.AX",
+      "shortName": "Scentre Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SDF.AX",
+      "shortName": "Steadfast Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SEK.AX",
+      "shortName": "Seek",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SFR.AX",
+      "shortName": "Sandfire Resources",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SGH.AX",
+      "shortName": "SGH",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SGM.AX",
+      "shortName": "Sims Metal",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SGP.AX",
+      "shortName": "Stockland",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SHL.AX",
+      "shortName": "Sonic Healthcare",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SIG.AX",
+      "shortName": "Sigma Healthcare",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SMR.AX",
+      "shortName": "Stanmore Resources",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SNZ.AX",
+      "shortName": "Summerset Group Holdings",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SOL.AX",
+      "shortName": "Soul Patts",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SPK.AX",
+      "shortName": "Spark New Zealand",
+      "marketCap": 0
+    },
+    {
+      "symbol": "STO.AX",
+      "shortName": "Santos",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SUL.AX",
+      "shortName": "Super Retail Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SUN.AX",
+      "shortName": "Suncorp",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TAH.AX",
+      "shortName": "Tabcorp",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TCL.AX",
+      "shortName": "Transurban",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TLC.AX",
+      "shortName": "The Lottery Corporation",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TLS.AX",
+      "shortName": "Telstra",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TLX.AX",
+      "shortName": "Telix Pharmaceuticals",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TNE.AX",
+      "shortName": "TechnologyOne",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TPG.AX",
+      "shortName": "TPG Telecom",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TUA.AX",
+      "shortName": "Tuas",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TWE.AX",
+      "shortName": "Treasury Wine Estates",
+      "marketCap": 0
+    },
+    {
+      "symbol": "VAU.AX",
+      "shortName": "Vault Minerals",
+      "marketCap": 0
+    },
+    {
+      "symbol": "VCX.AX",
+      "shortName": "Vicinity Centres",
+      "marketCap": 0
+    },
+    {
+      "symbol": "VEA.AX",
+      "shortName": "Viva Energy",
+      "marketCap": 0
+    },
+    {
+      "symbol": "VGN.AX",
+      "shortName": "Virgin Australia Holdings",
+      "marketCap": 0
+    },
+    {
+      "symbol": "VNT.AX",
+      "shortName": "Ventia Services Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WAF.AX",
+      "shortName": "West African Resources",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WAM.AX",
+      "shortName": "WAM Capital",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WBC.AX",
+      "shortName": "Westpac",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WDS.AX",
+      "shortName": "Woodside Energy Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WES.AX",
+      "shortName": "Wesfarmers",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WGX.AX",
+      "shortName": "Westgold Resources",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WHC.AX",
+      "shortName": "Whitehaven Coal",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WLE.AX",
+      "shortName": "WAM Leaders",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WOR.AX",
+      "shortName": "Worley",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WOW.AX",
+      "shortName": "Woolworths Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WTC.AX",
+      "shortName": "Wisetech Global",
+      "marketCap": 0
+    },
+    {
+      "symbol": "XRO.AX",
+      "shortName": "Xero",
+      "marketCap": 0
+    },
+    {
+      "symbol": "XYX.AX",
+      "shortName": "Block, Inc.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "YAL.AX",
+      "shortName": "Yancoal Australia",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ZIM.AX",
+      "shortName": "Zimplats Holdings",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ZIP.AX",
+      "shortName": "Zip",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CONSUMER.AX",
+      "shortName": "ARB Corporation Aristocrat Leisure Breville Corporate Travel Management Eagers Automotive Flight Centre Harvey Norman JB Hi-Fi Light & Wonder Lovisa Premier Investments Super Retail Group Tabcorp The Lottery Corporation Wesfarmers",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ENERGY.AX",
+      "shortName": "Ampol Beach Energy Deep Yellow New Hope Group Nexgen Energy Paladin Energy Santos Viva Energy Whitehaven Coal Woodside Energy Worley",
+      "marketCap": 0
+    },
+    {
+      "symbol": "FINANCIALS.AX",
+      "shortName": "Australian Foundation Investment Company AMP ANZ Argo Investments Australian Securities Exchange AUB Group Bank of Queensland Bendigo & Adelaide Bank BSP Financial Group Challenger Commonwealth Bank Generation Development Group GQG Partners HUB24 Insurance Australia Group Insignia Financial Infratil L1 Group L1 Long Short Fund Magellan Global Fund Macquarie Group Medibank Metrics Master Income Trust National Australia Bank Netwealth Group nib Group Perpetual Pinnacle QBE Insurance Steadfast Group Soul Patts Suncorp WAM Capital Westpac Block, Inc. Zip",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HEALTH.AX",
+      "shortName": "4DMedical Ansell Cochlear CSL EBOS Group Fisher & Paykel Healthcare Mesoblast Pro Medicus Ramsay Health Care Regis Healthcare ResMed Sigma Healthcare Sonic Healthcare Summerset Group Holdings Telix Pharmaceuticals",
+      "marketCap": 0
+    },
+    {
+      "symbol": "INDUSTRIALS.AX",
+      "shortName": "ALS Atlas Arteria Auckland International Airport Aurizon Austal Brambles Cleanaway Dalrymple Bay Infrastructure Downer Group DroneShield Electro Optic Systems Holdings Fletcher Building Freightways Group Monadelphous Group NRW Holdings Qantas Qube Holdings Reece Group Reliance Worldwide SGH Transurban Virgin Australia Ventia Services",
+      "marketCap": 0
+    },
+    {
+      "symbol": "INFORMATION.AX",
+      "shortName": "Life360 Codan Computershare NextDC TechnologyOne WiseTech Xero",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MATERIALS.AX",
+      "shortName": "Alcoa Alkane Resources Amcor Bellevue Gold BHP BlueScope Champion Iron Capricorn Metals Capstone Copper Catalyst Metals Deterra Royalties Dyno Nobel Emerald Resources Evolution Mining Fortescue Genesis Resources Greatland Resources IGO Iluka Resources IMDEX James Hardie Liontown Resources Lynas Rare Earths Mineral Resources Newmont Nickel Industries Northern Star Resources Ora Banda Mining Orica Orora Perenti Perseus Mining PLS Predictive Discovery Ramelius Resources Regis Resources Resolute Mining Rio Tinto Sandfire Resources Sims Metal South32 Stanmore Resources Vault Minerals West African Resources Westgold Resources Yancoal Zimplats",
+      "marketCap": 0
+    },
+    {
+      "symbol": "REAL.AX",
+      "shortName": "Abacus Storage King BWP Trust Charter Hall Centuria Industrial REIT Charter Hall Long WALE REIT Charter Hall Retail REIT Dexus Goodman Group GPT Group HomeCo Daily Needs REIT Lendlease Mirvac National Storage Pexa Group Region Group Scentre Group Stockland Vicinity Centres",
+      "marketCap": 0
+    },
+    {
+      "symbol": "UTILITIES.AX",
+      "shortName": "AGL Energy APA Group Contact Energy Genesis Energy Mercury Energy Meridian Energy Origin Energy",
+      "marketCap": 0
+    },
+    {
+      "symbol": "COMPANIES.AX",
+      "shortName": "COMPANIES",
+      "marketCap": 0
+    },
+    {
+      "symbol": "V.AX",
+      "shortName": "V",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GLOBAL.AX",
+      "shortName": "Equities",
+      "marketCap": 0
+    },
+    {
+      "symbol": "COMMODITIES.AX",
+      "shortName": "Bloomberg Commodity Index S&P GSCI Deutsche Bank Liquid Commodity Index NCDEX Commodity Index Refinitiv Equal Weight Commodity Index Refinitiv/CoreCommodity CRB Index Rogers International Commodity Index Standard & Poor's Commodity Index",
+      "marketCap": 0
+    },
+    {
+      "symbol": "REGIONAL.AX",
+      "shortName": "Asia",
+      "marketCap": 0
+    },
+    {
+      "symbol": "EUROPE.AX",
+      "shortName": "EURO STOXX 50 STOXX Europe 600 FTSEurofirst 300 Index FTSEurofirst Euro Supersector Indices S&P Europe 350 CECEEUR",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LATIN.AX",
+      "shortName": "S&P Latin America 40",
+      "marketCap": 0
+    },
+    {
+      "symbol": "OTHER.AX",
+      "shortName": "MSCI EAFE MSCI GCC",
+      "marketCap": 0
+    },
+    {
+      "symbol": "INDUSTRY.AX",
+      "shortName": "Energy",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ELECTRONICS.AX",
+      "shortName": "PHLX Semiconductor Sector TecDax",
+      "marketCap": 0
+    }
+  ]
+}

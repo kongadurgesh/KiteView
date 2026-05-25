@@ -1,0 +1,185 @@
+{
+  "indexId": "dow",
+  "label": "Dow Jones",
+  "group": "global",
+  "source": "wikipedia-table",
+  "asOf": "2026-05-25",
+  "isProxy": false,
+  "stocks": [
+    {
+      "symbol": "MMM",
+      "shortName": "3M",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AXP",
+      "shortName": "American Express",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AMGN",
+      "shortName": "Amgen",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AMZN",
+      "shortName": "Amazon",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AAPL",
+      "shortName": "Apple",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BA",
+      "shortName": "Boeing",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CAT",
+      "shortName": "Caterpillar",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CVX",
+      "shortName": "Chevron",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CSCO",
+      "shortName": "Cisco",
+      "marketCap": 0
+    },
+    {
+      "symbol": "KO",
+      "shortName": "Coca-Cola",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DIS",
+      "shortName": "Disney",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GS",
+      "shortName": "Goldman Sachs",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HD",
+      "shortName": "Home Depot",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HON",
+      "shortName": "Honeywell",
+      "marketCap": 0
+    },
+    {
+      "symbol": "IBM",
+      "shortName": "IBM",
+      "marketCap": 0
+    },
+    {
+      "symbol": "JNJ",
+      "shortName": "Johnson & Johnson",
+      "marketCap": 0
+    },
+    {
+      "symbol": "JPM",
+      "shortName": "JPMorgan Chase",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MCD",
+      "shortName": "McDonald's",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MRK",
+      "shortName": "Merck",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MSFT",
+      "shortName": "Microsoft",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NKE",
+      "shortName": "Nike",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NVDA",
+      "shortName": "Nvidia",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PG",
+      "shortName": "Procter & Gamble",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CRM",
+      "shortName": "Salesforce",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SHW",
+      "shortName": "Sherwin-Williams",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TRV",
+      "shortName": "Travelers Companies, Inc.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "UNH",
+      "shortName": "UnitedHealth Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "VZ",
+      "shortName": "Verizon",
+      "marketCap": 0
+    },
+    {
+      "symbol": "V",
+      "shortName": "Visa",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WMT",
+      "shortName": "Walmart",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NET",
+      "shortName": "Year",
+      "marketCap": 0
+    },
+    {
+      "symbol": "THE",
+      "shortName": "Newspapers",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BALONNE",
+      "shortName": "Regional",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SKY",
+      "shortName": "Channels",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AGENDA",
+      "shortName": "Current",
+      "marketCap": 0
+    }
+  ]
+}

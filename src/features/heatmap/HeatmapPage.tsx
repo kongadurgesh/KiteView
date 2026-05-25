@@ -3,7 +3,7 @@ import { useMatch, useSearchParams } from 'react-router-dom';
 import { useAppNavigation } from '../../app/navigation';
 import { fetchScreenerList, ScreenerStock } from '../../utils/screener';
 import { HEATMAP_INDICES, heatmapIndicesByGroup, getHeatmapIndexOption, isHeatmapIndexId, usesRemoteConstituents } from '../../data/heatmapIndices';
-import { fetchIndexConstituents } from '../../services/indexConstituents';
+import { fetchIndexConstituents, type IndexConstituentsResponse } from '../../services/indexConstituents';
 import { PageLayout } from '../../components/layout/PageLayout';
 import { SectionHeader } from '../../components/ui';
 import { PAGE_COPY } from '../../content/pageCopy';
@@ -18,6 +18,20 @@ const TIMEFRAME_OPTIONS: { key: HeatmapTimeframe; label: string }[] = [
 ];
 
 const AUTO_REFRESH_MS = 120_000;
+
+function tickerLabel(symbol: string): string {
+  return symbol.replace(/\.(NS|BO|L|DE|PA|AX|HK|T)$/i, '');
+}
+
+function tileDisplayName(name: string, symbol: string): string {
+  const trimmed = name.trim();
+  const bare = tickerLabel(symbol);
+  if (!trimmed) return '';
+  if (trimmed.toUpperCase() === symbol.toUpperCase() || trimmed.toUpperCase() === bare.toUpperCase()) {
+    return '';
+  }
+  return trimmed;
+}
 
 /** Bright red (losses) or bright green (gains) only — no yellow/gray blend on the gradient. */
 const HEAT_RED_LIGHT = { r: 254, g: 142, b: 142 };
@@ -150,6 +164,10 @@ export function HeatmapPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [allStocks, setAllStocks] = useState<ScreenerStock[]>([]);
   const [remoteStocks, setRemoteStocks] = useState<ScreenerStock[]>([]);
+  const [constituentsMeta, setConstituentsMeta] = useState<Pick<
+    IndexConstituentsResponse,
+    'source' | 'asOf' | 'isProxy' | 'total'
+  > | null>(null);
   const [constituentsLoading, setConstituentsLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState('nifty50');
   const [timeframe, setTimeframe] = useState<HeatmapTimeframe>('1d');
@@ -195,6 +213,7 @@ export function HeatmapPage() {
   useEffect(() => {
     if (selectedOption.source.type === 'slice') {
       setRemoteStocks([]);
+      setConstituentsMeta(null);
       setConstituentsLoading(false);
       return;
     }
@@ -205,11 +224,20 @@ export function HeatmapPage() {
 
     (async () => {
       try {
-        const stocks = await fetchIndexConstituents(selectedIndex);
-        if (!cancelled) setRemoteStocks(stocks);
+        const data = await fetchIndexConstituents(selectedIndex);
+        if (!cancelled) {
+          setRemoteStocks(data.stocks);
+          setConstituentsMeta({
+            source: data.source,
+            asOf: data.asOf,
+            isProxy: data.isProxy,
+            total: data.total,
+          });
+        }
       } catch (err) {
         if (!cancelled) {
           setRemoteStocks([]);
+          setConstituentsMeta(null);
           setError(err instanceof Error ? err.message : 'Failed to load index constituents');
         }
       } finally {
@@ -251,13 +279,22 @@ export function HeatmapPage() {
 
     setProgress({ loaded: 0, total: needed.length });
 
+    const nameBySymbol = new Map(stocks.map((s) => [s.symbol, s.shortName]));
+
     for (let i = 0; i < needed.length; i += 50) {
       if (runId.current !== id) return;
       const batch = needed.slice(i, i + 50).map((s) => s.symbol);
       try {
         const results = await fetchHeatmapBatch(batch, tf);
         for (const q of results) {
-          if (q.regularMarketPrice > 0) cache.current.set(cacheKey(q.symbol, tf), q);
+          if (q.regularMarketPrice > 0) {
+            const fallbackName = nameBySymbol.get(q.symbol);
+            const shortName =
+              tileDisplayName(q.shortName, q.symbol) ||
+              tileDisplayName(fallbackName ?? '', q.symbol) ||
+              q.shortName.trim();
+            cache.current.set(cacheKey(q.symbol, tf), { ...q, shortName });
+          }
         }
       } catch { /* continue */ }
       if (runId.current === id) {
@@ -371,6 +408,13 @@ export function HeatmapPage() {
               {usesRemoteConstituents(selectedOption) && constituentsLoading && (
                 <span className="text-xs text-gray-500 dark:text-gray-400">Loading constituents…</span>
               )}
+              {usesRemoteConstituents(selectedOption) && !constituentsLoading && constituentsMeta && (
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  {constituentsMeta.total} members
+                  {constituentsMeta.asOf ? ` · ${constituentsMeta.asOf}` : ''}
+                  {constituentsMeta.isProxy ? ' · approximate' : ''}
+                </span>
+              )}
             </div>
 
             <div className="h-5 w-px bg-gray-300 dark:bg-gray-700 hidden sm:block" />
@@ -463,11 +507,13 @@ export function HeatmapPage() {
                 const pctW = (r.w / CW) * 100;
                 const pctH = (r.h / CH) * 100;
                 const sizeFactor = Math.sqrt(pctW * pctH);
-                const showSymbol = sizeFactor > 1.2;
+                const showName = sizeFactor > 1.2;
                 const showChange = sizeFactor > 1.8;
                 const showPrice = sizeFactor > 5;
                 const fontSize = sizeFactor > 7 ? 15 : sizeFactor > 5 ? 13 : sizeFactor > 3 ? 11 : sizeFactor > 2 ? 9 : 7;
                 const changePct = r.quote.changePercent;
+                const companyName = tileDisplayName(r.quote.shortName, r.quote.symbol);
+                const ticker = tickerLabel(r.quote.symbol);
                 const isFlat = Math.abs(changePct) <= 0.08;
                 const isLightTile =
                   isFlat ||
@@ -492,11 +538,14 @@ export function HeatmapPage() {
                       textShadow: `0 1px 2px ${shadowColor}`,
                     }}
                     onClick={() => viewStock(r.quote.symbol)}
-                    title={`${r.quote.shortName}\n${r.quote.symbol}\n${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}%\n₹${r.quote.regularMarketPrice.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`}
+                    title={`${companyName || r.quote.shortName}\n${ticker}\n${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}%\n₹${r.quote.regularMarketPrice.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`}
                   >
-                    {showSymbol && (
-                      <span className="font-bold leading-tight truncate max-w-full px-1">
-                        {r.quote.symbol.replace('.NS', '')}
+                    {showName && companyName && (
+                      <span
+                        className="font-bold leading-tight truncate max-w-full px-1 text-center"
+                        style={{ fontSize: `${fontSize}px`, lineHeight: 1.15 }}
+                      >
+                        {companyName}
                       </span>
                     )}
                     {showChange && (

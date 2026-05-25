@@ -1,0 +1,260 @@
+{
+  "indexId": "midcap50",
+  "label": "Nifty Midcap 50",
+  "group": "indian",
+  "source": "niftyindices",
+  "asOf": "2026-05-25",
+  "isProxy": false,
+  "stocks": [
+    {
+      "symbol": "APLAPOLLO.NS",
+      "shortName": "APL Apollo Tubes Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AUBANK.NS",
+      "shortName": "AU Small Finance Bank Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ALKEM.NS",
+      "shortName": "Alkem Laboratories Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ASHOKLEY.NS",
+      "shortName": "Ashok Leyland Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AUROPHARMA.NS",
+      "shortName": "Aurobindo Pharma Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BSE.NS",
+      "shortName": "BSE Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BHARATFORG.NS",
+      "shortName": "Bharat Forge Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BHEL.NS",
+      "shortName": "Bharat Heavy Electricals Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "COFORGE.NS",
+      "shortName": "Coforge Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "COLPAL.NS",
+      "shortName": "Colgate Palmolive (India) Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DABUR.NS",
+      "shortName": "Dabur India Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DIXON.NS",
+      "shortName": "Dixon Technologies (India) Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NYKAA.NS",
+      "shortName": "FSN E-Commerce Ventures Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "FEDERALBNK.NS",
+      "shortName": "Federal Bank Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "FORTIS.NS",
+      "shortName": "Fortis Healthcare Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GMRAIRPORT.NS",
+      "shortName": "GMR Airports Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GODREJPROP.NS",
+      "shortName": "Godrej Properties Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HAVELLS.NS",
+      "shortName": "Havells India Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HEROMOTOCO.NS",
+      "shortName": "Hero MotoCorp Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HINDPETRO.NS",
+      "shortName": "Hindustan Petroleum Corporation Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ICICIGI.NS",
+      "shortName": "ICICI Lombard General Insurance Company Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "IDFCFIRSTB.NS",
+      "shortName": "IDFC First Bank Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "INDUSTOWER.NS",
+      "shortName": "Indus Towers Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "INDUSINDBK.NS",
+      "shortName": "IndusInd Bank Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NAUKRI.NS",
+      "shortName": "Info Edge (India) Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LAURUSLABS.NS",
+      "shortName": "Laurus Labs Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LUPIN.NS",
+      "shortName": "Lupin Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MANKIND.NS",
+      "shortName": "Mankind Pharma Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MARICO.NS",
+      "shortName": "Marico Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MFSL.NS",
+      "shortName": "Max Financial Services Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MPHASIS.NS",
+      "shortName": "MphasiS Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MCX.NS",
+      "shortName": "Multi Commodity Exchange of India Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NHPC.NS",
+      "shortName": "NHPC Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NMDC.NS",
+      "shortName": "NMDC Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "OIL.NS",
+      "shortName": "Oil India Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PAYTM.NS",
+      "shortName": "One 97 Communications Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "POLICYBZR.NS",
+      "shortName": "PB Fintech Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PERSISTENT.NS",
+      "shortName": "Persistent Systems Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PHOENIXLTD.NS",
+      "shortName": "Phoenix Mills Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "POLYCAB.NS",
+      "shortName": "Polycab India Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PRESTIGE.NS",
+      "shortName": "Prestige Estates Projects Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SBICARD.NS",
+      "shortName": "SBI Cards and Payment Services Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SRF.NS",
+      "shortName": "SRF Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SUPREMEIND.NS",
+      "shortName": "Supreme Industries Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SUZLON.NS",
+      "shortName": "Suzlon Energy Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SWIGGY.NS",
+      "shortName": "Swiggy Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TIINDIA.NS",
+      "shortName": "Tube Investments of India Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "UPL.NS",
+      "shortName": "UPL Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WAAREEENER.NS",
+      "shortName": "Waaree Energies Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "YESBANK.NS",
+      "shortName": "Yes Bank Ltd.",
+      "marketCap": 0
+    }
+  ]
+}

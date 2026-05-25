@@ -1,0 +1,210 @@
+{
+  "indexId": "niftyenergy",
+  "label": "Nifty Energy",
+  "group": "indian",
+  "source": "niftyindices",
+  "asOf": "2026-05-25",
+  "isProxy": false,
+  "stocks": [
+    {
+      "symbol": "ABB.NS",
+      "shortName": "ABB India Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ADANIENSOL.NS",
+      "shortName": "Adani Energy Solutions Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ADANIGREEN.NS",
+      "shortName": "Adani Green Energy Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ADANIPOWER.NS",
+      "shortName": "Adani Power Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ATGL.NS",
+      "shortName": "Adani Total Gas Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AEGISLOG.NS",
+      "shortName": "Aegis Logistics Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BHEL.NS",
+      "shortName": "Bharat Heavy Electricals Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BPCL.NS",
+      "shortName": "Bharat Petroleum Corporation Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CESC.NS",
+      "shortName": "CESC Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CGPOWER.NS",
+      "shortName": "CG Power and Industrial Solutions Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CASTROLIND.NS",
+      "shortName": "Castrol India Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "COALINDIA.NS",
+      "shortName": "Coal India Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GAIL.NS",
+      "shortName": "GAIL (India) Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "GVT&D.NS",
+      "shortName": "GE Vernova T&D India Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HINDPETRO.NS",
+      "shortName": "Hindustan Petroleum Corporation Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "POWERINDIA.NS",
+      "shortName": "Hitachi Energy India Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "IOC.NS",
+      "shortName": "Indian Oil Corporation Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "IGL.NS",
+      "shortName": "Indraprastha Gas Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "INOXWIND.NS",
+      "shortName": "Inox Wind Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "JSWENERGY.NS",
+      "shortName": "JSW Energy Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "JPPOWER.NS",
+      "shortName": "Jaiprakash Power Ventures Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MGL.NS",
+      "shortName": "Mahanagar Gas Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NHPC.NS",
+      "shortName": "NHPC Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NLCINDIA.NS",
+      "shortName": "NLC India Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NTPCGREEN.NS",
+      "shortName": "NTPC Green Energy Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NTPC.NS",
+      "shortName": "NTPC Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NAVA.NS",
+      "shortName": "Nava Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ONGC.NS",
+      "shortName": "Oil & Natural Gas Corporation Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "OIL.NS",
+      "shortName": "Oil India Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PETRONET.NS",
+      "shortName": "Petronet LNG Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "POWERGRID.NS",
+      "shortName": "Power Grid Corporation of India Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RELIANCE.NS",
+      "shortName": "Reliance Industries Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RPOWER.NS",
+      "shortName": "Reliance Power Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SJVN.NS",
+      "shortName": "SJVN Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ENRIN.NS",
+      "shortName": "Siemens Energy India Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SIEMENS.NS",
+      "shortName": "Siemens Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SUZLON.NS",
+      "shortName": "Suzlon Energy Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TATAPOWER.NS",
+      "shortName": "Tata Power Co. Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "THERMAX.NS",
+      "shortName": "Thermax Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TORNTPOWER.NS",
+      "shortName": "Torrent Power Ltd.",
+      "marketCap": 0
+    }
+  ]
+}

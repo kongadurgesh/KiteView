@@ -1,0 +1,70 @@
+{
+  "indexId": "niftypsu",
+  "label": "Nifty PSU Bank",
+  "group": "indian",
+  "source": "niftyindices",
+  "asOf": "2026-05-25",
+  "isProxy": false,
+  "stocks": [
+    {
+      "symbol": "BANKBARODA.NS",
+      "shortName": "Bank of Baroda",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BANKINDIA.NS",
+      "shortName": "Bank of India",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MAHABANK.NS",
+      "shortName": "Bank of Maharashtra",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CANBK.NS",
+      "shortName": "Canara Bank",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CENTRALBK.NS",
+      "shortName": "Central Bank of India",
+      "marketCap": 0
+    },
+    {
+      "symbol": "INDIANB.NS",
+      "shortName": "Indian Bank",
+      "marketCap": 0
+    },
+    {
+      "symbol": "IOB.NS",
+      "shortName": "Indian Overseas Bank",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PSB.NS",
+      "shortName": "Punjab & Sind Bank",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PNB.NS",
+      "shortName": "Punjab National Bank",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SBIN.NS",
+      "shortName": "State Bank of India",
+      "marketCap": 0
+    },
+    {
+      "symbol": "UCOBANK.NS",
+      "shortName": "UCO Bank",
+      "marketCap": 0
+    },
+    {
+      "symbol": "UNIONBANK.NS",
+      "shortName": "Union Bank of India",
+      "marketCap": 0
+    }
+  ]
+}

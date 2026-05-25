@@ -50,7 +50,7 @@ export const PAGE_COPY = {
     description:
       'Live quotes for Indian and global indices, forex pairs, commodities, and crypto — grouped by asset class with 15-second refresh.',
     indianHeatmapHint:
-      'Click an index to open its heatmap with real constituents (Yahoo index components or sector screen for NSE names).',
+      'Click an index to open its heatmap with official index constituents (Nifty Indices, S&P 500 CSV, Wikipedia). Nikkei, Hang Seng, Russell, and KOSPI use approximate regional lists.',
     globalHeatmapHint:
       'Click a benchmark to open its heatmap with index members or regional large-cap lists (S&P 500, Nikkei, FTSE, etc.).',
   },

@@ -1,0 +1,105 @@
+{
+  "indexId": "niftymetal",
+  "label": "Nifty Metal",
+  "group": "indian",
+  "source": "niftyindices",
+  "asOf": "2026-05-25",
+  "isProxy": false,
+  "stocks": [
+    {
+      "symbol": "APLAPOLLO.NS",
+      "shortName": "APL Apollo Tubes Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ADANIENT.NS",
+      "shortName": "Adani Enterprises Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DUMMYVEDL1.NS",
+      "shortName": "Dummy Vedanta Ltd. 1",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DUMMYVEDL2.NS",
+      "shortName": "Dummy Vedanta Ltd. 2",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DUMMYVEDL3.NS",
+      "shortName": "Dummy Vedanta Ltd. 3",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DUMMYVEDL4.NS",
+      "shortName": "Dummy Vedanta Ltd. 4",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HINDALCO.NS",
+      "shortName": "Hindalco Industries Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HINDCOPPER.NS",
+      "shortName": "Hindustan Copper Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HINDZINC.NS",
+      "shortName": "Hindustan Zinc Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "JSWSTEEL.NS",
+      "shortName": "JSW Steel Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "JSL.NS",
+      "shortName": "Jindal Stainless Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "JINDALSTEL.NS",
+      "shortName": "Jindal Steel Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "LLOYDSME.NS",
+      "shortName": "Lloyds Metals And Energy Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NMDC.NS",
+      "shortName": "NMDC Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NATIONALUM.NS",
+      "shortName": "National Aluminium Co. Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SAIL.NS",
+      "shortName": "Steel Authority of India Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TATASTEEL.NS",
+      "shortName": "Tata Steel Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "VEDL.NS",
+      "shortName": "Vedanta Ltd.",
+      "marketCap": 0
+    },
+    {
+      "symbol": "WELCORP.NS",
+      "shortName": "Welspun Corp Ltd.",
+      "marketCap": 0
+    }
+  ]
+}

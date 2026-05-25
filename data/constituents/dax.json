@@ -1,0 +1,235 @@
+{
+  "indexId": "dax",
+  "label": "DAX",
+  "group": "global",
+  "source": "wikipedia-table",
+  "asOf": "2026-05-25",
+  "isProxy": false,
+  "stocks": [
+    {
+      "symbol": "ADS.DE",
+      "shortName": "Adidas",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AIR.PA.DE",
+      "shortName": "Airbus",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ALV.DE",
+      "shortName": "Allianz",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BAS.DE",
+      "shortName": "BASF",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BAYN.DE",
+      "shortName": "Bayer",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BEI.DE",
+      "shortName": "Beiersdorf",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BMW.DE",
+      "shortName": "BMW",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BNR.DE",
+      "shortName": "Brenntag",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CBK.DE",
+      "shortName": "Commerzbank",
+      "marketCap": 0
+    },
+    {
+      "symbol": "CON.DE",
+      "shortName": "Continental",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DTG.DE",
+      "shortName": "Daimler Truck",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DBK.DE",
+      "shortName": "Deutsche Bank",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DB1.DE",
+      "shortName": "Deutsche Börse",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DHL.DE",
+      "shortName": "Deutsche Post",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DTE.DE",
+      "shortName": "Deutsche Telekom",
+      "marketCap": 0
+    },
+    {
+      "symbol": "EOAN.DE",
+      "shortName": "E.ON",
+      "marketCap": 0
+    },
+    {
+      "symbol": "FRE.DE",
+      "shortName": "Fresenius",
+      "marketCap": 0
+    },
+    {
+      "symbol": "FME.DE",
+      "shortName": "Fresenius Medical Care",
+      "marketCap": 0
+    },
+    {
+      "symbol": "G1A.DE",
+      "shortName": "GEA Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HNR1.DE",
+      "shortName": "Hannover Re",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HEI.DE",
+      "shortName": "Heidelberg Materials",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HEN3.DE",
+      "shortName": "Henkel",
+      "marketCap": 0
+    },
+    {
+      "symbol": "IFX.DE",
+      "shortName": "Infineon Technologies",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MBG.DE",
+      "shortName": "Mercedes-Benz Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MRK.DE",
+      "shortName": "Merck",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MTX.DE",
+      "shortName": "MTU Aero Engines",
+      "marketCap": 0
+    },
+    {
+      "symbol": "MUV2.DE",
+      "shortName": "Munich Re",
+      "marketCap": 0
+    },
+    {
+      "symbol": "PAH3.DE",
+      "shortName": "Porsche SE",
+      "marketCap": 0
+    },
+    {
+      "symbol": "QIA.DE",
+      "shortName": "Qiagen",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RHM.DE",
+      "shortName": "Rheinmetall",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RWE.DE",
+      "shortName": "RWE",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SAP.DE",
+      "shortName": "SAP",
+      "marketCap": 0
+    },
+    {
+      "symbol": "G24.DE",
+      "shortName": "Scout24",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SIE.DE",
+      "shortName": "Siemens",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ENR.DE",
+      "shortName": "Siemens Energy",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SHL.DE",
+      "shortName": "Siemens Healthineers",
+      "marketCap": 0
+    },
+    {
+      "symbol": "SY1.DE",
+      "shortName": "Symrise",
+      "marketCap": 0
+    },
+    {
+      "symbol": "VOW3.DE",
+      "shortName": "Volkswagen Group",
+      "marketCap": 0
+    },
+    {
+      "symbol": "VNA.DE",
+      "shortName": "Vonovia",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ZAL.DE",
+      "shortName": "Zalando",
+      "marketCap": 0
+    },
+    {
+      "symbol": "DATE.DE",
+      "shortName": "Component included",
+      "marketCap": 0
+    },
+    {
+      "symbol": "03.09.1990.DE",
+      "shortName": "Metallgesellschaft",
+      "marketCap": 0
+    },
+    {
+      "symbol": "NIXDORF.DE",
+      "shortName": "Merged with Siemens to form Siemens-Nixdorf",
+      "marketCap": 0
+    },
+    {
+      "symbol": "18.09.1995.DE",
+      "shortName": "SAP",
+      "marketCap": 0
+    },
+    {
+      "symbol": "22.07.1996.DE",
+      "shortName": "METRO",
+      "marketCap": 0
+    }
+  ]
+}
