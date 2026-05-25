@@ -1,9 +1,11 @@
 import type { StockStats } from '../../../types/stockStats';
 import type { QuoteSnapshot } from '../quoteSnapshot';
-import { fmtMarketCap, fmtMarketCapCr, fmtNumber, fmtPct, fmtQuotePct, fmtRatio, fmtVolume } from '../../../lib/format';
+import { fmtMarketCap, fmtMarketCapCr, fmtMoney, fmtPct, fmtQuotePct, fmtRatio, fmtVolume } from '../../../lib/format';
+import { isIndianSymbol } from '../../../lib/nseSymbol';
 import { capCategoryBadgeClass, getCapCategory } from '../../../lib/marketCap';
 
 interface Props {
+  symbol: string;
   currentPrice: number;
   fiftyTwoWeekHigh: number;
   fiftyTwoWeekLow: number;
@@ -16,6 +18,7 @@ interface Props {
 }
 
 export function StockOverviewSection({
+  symbol,
   currentPrice,
   fiftyTwoWeekHigh,
   fiftyTwoWeekLow,
@@ -26,6 +29,7 @@ export function StockOverviewSection({
   quoteSnapshot,
   stockStats,
 }: Props) {
+  const indian = isIndianSymbol(symbol);
   const cap = capCategoryBadgeClass(getCapCategory(marketCapCr));
   const ch = quoteSnapshot?.change;
   const chPct = quoteSnapshot?.changePercent;
@@ -44,7 +48,7 @@ export function StockOverviewSection({
     <div className="card p-5 space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         <p className="label-caps">Overview</p>
-        {marketCapCr > 0 && (
+        {indian && marketCapCr > 0 && (
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cap.color}`}>
             {cap.label} · {fmtMarketCapCr(marketCapCr)}
           </span>
@@ -58,11 +62,15 @@ export function StockOverviewSection({
 
       {hasQuote && quoteSnapshot && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <MiniStat label="Day chg" value={ch != null ? `${ch >= 0 ? '+' : ''}${fmtNumber(ch)}` : '—'} valueClass={ch != null ? dayColor : undefined} />
+          <MiniStat
+            label="Day chg"
+            value={ch != null ? `${ch >= 0 ? '+' : '-'}${fmtMoney(Math.abs(ch), symbol)}` : '—'}
+            valueClass={ch != null ? dayColor : undefined}
+          />
           <MiniStat label="Day chg %" value={chPct != null ? fmtQuotePct(chPct) : '—'} valueClass={chPct != null ? dayColor : undefined} />
-          <MiniStat label="Prev close" value={quoteSnapshot.previousClose != null ? fmtNumber(quoteSnapshot.previousClose) : '—'} />
-          <MiniStat label="Day high" value={quoteSnapshot.dayHigh != null ? fmtNumber(quoteSnapshot.dayHigh) : '—'} />
-          <MiniStat label="Day low" value={quoteSnapshot.dayLow != null ? fmtNumber(quoteSnapshot.dayLow) : '—'} />
+          <MiniStat label="Prev close" value={quoteSnapshot.previousClose != null ? fmtMoney(quoteSnapshot.previousClose, symbol) : '—'} />
+          <MiniStat label="Day high" value={quoteSnapshot.dayHigh != null ? fmtMoney(quoteSnapshot.dayHigh, symbol) : '—'} />
+          <MiniStat label="Day low" value={quoteSnapshot.dayLow != null ? fmtMoney(quoteSnapshot.dayLow, symbol) : '—'} />
           <MiniStat label="Volume" value={fmtVolume(quoteSnapshot.volume)} />
         </div>
       )}
@@ -74,14 +82,14 @@ export function StockOverviewSection({
           <MiniStat label="P/B" value={fmtRatio(stockStats.pb)} />
           <MiniStat label="Beta" value={fmtRatio(stockStats.beta)} />
           <MiniStat label="52W chg" value={fmtPct(stockStats.fiftyTwoWeekChange)} />
-          <MiniStat label="Mkt cap" value={fmtMarketCap(stockStats.marketCap)} />
+          <MiniStat label="Mkt cap" value={fmtMarketCap(stockStats.marketCap, indian)} />
         </div>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <MiniStat
           label="52W high"
-          value={fmtNumber(fiftyTwoWeekHigh)}
+          value={fmtMoney(fiftyTwoWeekHigh, symbol)}
           note={
             currentPrice > 0 && fiftyTwoWeekHigh > 0
               ? `${((1 - currentPrice / fiftyTwoWeekHigh) * 100).toFixed(1)}% below`
@@ -90,7 +98,7 @@ export function StockOverviewSection({
         />
         <MiniStat
           label="52W low"
-          value={fmtNumber(fiftyTwoWeekLow)}
+          value={fmtMoney(fiftyTwoWeekLow, symbol)}
           note={
             currentPrice > 0 && fiftyTwoWeekLow > 0
               ? `${(((currentPrice / fiftyTwoWeekLow) - 1) * 100).toFixed(1)}% above`
@@ -99,7 +107,7 @@ export function StockOverviewSection({
         />
         <MiniStat
           label="All-time high"
-          value={fmtNumber(allTimeHigh)}
+          value={fmtMoney(allTimeHigh, symbol)}
           note={
             currentPrice > 0 && allTimeHigh > 0
               ? `${((1 - currentPrice / allTimeHigh) * 100).toFixed(1)}% below`

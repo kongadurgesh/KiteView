@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Page } from '../components/layout/types';
-import { analysisPath, comparePath, pageToPath } from './routes';
+import { analysisPath, comparePath, heatmapPath, pageToPath } from './routes';
 
 export function useAppNavigation() {
   const navigate = useNavigate();
@@ -18,5 +18,9 @@ export function useAppNavigation() {
     navigate(comparePath(symbol));
   }, [navigate]);
 
-  return { goToPage, viewStock, compareStock };
+  const viewHeatmapIndex = useCallback((indexId: string) => {
+    navigate(heatmapPath(indexId));
+  }, [navigate]);
+
+  return { goToPage, viewStock, compareStock, viewHeatmapIndex };
 }

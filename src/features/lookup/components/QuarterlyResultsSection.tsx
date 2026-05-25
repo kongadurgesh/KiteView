@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import type { QuarterlyPeriod, QuarterlyResults } from '../../../types/analysisExtras';
-import { fmtEps, fmtFinancialInr } from '../../../lib/format';
+import { fmtEps, fmtFinancialAmount } from '../../../lib/format';
+import { isIndianSymbol } from '../../../lib/nseSymbol';
 
 type AmountKey = 'revenue' | 'pretaxIncome' | 'netIncomeCommon';
 
@@ -32,12 +33,24 @@ function cellClass(
   return '';
 }
 
-function fmtMetric(key: AmountKey | 'basicEps', value: number | null): string {
-  if (key === 'basicEps') return fmtEps(value);
-  return fmtFinancialInr(value);
+function fmtMetric(
+  key: AmountKey | 'basicEps',
+  value: number | null,
+  indian: boolean,
+): string {
+  if (key === 'basicEps') return fmtEps(value, indian);
+  return fmtFinancialAmount(value, indian);
 }
 
-export function QuarterlyResultsSection({ data }: { data: QuarterlyResults }) {
+export function QuarterlyResultsSection({
+  symbol,
+  data,
+}: {
+  symbol: string;
+  data: QuarterlyResults;
+}) {
+  const indian = isIndianSymbol(symbol);
+  const currencyLabel = indian ? 'INR' : 'USD';
   const periods = useMemo(() => sortRecentToOldest(data.periods), [data.periods]);
   const { basis } = data;
 
@@ -102,7 +115,7 @@ export function QuarterlyResultsSection({ data }: { data: QuarterlyResults }) {
                       key={`${p.endDate}-${key}`}
                       className={`py-2.5 px-2 text-right font-mono tabular-nums text-xs ${cellClass(val, base, i === baseIdx)}`}
                     >
-                      {fmtMetric(key, val)}
+                      {fmtMetric(key, val, indian)}
                     </td>
                   );
                 })}
@@ -112,7 +125,7 @@ export function QuarterlyResultsSection({ data }: { data: QuarterlyResults }) {
         </table>
       </div>
       <p className="text-[11px] text-ink-muted dark:text-ink-dark-muted mt-3">
-        Green / red vs oldest quarter (right). Source: Yahoo Finance.
+        Amounts in {currencyLabel}. Green / red vs oldest quarter (right). Source: Yahoo Finance.
       </p>
     </div>
   );

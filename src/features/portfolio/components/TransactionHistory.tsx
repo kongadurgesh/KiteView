@@ -1,4 +1,5 @@
 import { Transaction } from '../../../types';
+import { TableSerialCell, TableSerialHeader } from '../../../components/ui';
 import { fmtNumber } from '../../../lib/format';
 
 interface TransactionHistoryProps {
@@ -13,6 +14,7 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
       <table className="w-full text-sm">
         <thead>
           <tr className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+            <TableSerialHeader className="px-4 py-2" />
             <th className="px-4 py-2 text-left font-medium">Date</th>
             <th className="px-4 py-2 text-left font-medium">Type</th>
             <th className="px-4 py-2 text-right font-medium">Qty</th>
@@ -21,8 +23,9 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
           </tr>
         </thead>
         <tbody>
-          {sorted.map((t) => (
+          {sorted.map((t, rowIndex) => (
             <tr key={t.id} className="border-t border-gray-200 dark:border-gray-800">
+              <TableSerialCell index={rowIndex} className="px-4 py-2" />
               <td className="px-4 py-2 text-gray-500 dark:text-gray-400">{t.date}</td>
               <td className="px-4 py-2">
                 <span

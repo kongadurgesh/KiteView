@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { nseSymbolToTrendlyneTicker } from '../../../lib/nseSymbol';
+import { isIndianSymbol, nseSymbolToTrendlyneTicker } from '../../../lib/nseSymbol';
 
 const SWOT_WIDGET_COLORS = 'posCol=00A25B&primaryCol=006AFF&negCol=EB3B00&neuCol=F7941E';
 
@@ -47,12 +47,13 @@ async function mountSwotWidget(
 }
 
 export function SwotSection({ symbol }: { symbol: string }) {
+  const indian = isIndianSymbol(symbol);
   const hostRef = useRef<HTMLDivElement>(null);
-  const ticker = nseSymbolToTrendlyneTicker(symbol);
+  const ticker = indian ? nseSymbolToTrendlyneTicker(symbol) : '';
 
   useEffect(() => {
     const host = hostRef.current;
-    if (!host || !ticker) return;
+    if (!indian || !host || !ticker) return;
 
     const controller = new AbortController();
     const url = swotWidgetUrl(ticker);
@@ -67,9 +68,9 @@ export function SwotSection({ symbol }: { symbol: string }) {
     void mountSwotWidget(el, url, controller.signal);
 
     return () => controller.abort();
-  }, [ticker]);
+  }, [ticker, indian]);
 
-  if (!ticker) return null;
+  if (!indian || !ticker) return null;
 
   return (
     <div

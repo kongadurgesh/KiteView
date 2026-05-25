@@ -2,7 +2,16 @@ export { Alert } from './Alert';
 export { Badge } from './Badge';
 export { Button } from './Button';
 export { Card, CardBody, CardHeader } from './Card';
-export { DataTable, SortableHeader, TableBody, TableCell, TableHead, TableRow } from './DataTable';
+export {
+  DataTable,
+  SortableHeader,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TableSerialCell,
+  TableSerialHeader,
+} from './DataTable';
 export { EmptyState } from './EmptyState';
 export { Modal } from './Modal';
 export { PageHeader } from './PageHeader';

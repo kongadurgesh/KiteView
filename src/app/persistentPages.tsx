@@ -6,6 +6,7 @@ import { StockAnalysisPage } from '../features/lookup/StockAnalysisPage';
 import { StockComparePage } from '../features/compare/ComparePage';
 import { PortfolioPage } from '../features/portfolio/PortfolioPage';
 import { WatchlistPage } from '../features/watchlist/WatchlistPage';
+import { IndicesPage } from '../features/indices/IndicesPage';
 import { AboutPage } from '../features/about/AboutPage';
 
 export interface PersistentPageConfig {
@@ -22,6 +23,7 @@ export const PERSISTENT_PAGES: PersistentPageConfig[] = [
   { path: '/compare', Component: StockComparePage },
   { path: '/portfolio', Component: PortfolioPage },
   { path: '/watchlist', Component: WatchlistPage },
+  { path: '/indices', Component: IndicesPage },
   { path: '/about', Component: AboutPage },
 ];
 

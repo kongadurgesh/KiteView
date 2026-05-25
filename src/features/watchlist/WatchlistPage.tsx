@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { useAppNavigation } from '../../app/navigation';
 import { PageLayout } from '../../components/layout/PageLayout';
-import { Alert, Button } from '../../components/ui';
+import { Alert, Button, TableSerialCell, TableSerialHeader } from '../../components/ui';
 import { PAGE_COPY } from '../../content/pageCopy';
 import { fmtDistPct, fmtNumber, fmtQuotePct } from '../../lib/format';
 import { fetchWatchlistSnapshot } from '../../services/apiBatch';
@@ -317,6 +317,7 @@ export function WatchlistPage() {
               <table className="w-full text-sm min-w-[900px]">
                 <thead className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-800">
                   <tr>
+                    <TableSerialHeader />
                     <th className="p-3 text-left font-semibold">Stock</th>
                     <th className="p-3 text-right font-semibold">CMP</th>
                     <th className="p-3 text-right font-semibold">1D %</th>
@@ -330,12 +331,13 @@ export function WatchlistPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {active.items.map((item) => {
+                  {active.items.map((item, rowIndex) => {
                     const snap = snapshots[item.symbol];
                     const isExpanded = expanded === item.symbol;
                     return (
                       <Fragment key={item.symbol}>
                         <tr className="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                          <TableSerialCell index={rowIndex} />
                           <td className="p-3">
                             <button type="button" className="text-left" onClick={() => viewStock(item.symbol)}>
                               <p className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[180px]">
@@ -407,7 +409,7 @@ export function WatchlistPage() {
                         </tr>
                         {isExpanded && (
                           <tr>
-                            <td colSpan={10}>
+                            <td colSpan={11}>
                               <ThesisPanel item={item} onPatch={(patch) => patchItem(item.symbol, patch)} />
                             </td>
                           </tr>

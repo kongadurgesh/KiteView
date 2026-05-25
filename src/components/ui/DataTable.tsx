@@ -86,6 +86,58 @@ export function TableRow({
   );
 }
 
+const serialBase =
+  'w-11 min-w-[2.75rem] text-center font-mono text-xs tabular-nums text-gray-400 dark:text-gray-500';
+
+export function TableSerialHeader({
+  className,
+  sticky,
+}: {
+  className?: string;
+  /** Pin left when table scrolls horizontally */
+  sticky?: boolean;
+}) {
+  return (
+    <th
+      className={cn(
+        'p-3 font-medium text-xs uppercase tracking-wider',
+        serialBase,
+        sticky && 'sticky left-0 z-20 bg-gray-100 dark:bg-gray-800',
+        className,
+      )}
+    >
+      #
+    </th>
+  );
+}
+
+export function TableSerialCell({
+  index,
+  className,
+  sticky,
+  rowBg,
+}: {
+  /** 0-based row index */
+  index: number;
+  className?: string;
+  sticky?: boolean;
+  /** Background for sticky body cells (match row/card surface) */
+  rowBg?: string;
+}) {
+  return (
+    <td
+      className={cn(
+        'p-3',
+        serialBase,
+        sticky && cn('sticky left-0 z-10', rowBg ?? 'bg-white dark:bg-gray-900'),
+        className,
+      )}
+    >
+      {index + 1}
+    </td>
+  );
+}
+
 export function TableCell({
   children,
   align = 'right',

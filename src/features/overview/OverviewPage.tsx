@@ -1,40 +1,166 @@
+import { type KeyboardEvent, type ReactNode } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useAppNavigation } from '../../app/navigation';
+import type { Page } from '../../components/layout/types';
 import { PageLayout } from '../../components/layout/PageLayout';
 import { PAGE_COPY } from '../../content/pageCopy';
+import { cn } from '../../lib/cn';
 
 const PREVIEW_ROOT = 'relative h-full w-full min-h-0 overflow-hidden';
 
-function OpenButton({ label, onClick }: { label: string; onClick: () => void }) {
-  return (
-    <button type="button" onClick={onClick} className="btn-primary text-xs px-3 py-2">
-      {label}
-    </button>
-  );
-}
+type CardAccent = 'blue' | 'teal' | 'violet' | 'amber' | 'emerald' | 'rose' | 'sky' | 'slate';
 
-function OverviewCard({
+const ACCENT_STYLES: Record<
+  CardAccent,
+  { border: string; glow: string; chip: string; arrow: string }
+> = {
+  blue: {
+    border: 'group-hover:border-blue-500/35 dark:group-hover:border-blue-400/30',
+    glow: 'from-blue-500/[0.07] via-transparent to-transparent',
+    chip: 'bg-blue-500/10 text-blue-700 dark:text-blue-300 group-hover:bg-blue-600 group-hover:text-white',
+    arrow: 'text-blue-600 dark:text-blue-400 group-hover:text-white',
+  },
+  teal: {
+    border: 'group-hover:border-teal-500/35 dark:group-hover:border-teal-400/30',
+    glow: 'from-teal-500/[0.07] via-transparent to-transparent',
+    chip: 'bg-teal-500/10 text-teal-700 dark:text-teal-300 group-hover:bg-teal-600 group-hover:text-white',
+    arrow: 'text-teal-600 dark:text-teal-400 group-hover:text-white',
+  },
+  violet: {
+    border: 'group-hover:border-violet-500/35 dark:group-hover:border-violet-400/30',
+    glow: 'from-violet-500/[0.07] via-transparent to-transparent',
+    chip: 'bg-violet-500/10 text-violet-700 dark:text-violet-300 group-hover:bg-violet-600 group-hover:text-white',
+    arrow: 'text-violet-600 dark:text-violet-400 group-hover:text-white',
+  },
+  amber: {
+    border: 'group-hover:border-amber-500/35 dark:group-hover:border-amber-400/30',
+    glow: 'from-amber-500/[0.07] via-transparent to-transparent',
+    chip: 'bg-amber-500/10 text-amber-800 dark:text-amber-300 group-hover:bg-amber-600 group-hover:text-white',
+    arrow: 'text-amber-700 dark:text-amber-400 group-hover:text-white',
+  },
+  emerald: {
+    border: 'group-hover:border-emerald-500/35 dark:group-hover:border-emerald-400/30',
+    glow: 'from-emerald-500/[0.07] via-transparent to-transparent',
+    chip: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 group-hover:bg-emerald-600 group-hover:text-white',
+    arrow: 'text-emerald-600 dark:text-emerald-400 group-hover:text-white',
+  },
+  rose: {
+    border: 'group-hover:border-rose-500/35 dark:group-hover:border-rose-400/30',
+    glow: 'from-rose-500/[0.07] via-transparent to-transparent',
+    chip: 'bg-rose-500/10 text-rose-700 dark:text-rose-300 group-hover:bg-rose-600 group-hover:text-white',
+    arrow: 'text-rose-600 dark:text-rose-400 group-hover:text-white',
+  },
+  sky: {
+    border: 'group-hover:border-sky-500/35 dark:group-hover:border-sky-400/30',
+    glow: 'from-sky-500/[0.07] via-transparent to-transparent',
+    chip: 'bg-sky-500/10 text-sky-700 dark:text-sky-300 group-hover:bg-sky-600 group-hover:text-white',
+    arrow: 'text-sky-600 dark:text-sky-400 group-hover:text-white',
+  },
+  slate: {
+    border: 'group-hover:border-slate-500/30 dark:group-hover:border-slate-400/25',
+    glow: 'from-slate-500/[0.06] via-transparent to-transparent',
+    chip: 'bg-slate-500/10 text-slate-700 dark:text-slate-300 group-hover:bg-slate-600 group-hover:text-white',
+    arrow: 'text-slate-600 dark:text-slate-400 group-hover:text-white',
+  },
+};
+
+function OverviewNavCard({
   title,
   blurb,
-  action,
+  accent,
   preview,
+  onClick,
   className = '',
 }: {
   title: string;
   blurb: string;
-  action: React.ReactNode;
-  preview: React.ReactNode;
+  accent: CardAccent;
+  preview: ReactNode;
+  onClick: () => void;
   className?: string;
 }) {
+  const styles = ACCENT_STYLES[accent];
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onClick();
+    }
+  };
+
   return (
-    <div className={['card h-full min-h-[220px] flex flex-col p-5', className].join(' ')}>
-      <div className="card-muted shrink-0 h-28 p-3 overflow-hidden">{preview}</div>
-      <div className="mt-4 flex items-start justify-between gap-3 flex-1">
-        <div className="min-w-0 flex-1 pr-2">
-          <p className="text-sm font-semibold text-ink-primary dark:text-ink-dark-primary">{title}</p>
-          <p className="card-blurb mt-1">{blurb}</p>
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={handleKeyDown}
+      aria-label={`Open ${title}`}
+      className={cn(
+        'group relative flex h-full min-h-[220px] flex-col overflow-hidden rounded-2xl',
+        'border border-border/80 dark:border-border-dark/80',
+        'bg-surface dark:bg-surface-dark',
+        'shadow-sm shadow-black/[0.03] dark:shadow-black/20',
+        'cursor-pointer select-none',
+        'transition-[transform,box-shadow,border-color] duration-300 ease-out',
+        'hover:-translate-y-1 hover:shadow-lg hover:shadow-black/[0.06] dark:hover:shadow-black/40',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
+        'dark:focus-visible:ring-offset-surface-dark',
+        'active:translate-y-0 active:shadow-md',
+        styles.border,
+        className,
+      )}
+    >
+      <div
+        className={cn(
+          'pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100',
+          'bg-gradient-to-br',
+          styles.glow,
+        )}
+      />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent dark:via-white/10" />
+
+      <div className="relative flex-1 p-4 pb-0">
+        <div
+          className={cn(
+            'h-28 overflow-hidden rounded-xl border border-border/60 dark:border-border-dark/60',
+            'bg-surface-muted/80 dark:bg-surface-dark-muted/80',
+            'transition-[transform,box-shadow] duration-300 ease-out',
+            'group-hover:scale-[1.02] group-hover:shadow-inner',
+          )}
+        >
+          {preview}
         </div>
-        <div className="shrink-0">{action}</div>
+      </div>
+
+      <div className="relative flex items-end gap-3 p-5 pt-4">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold tracking-tight text-ink-primary dark:text-ink-dark-primary transition-colors group-hover:text-ink-primary dark:group-hover:text-white">
+            {title}
+          </p>
+          <p className="card-blurb mt-1.5 line-clamp-2">{blurb}</p>
+        </div>
+        <div
+          className={cn(
+            'flex size-10 shrink-0 items-center justify-center rounded-full',
+            'transition-all duration-300 ease-out',
+            'group-hover:scale-110 group-hover:shadow-md',
+            styles.chip,
+          )}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            className={cn('size-4 transition-transform duration-300 group-hover:translate-x-0.5', styles.arrow)}
+            aria-hidden
+          >
+            <path
+              fillRule="evenodd"
+              d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </div>
       </div>
     </div>
   );
@@ -192,6 +318,27 @@ function WatchlistPreview({ animated }: { animated: boolean }) {
   );
 }
 
+function IndicesPreview({ animated }: { animated: boolean }) {
+  const chips = [
+    { label: 'Nifty', c: 'text-emerald-600' },
+    { label: 'USD/INR', c: 'text-gray-600 dark:text-gray-400' },
+    { label: 'Gold', c: 'text-amber-600' },
+    { label: 'BTC', c: 'text-orange-500' },
+  ];
+  return (
+    <div className={`${PREVIEW_ROOT} ${animated ? 'ov-anim' : ''}`}>
+      <div className="absolute inset-0 rounded-lg bg-white/70 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 overflow-hidden" />
+      <div className={`absolute inset-x-0 top-1/2 -translate-y-1/2 flex gap-3 px-2 ${animated ? 'ticker-marquee-track' : ''}`} style={animated ? { width: 'max-content' } : undefined}>
+        {[...chips, ...chips].map((chip, i) => (
+          <span key={i} className={`text-[9px] font-semibold whitespace-nowrap ${chip.c}`}>
+            {chip.label} +0.4%
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function AboutPreview({ animated }: { animated: boolean }) {
   return (
     <div className={`${PREVIEW_ROOT} ${animated ? 'ov-anim' : ''}`}>
@@ -211,6 +358,23 @@ function AboutPreview({ animated }: { animated: boolean }) {
   );
 }
 
+const TOOL_NAV: {
+  key: keyof typeof PAGE_COPY.toolCards;
+  page: Page;
+  accent: CardAccent;
+  preview: (animated: boolean) => ReactNode;
+  wide?: boolean;
+}[] = [
+  { key: 'screener', page: 'screener', accent: 'blue', preview: (a) => <ScreenerPreview animated={a} />, wide: true },
+  { key: 'heatmap', page: 'heatmap', accent: 'teal', preview: (a) => <HeatmapPreview animated={a} /> },
+  { key: 'analysis', page: 'analysis', accent: 'violet', preview: (a) => <LookupPreview animated={a} /> },
+  { key: 'compare', page: 'compare', accent: 'amber', preview: (a) => <ComparePreview animated={a} /> },
+  { key: 'portfolio', page: 'portfolio', accent: 'emerald', preview: (a) => <PortfolioPreview animated={a} /> },
+  { key: 'watchlist', page: 'watchlist', accent: 'rose', preview: (a) => <WatchlistPreview animated={a} /> },
+  { key: 'indices', page: 'indices', accent: 'sky', preview: (a) => <IndicesPreview animated={a} /> },
+  { key: 'about', page: 'about', accent: 'slate', preview: (a) => <AboutPreview animated={a} /> },
+];
+
 export function OverviewPage() {
   const { goToPage } = useAppNavigation();
   const reduceMotion = useReducedMotion();
@@ -224,7 +388,6 @@ export function OverviewPage() {
   };
 
   const gridCell = 'h-full min-h-[220px]';
-
   const cards = PAGE_COPY.toolCards;
 
   return (
@@ -242,69 +405,26 @@ export function OverviewPage() {
         }}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch"
       >
-        <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
-          <OverviewCard
-            title={cards.screener.title}
-            blurb={cards.screener.blurb}
-            action={<OpenButton label="Open" onClick={() => goToPage('screener')} />}
-            preview={<ScreenerPreview animated={animated} />}
-            className="lg:col-span-2"
-          />
-        </motion.div>
-
-        <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
-          <OverviewCard
-            title={cards.heatmap.title}
-            blurb={cards.heatmap.blurb}
-            action={<OpenButton label="Open" onClick={() => goToPage('heatmap')} />}
-            preview={<HeatmapPreview animated={animated} />}
-          />
-        </motion.div>
-
-        <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
-          <OverviewCard
-            title={cards.analysis.title}
-            blurb={cards.analysis.blurb}
-            action={<OpenButton label="Open" onClick={() => goToPage('analysis')} />}
-            preview={<LookupPreview animated={animated} />}
-          />
-        </motion.div>
-
-        <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
-          <OverviewCard
-            title={cards.compare.title}
-            blurb={cards.compare.blurb}
-            action={<OpenButton label="Open" onClick={() => goToPage('compare')} />}
-            preview={<ComparePreview animated={animated} />}
-          />
-        </motion.div>
-
-        <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
-          <OverviewCard
-            title={cards.portfolio.title}
-            blurb={cards.portfolio.blurb}
-            action={<OpenButton label="Open" onClick={() => goToPage('portfolio')} />}
-            preview={<PortfolioPreview animated={animated} />}
-          />
-        </motion.div>
-
-        <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
-          <OverviewCard
-            title={cards.watchlist.title}
-            blurb={cards.watchlist.blurb}
-            action={<OpenButton label="Open" onClick={() => goToPage('watchlist')} />}
-            preview={<WatchlistPreview animated={animated} />}
-          />
-        </motion.div>
-
-        <motion.div className={gridCell} variants={item} whileHover={reduceMotion ? undefined : { y: -2 }} transition={cardTransition}>
-          <OverviewCard
-            title={cards.about.title}
-            blurb={cards.about.blurb}
-            action={<OpenButton label="Open" onClick={() => goToPage('about')} />}
-            preview={<AboutPreview animated={animated} />}
-          />
-        </motion.div>
+        {TOOL_NAV.map(({ key, page, accent, preview, wide }) => {
+          const copy = cards[key];
+          return (
+            <motion.div
+              key={key}
+              className={cn(gridCell, wide && 'lg:col-span-2')}
+              variants={item}
+              transition={cardTransition}
+            >
+              <OverviewNavCard
+                title={copy.title}
+                blurb={copy.blurb}
+                accent={accent}
+                preview={preview(animated)}
+                onClick={() => goToPage(page)}
+                className={wide ? 'h-full' : undefined}
+              />
+            </motion.div>
+          );
+        })}
       </motion.div>
 
       <style>{`
