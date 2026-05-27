@@ -10,7 +10,7 @@ import { ImportExcelModal } from './components/ImportExcelModal';
 import { TransactionHistory } from './components/TransactionHistory';
 import { PerformanceChart } from './components/PerformanceChart';
 import { RiskDashboard } from './components/RiskDashboard';
-import { TableSerialCell, TableSerialHeader } from '../../components/ui';
+import { Button, Modal, TableSerialCell, TableSerialHeader } from '../../components/ui';
 type SortKey = 'name' | 'qty' | 'avgBuy' | 'cmp' | 'invested' | 'current' | 'pnl' | 'pnlPct' | 'todayPnl' | 'todayPnlPct';
 type SortDir = 'asc' | 'desc';
 
@@ -66,6 +66,7 @@ export function PortfolioPage() {
   const [loadingPrices, setLoadingPrices] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showImport, setShowImport] = useState(false);
+  const [showDeletePortfolioModal, setShowDeletePortfolioModal] = useState(false);
   const [expandedSymbol, setExpandedSymbol] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>('name');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
@@ -162,11 +163,11 @@ export function PortfolioPage() {
   };
 
   const handleClearPortfolio = () => {
-    if (!confirm('Delete entire portfolio? This will remove all positions and transaction history.')) return;
     const empty = clearPortfolio();
     setPortfolio(empty);
     setLivePrices({});
     setExpandedSymbol(null);
+    setShowDeletePortfolioModal(false);
   };
 
   const maxSellQty: Record<string, number> = {};
@@ -219,7 +220,7 @@ export function PortfolioPage() {
               onClick={() => setShowImport(true)}
               className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
-              Import Excel
+              Import CSV
             </button>
             <button
               onClick={() => setShowModal(true)}
@@ -229,7 +230,7 @@ export function PortfolioPage() {
             </button>
             {positions.length > 0 && (
               <button
-                onClick={handleClearPortfolio}
+                onClick={() => setShowDeletePortfolioModal(true)}
                 className="px-4 py-2 text-sm font-medium rounded-lg border border-red-800 text-red-600 dark:text-red-400 hover:bg-red-900/30 transition-colors"
               >
                 Delete Portfolio
@@ -330,6 +331,28 @@ export function PortfolioPage() {
           onImport={handleImportRows}
           onClose={() => setShowImport(false)}
         />
+      )}
+
+      {showDeletePortfolioModal && (
+        <Modal title="Delete portfolio" onClose={() => setShowDeletePortfolioModal(false)}>
+          <div className="space-y-4">
+            <p className="text-sm text-ink-muted dark:text-ink-dark-muted">
+              Delete entire portfolio? This will remove all positions and transaction history.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setShowDeletePortfolioModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="button" variant="danger" onClick={handleClearPortfolio}>
+                Delete Portfolio
+              </Button>
+            </div>
+          </div>
+        </Modal>
       )}
       </div>
     </PageLayout>

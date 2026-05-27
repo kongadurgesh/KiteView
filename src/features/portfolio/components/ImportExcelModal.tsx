@@ -1,5 +1,4 @@
 import { useState, useRef } from 'react';
-import * as XLSX from 'xlsx';
 
 interface ImportRow {
   isin: string;
@@ -24,6 +23,48 @@ const QTY_HEADERS = ['quantity', 'qty', 'shares', 'units', 'holding qty'];
 function matchHeader(header: string, patterns: string[]): boolean {
   const h = header.toLowerCase().trim();
   return patterns.some((p) => h === p || h.includes(p));
+}
+
+function parseCsvLine(line: string): string[] {
+  const out: string[] = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    const next = line[i + 1];
+
+    if (char === '"') {
+      if (inQuotes && next === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (char === ',' && !inQuotes) {
+      out.push(current.trim());
+      current = '';
+      continue;
+    }
+
+    current += char;
+  }
+
+  out.push(current.trim());
+  return out;
+}
+
+function parseCsv(content: string): string[][] {
+  const lines = content
+    .replace(/^\uFEFF/, '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+
+  return lines.map(parseCsvLine);
 }
 
 function detectColumns(headers: string[]): { isinCol: number; priceCol: number; qtyCol: number } {
@@ -65,10 +106,8 @@ export function ImportExcelModal({ onImport, onClose }: ImportExcelModalProps) {
     const reader = new FileReader();
     reader.onload = (evt) => {
       try {
-        const data = new Uint8Array(evt.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const json = XLSX.utils.sheet_to_json<string[]>(sheet, { header: 1 });
+        const text = String(evt.target?.result ?? '');
+        const json = parseCsv(text);
 
         if (json.length < 2) { setError('File has no data rows'); return; }
 
@@ -92,10 +131,10 @@ export function ImportExcelModal({ onImport, onClose }: ImportExcelModalProps) {
         if (parsed.length === 0) { setError('No valid rows found in the file'); return; }
         setRows(parsed);
       } catch {
-        setError('Failed to parse file. Make sure it is a valid Excel or CSV file.');
+        setError('Failed to parse file. Make sure it is a valid CSV file.');
       }
     };
-    reader.readAsArrayBuffer(file);
+    reader.readAsText(file);
   };
 
   const handleResolve = async () => {
@@ -145,19 +184,19 @@ export function ImportExcelModal({ onImport, onClose }: ImportExcelModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-2xl mx-4 p-6 max-h-[85vh] flex flex-col">
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Import from Excel</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Import from CSV</h3>
           <button onClick={onClose} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none">&times;</button>
         </div>
 
         {rows.length === 0 ? (
           <div className="space-y-4">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Upload an Excel file (.xlsx, .xls, .csv) with columns for <strong>ISIN</strong>, <strong>Buy Price</strong>, and <strong>Quantity</strong>.
+              Upload a CSV file with columns for <strong>ISIN</strong>, <strong>Buy Price</strong>, and <strong>Quantity</strong>.
             </p>
             <input
               ref={fileRef}
               type="file"
-              accept=".xlsx,.xls,.csv"
+              accept=".csv,text/csv"
               onChange={handleFile}
               className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-900/30 file:text-blue-400 hover:file:bg-blue-900/50 cursor-pointer"
             />

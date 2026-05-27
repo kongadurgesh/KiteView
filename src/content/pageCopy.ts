@@ -37,7 +37,7 @@ export const PAGE_COPY = {
   portfolio: {
     title: 'Portfolio',
     description:
-      'Track BUY and SELL transactions, live P&L, performance vs indices, and risk metrics. Import holdings from Excel or CSV.',
+      'Track BUY and SELL transactions, live P&L, performance vs indices, and risk metrics. Import holdings from CSV.',
   },
   watchlist: {
     title: 'Watchlist',
