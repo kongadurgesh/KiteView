@@ -8,6 +8,7 @@ import type {
   FinancialHighlights,
   QuarterlyPeriod,
   QuarterlyResults,
+  QuarterlyResultsRaw,
 } from '../../types/analysisExtras';
 import { fetchAnalysisBundle, fetchStatsBatch } from '../../services/apiBatch';
 import { detectPattern } from '../../utils/patternDetector';
@@ -52,6 +53,29 @@ function normalizeQuarterlyResults(qr: QuarterlyResults): QuarterlyResults {
     periods: qr.periods
       .map((p) => normalizeQuarterlyPeriod(p))
       .sort((a, b) => b.endDate.localeCompare(a.endDate)),
+  };
+}
+
+function normalizeQuarterlyResultsRaw(qr?: QuarterlyResultsRaw): QuarterlyResultsRaw {
+  const fallback: QuarterlyResultsRaw = {
+    basis: 'unknown',
+    consolidated: { source: 'fundamentals-timeseries', periods: [] },
+    standalone: { source: 'incomeStatementHistoryQuarterly', periods: [] },
+  };
+  if (!qr) return fallback;
+  const sortByDate = <T extends { endDate: string }>(periods: T[]): T[] => (
+    [...periods].sort((a, b) => b.endDate.localeCompare(a.endDate)).slice(0, 5)
+  );
+  return {
+    basis: qr.basis ?? 'unknown',
+    consolidated: {
+      source: qr.consolidated?.source ?? fallback.consolidated.source,
+      periods: sortByDate(qr.consolidated?.periods ?? []),
+    },
+    standalone: {
+      source: qr.standalone?.source ?? fallback.standalone.source,
+      periods: sortByDate(qr.standalone?.periods ?? []),
+    },
   };
 }
 
@@ -149,6 +173,11 @@ const emptyRecs: AnalysisRecommendations = {
 };
 
 const emptyQuarterly: QuarterlyResults = { basis: 'unknown', periods: [] };
+const emptyQuarterlyRaw: QuarterlyResultsRaw = {
+  basis: 'unknown',
+  consolidated: { source: 'fundamentals-timeseries', periods: [] },
+  standalone: { source: 'incomeStatementHistoryQuarterly', periods: [] },
+};
 
 export function useStockAnalysis() {
   const [isLoading, setIsLoading] = useState(false);
@@ -173,6 +202,7 @@ export function useStockAnalysis() {
   const [recommendations, setRecommendations] = useState<AnalysisRecommendations>(emptyRecs);
   const [news, setNews] = useState<AnalysisNewsItem[]>([]);
   const [quarterlyResults, setQuarterlyResults] = useState<QuarterlyResults>(emptyQuarterly);
+  const [quarterlyResultsRaw, setQuarterlyResultsRaw] = useState<QuarterlyResultsRaw>(emptyQuarterlyRaw);
   const [hasSearched, setHasSearched] = useState(false);
 
   const search = useCallback(async (sym: string): Promise<string | null> => {
@@ -189,6 +219,7 @@ export function useStockAnalysis() {
     setRecommendations(emptyRecs);
     setNews([]);
     setQuarterlyResults(emptyQuarterly);
+    setQuarterlyResultsRaw(emptyQuarterlyRaw);
     setStockName('');
     setCurrentPrice(0);
     setHasSearched(true);
@@ -241,6 +272,7 @@ export function useStockAnalysis() {
       setQuarterlyResults(
         normalizeQuarterlyResults(bundle.quarterlyResults ?? emptyQuarterly),
       );
+      setQuarterlyResultsRaw(normalizeQuarterlyResultsRaw(bundle.quarterlyResultsRaw));
 
       const statsMc = statsMap[statsKey]?.marketCap;
       const indian = isIndianSymbol(norm);
@@ -314,6 +346,7 @@ export function useStockAnalysis() {
     technical,
     priceSeries,
     quarterlyResults,
+    quarterlyResultsRaw,
     dvm,
     search,
     canRescan: Boolean(symbol) && !isLoading,

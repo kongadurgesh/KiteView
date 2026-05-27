@@ -6,6 +6,7 @@ import type {
   AnalysisRecommendations,
   FinancialHighlights,
   QuarterlyResults,
+  QuarterlyResultsRaw,
 } from '../types/analysisExtras';
 import type { WatchlistSnapshot } from '../types/watchlist';
 
@@ -70,6 +71,7 @@ export interface AnalysisBundleResponse {
   recommendations: AnalysisRecommendations;
   news: AnalysisNewsItem[];
   quarterlyResults: QuarterlyResults;
+  quarterlyResultsRaw?: QuarterlyResultsRaw;
 }
 
 /** @deprecated Use AnalysisBundleResponse */
