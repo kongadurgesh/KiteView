@@ -131,15 +131,6 @@ export function Sidebar({
           ${expanded ? 'lg:w-48' : 'lg:w-16'}
         `}
       >
-        <div className="h-14 flex items-center px-4 border-b border-gray-200 dark:border-gray-800 shrink-0">
-          <span className="text-blue-600 dark:text-blue-400 font-bold text-lg tracking-tight whitespace-nowrap lg:hidden">
-            KiteView
-          </span>
-          <span className="text-blue-600 dark:text-blue-400 font-bold text-lg tracking-tight whitespace-nowrap hidden lg:inline">
-            {showLabels ? 'KiteView' : 'KV'}
-          </span>
-        </div>
-
         <nav className="flex-1 py-3 flex flex-col gap-1 px-2 overflow-y-auto">
           {NAV_ITEMS.map((item) => (
             <NavLink
