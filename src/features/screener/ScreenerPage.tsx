@@ -187,7 +187,7 @@ export function ScreenerPage() {
   const pct = progress.total > 0 ? Math.round((progress.scanned / progress.total) * 100) : 0;
 
   return (
-    <PageLayout className="w-full max-w-none mt-6" title={PAGE_COPY.screener.title} description={PAGE_COPY.screener.description}>
+    <PageLayout className="w-full mt-6" title={PAGE_COPY.screener.title} description={PAGE_COPY.screener.description}>
       <div className="w-full space-y-6">
       <div className="card p-6">
         <SectionHeader title="Scan controls" />
