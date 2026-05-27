@@ -1,6 +1,7 @@
 import { normalizeNseSymbol } from '../../lib/nseSymbol';
 import type { Watchlist, WatchlistAlerts, WatchlistItem, WatchlistThesis } from '../../types/watchlist';
 import { DEFAULT_ALERTS, EMPTY_THESIS } from '../../types/watchlist';
+import { supabase } from '../../auth/supabase';
 
 const STORAGE_KEY = 'kiteview-watchlists-v1';
 
@@ -16,6 +17,25 @@ function defaultWatchlist(): Watchlist {
     createdAt: now,
     items: [],
   };
+}
+
+export async function loadWatchlistsFromCloud(userId: string): Promise<Watchlist[]> {
+  const { data, error } = await supabase
+    .from('watchlists')
+    .select('data')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (error || !data) return [defaultWatchlist()];
+  const parsed = data.data as Watchlist[];
+  if (!Array.isArray(parsed) || parsed.length === 0) return [defaultWatchlist()];
+  return parsed;
+}
+
+export async function saveWatchlistsToCloud(userId: string, lists: Watchlist[]): Promise<void> {
+  await supabase.from('watchlists').upsert(
+    { user_id: userId, data: lists, updated_at: new Date().toISOString() },
+    { onConflict: 'user_id' },
+  );
 }
 
 export function loadWatchlists(): Watchlist[] {

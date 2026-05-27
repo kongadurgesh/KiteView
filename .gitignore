@@ -31,3 +31,4 @@ data/constituents/*.json
 # Sample upload files
 test/*.csv
 test/*.xlsx
+.env.local

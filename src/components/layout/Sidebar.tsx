@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { pageToPath } from '../../app/routes';
+import { useAuth } from '../../auth/AuthContext';
 import type { Page } from './types';
 
 export type { Page } from './types';
@@ -96,6 +97,7 @@ export function Sidebar({
   onMobileClose,
 }: SidebarProps) {
   const [expanded, setExpanded] = useState(false);
+  const { user, signOut, openLoginModal } = useAuth();
 
   const showLabels = mobileOpen || expanded;
 
@@ -159,6 +161,38 @@ export function Sidebar({
             </svg>
             {showLabels && <span>About</span>}
           </NavLink>
+
+          {/* Auth: sign-in button or user email + sign-out */}
+          {user ? (
+            <button
+              type="button"
+              onClick={() => void signOut()}
+              title={showLabels ? undefined : (user.email ?? 'Sign Out')}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap w-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+              </svg>
+              {showLabels && (
+                <span className="flex-1 overflow-hidden text-left">
+                  <span className="block text-xs truncate text-gray-700 dark:text-gray-200">{user.email}</span>
+                  <span className="block text-[10px] text-gray-400 dark:text-gray-500">Sign Out</span>
+                </span>
+              )}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={openLoginModal}
+              title={showLabels ? undefined : 'Sign In'}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap w-full text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-600/10"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25 2.25V15M12 9l3 3m0 0l-3 3m3-3H3.75" />
+              </svg>
+              {showLabels && <span>Sign In</span>}
+            </button>
+          )}
 
           <button
             type="button"

@@ -1,6 +1,25 @@
 import { Portfolio, Position, Transaction } from '../types';
+import { supabase } from '../auth/supabase';
 
 const STORAGE_KEY = 'bullish-portfolio';
+
+export async function loadPortfolioFromCloud(userId: string): Promise<Portfolio> {
+  const { data, error } = await supabase
+    .from('portfolios')
+    .select('data')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (error || !data) return { positions: {} };
+  return (data.data as Portfolio) ?? { positions: {} };
+}
+
+export async function savePortfolioToCloud(userId: string, portfolio: Portfolio): Promise<void> {
+  await supabase.from('portfolios').upsert(
+    { user_id: userId, data: portfolio, updated_at: new Date().toISOString() },
+    { onConflict: 'user_id' },
+  );
+}
+
 
 export function loadPortfolio(): Portfolio {
   try {

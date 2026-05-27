@@ -4,6 +4,7 @@ import { AppShell } from '../components/layout/AppShell';
 import { PersistentOutlet } from './PersistentOutlet';
 import { WatchlistProvider } from '../features/watchlist/WatchlistProvider';
 import { initTheme, getTheme, toggleTheme } from '../utils/theme';
+import { AuthProvider } from '../auth/AuthProvider';
 
 export function AppLayout() {
   const location = useLocation();
@@ -25,6 +26,7 @@ export function AppLayout() {
   };
 
   return (
+    <AuthProvider>
     <AppShell
       isDark={isDark}
       onToggleTheme={handleToggleTheme}
@@ -38,5 +40,6 @@ export function AppLayout() {
         <PersistentOutlet scrollContainerRef={mainScrollRef} />
       </WatchlistProvider>
     </AppShell>
+    </AuthProvider>
   );
 }
