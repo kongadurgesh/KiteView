@@ -9,6 +9,7 @@ import type { WatchlistAlerts, WatchlistItem, WatchlistSnapshot, WatchlistThesis
 import { RenameWatchlistModal } from './components/RenameWatchlistModal';
 import { useWatchlists } from './WatchlistProvider';
 import { evaluateWatchlistAlerts, requestNotificationPermission } from './watchlistAlerts';
+import { useAuth } from '../../auth/AuthContext';
 
 function SignalBadge({ signal }: { signal: 'BUY' | 'WAIT' }) {
   const isBuy = signal === 'BUY';
@@ -140,8 +141,9 @@ function ThesisPanel({
 }
 
 export function WatchlistPage() {
+  const { user, loading: authLoading, openLoginModal } = useAuth();
   const { viewStock } = useAppNavigation();
-  const { lists, active, activeId, setActiveId, addList, removeList, renameList, removeSymbol, patchItem } =
+  const { lists, active, activeId, cloudLoading, setActiveId, addList, removeList, renameList, removeSymbol, patchItem } =
     useWatchlists();
   const [snapshots, setSnapshots] = useState<Record<string, WatchlistSnapshot>>({});
   const [loading, setLoading] = useState(false);
@@ -212,6 +214,27 @@ export function WatchlistPage() {
       title={PAGE_COPY.watchlist.title}
       description={PAGE_COPY.watchlist.description}
     >
+      {(authLoading || cloudLoading) ? (
+        <div className="flex items-center justify-center py-24 text-gray-400 dark:text-gray-500 text-sm">
+          Loading…
+        </div>
+      ) : !user ? (
+        <div className="flex flex-col items-center justify-center py-24 gap-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="size-12 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+          </svg>
+          <p className="text-gray-500 dark:text-gray-400 font-medium">Sign in to access your watchlists</p>
+          <p className="text-gray-400 dark:text-gray-500 text-sm">Your data is stored securely in the cloud and accessible from any browser.</p>
+          <button
+            type="button"
+            onClick={openLoginModal}
+            className="mt-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-500 transition-colors"
+          >
+            Sign In
+          </button>
+        </div>
+      ) : (
+      <>
       <div className="space-y-4">
         {notifPerm !== 'granted' && notifPerm !== 'unsupported' && (
           <Alert variant="info" title="Browser alerts">
@@ -413,6 +436,8 @@ export function WatchlistPage() {
           }}
           onClose={() => setShowRenameModal(false)}
         />
+      )}
+      </>
       )}
     </PageLayout>
   );

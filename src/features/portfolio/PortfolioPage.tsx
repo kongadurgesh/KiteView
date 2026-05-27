@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react';
 import { Portfolio, Position, Transaction } from '../../types';
-import { loadPortfolio, savePortfolio, addTransaction, getPositions, removePosition, clearPortfolio } from '../../utils/portfolio';
+import { loadPortfolioFromCloud, savePortfolio, addTransaction, getPositions, removePosition, clearPortfolio, savePortfolioToCloud } from '../../utils/portfolio';
+import { useAuth } from '../../auth/AuthContext';
 import { fetchBatchQuotesDetailed } from '../../services/fetchStockData';
 import { PageLayout } from '../../components/layout/PageLayout';
 import { PAGE_COPY } from '../../content/pageCopy';
@@ -60,7 +61,10 @@ function getSortValue(row: PositionRow, key: SortKey): number | string {
 }
 
 export function PortfolioPage() {
-  const [portfolio, setPortfolio] = useState<Portfolio>(loadPortfolio);
+  const { user, loading: authLoading, openLoginModal } = useAuth();
+  const [portfolio, setPortfolio] = useState<Portfolio>({ positions: {} });
+  const [cloudLoading, setCloudLoading] = useState(false);
+  const cloudReady = useRef(false);
   const [livePrices, setLivePrices] = useState<Record<string, number>>({});
   const [livePrevClose, setLivePrevClose] = useState<Record<string, number>>({});
   const [loadingPrices, setLoadingPrices] = useState(false);
@@ -70,6 +74,28 @@ export function PortfolioPage() {
   const [expandedSymbol, setExpandedSymbol] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>('name');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
+
+  // Load from cloud when user changes
+  useEffect(() => {
+    cloudReady.current = false;
+    if (!user) {
+      setPortfolio({ positions: {} });
+      setLivePrices({});
+      return;
+    }
+    setCloudLoading(true);
+    loadPortfolioFromCloud(user.id).then((p) => {
+      setPortfolio(p);
+      cloudReady.current = true;
+      setCloudLoading(false);
+    });
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Persist to cloud whenever portfolio changes (after initial cloud load)
+  useEffect(() => {
+    if (!user?.id || !cloudReady.current) return;
+    savePortfolioToCloud(user.id, portfolio);
+  }, [portfolio, user?.id]);
 
   const positions = getPositions(portfolio);
   const activePositions = positions.filter((p) => p.totalQty > 0);
@@ -206,8 +232,28 @@ export function PortfolioPage() {
 
   return (
     <PageLayout className="max-w-6xl mt-6" title={PAGE_COPY.portfolio.title} description={PAGE_COPY.portfolio.description}>
-      <div className="w-full space-y-6">
-      <CollapsibleSection title="Portfolio">
+      {(authLoading || cloudLoading) ? (
+        <div className="flex items-center justify-center py-24 text-gray-400 dark:text-gray-500 text-sm">
+          Loading…
+        </div>
+      ) : !user ? (
+        <div className="flex flex-col items-center justify-center py-24 gap-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="size-12 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+          </svg>
+          <p className="text-gray-500 dark:text-gray-400 font-medium">Sign in to access your portfolio</p>
+          <p className="text-gray-400 dark:text-gray-500 text-sm">Your data is stored securely in the cloud and accessible from any browser.</p>
+          <button
+            type="button"
+            onClick={openLoginModal}
+            className="mt-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-500 transition-colors"
+          >
+            Sign In
+          </button>
+        </div>
+      ) : (
+        <div className="w-full space-y-6">
+        <CollapsibleSection title="Portfolio">
         <div className="flex flex-wrap justify-end gap-2 mb-4">
             <button
               onClick={refreshPrices}
@@ -355,6 +401,7 @@ export function PortfolioPage() {
         </Modal>
       )}
       </div>
+      )}
     </PageLayout>
   );
 }

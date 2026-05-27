@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -12,17 +13,20 @@ import {
   addToWatchlist,
   createWatchlist,
   deleteWatchlist,
-  loadWatchlists,
+  loadWatchlistsFromCloud,
   removeFromWatchlist,
   renameWatchlist,
   saveWatchlists,
+  saveWatchlistsToCloud,
   updateWatchlistItem,
 } from './watchlistStore';
+import { useAuth } from '../../auth/AuthContext';
 
 interface WatchlistContextValue {
   lists: Watchlist[];
   active: Watchlist | null;
   activeId: string;
+  cloudLoading: boolean;
   setActiveId: (id: string) => void;
   refresh: () => void;
   addList: (name: string) => void;
@@ -45,8 +49,35 @@ interface WatchlistContextValue {
 const WatchlistContext = createContext<WatchlistContextValue | null>(null);
 
 export function WatchlistProvider({ children }: { children: ReactNode }) {
-  const [lists, setLists] = useState<Watchlist[]>(() => loadWatchlists());
-  const [activeId, setActiveId] = useState<string>(() => loadWatchlists()[0]?.id ?? '');
+  const { user } = useAuth();
+  const [lists, setLists] = useState<Watchlist[]>([]);
+  const [activeId, setActiveId] = useState<string>('');
+  const [cloudLoading, setCloudLoading] = useState(false);
+  // cloudReady guards the save-to-cloud effect from firing before the initial load
+  const cloudReady = useRef(false);
+
+  // Load from cloud whenever the user changes
+  useEffect(() => {
+    cloudReady.current = false;
+    if (!user) {
+      setLists([]);
+      setActiveId('');
+      return;
+    }
+    setCloudLoading(true);
+    loadWatchlistsFromCloud(user.id).then((loaded) => {
+      setLists(loaded);
+      setActiveId((prev) => (loaded.some((l) => l.id === prev) ? prev : (loaded[0]?.id ?? '')));
+      cloudReady.current = true;
+      setCloudLoading(false);
+    });
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Persist to cloud whenever lists change (after initial cloud load)
+  useEffect(() => {
+    if (!user?.id || !cloudReady.current) return;
+    saveWatchlistsToCloud(user.id, lists);
+  }, [lists, user?.id]);
 
   useEffect(() => {
     if (!lists.some((l) => l.id === activeId) && lists[0]) {
@@ -54,17 +85,12 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
     }
   }, [lists, activeId]);
 
-  useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === 'kiteview-watchlists-v1') setLists(loadWatchlists());
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, []);
-
   const active = lists.find((l) => l.id === activeId) ?? lists[0] ?? null;
 
-  const refresh = useCallback(() => setLists(loadWatchlists()), []);
+  const refresh = useCallback(() => {
+    if (!user?.id) return;
+    loadWatchlistsFromCloud(user.id).then(setLists);
+  }, [user?.id]);
 
   const addList = useCallback((name: string) => {
     setLists((prev) => {
@@ -125,6 +151,7 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
       lists,
       active,
       activeId,
+      cloudLoading,
       setActiveId,
       refresh,
       addList,
@@ -139,6 +166,7 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
       lists,
       active,
       activeId,
+      cloudLoading,
       refresh,
       addList,
       removeList,
