@@ -2,8 +2,8 @@ import { PageLayout } from '../../components/layout/PageLayout';
 import { PAGE_COPY } from '../../content/pageCopy';
 
 const TRACK_RECORD = [
-  { fy: '2021-22', status: 'Net Positive', proofLabel: 'View P&L (Groww)', url: 'https://docs.google.com/spreadsheets/d/1P04wvDCzSVS0UxyIZTOGnMohoJtiGZoE/edit?usp=sharing&ouid=111406837300351215866&rtpof=true&sd=true', type: 'xlsx' as const },
-  { fy: '2022-23', status: 'Net Positive', proofLabel: 'View P&L (Groww)', url: 'https://docs.google.com/spreadsheets/d/11cD9ttg6tS1e0Bjl51lpwiIxhB3TGecW/edit?usp=sharing&ouid=111406837300351215866&rtpof=true&sd=true', type: 'xlsx' as const },
+  { fy: '2021-22', status: 'Net Positive', proofLabel: 'View P&L (Groww)', url: 'https://docs.google.com/spreadsheets/d/1P04wvDCzSVS0UxyIZTOGnMohoJtiGZoE/edit?usp=sharing&ouid=111406837300351215866&rtpof=true&sd=true', type: 'sheet' as const },
+  { fy: '2022-23', status: 'Net Positive', proofLabel: 'View P&L (Groww)', url: 'https://docs.google.com/spreadsheets/d/11cD9ttg6tS1e0Bjl51lpwiIxhB3TGecW/edit?usp=sharing&ouid=111406837300351215866&rtpof=true&sd=true', type: 'sheet' as const },
   { fy: '2023-24', status: 'Net Positive', proofLabel: 'FYERS Verified P&L', url: 'https://verifiedpnldocs.fyers.in/VerifiedPNL/htmls/ab143f05-371f-40a6-97b0-deafbedf312c.html', type: 'verified' as const },
   { fy: '2024-25', status: 'Net Positive', proofLabel: 'FYERS Verified P&L', url: 'https://verifiedpnldocs.fyers.in/VerifiedPNL/htmls/53edf16c-39a4-490a-83ee-809d22ff5498.html', type: 'verified' as const },
   { fy: '2025-26', status: 'Net Positive', proofLabel: 'FYERS Verified P&L', url: 'https://verifiedpnldocs.fyers.in/VerifiedPNL/htmls/83ba31c7-8a4f-4436-a94a-8d141acab9b7.html', type: 'verified' as const },

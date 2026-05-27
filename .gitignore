@@ -27,3 +27,7 @@ dist-ssr
 
 # Constituents data files
 data/constituents/*.json
+
+# Sample upload files
+test/*.csv
+test/*.xlsx

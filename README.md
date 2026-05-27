@@ -93,7 +93,7 @@ Dedicated page to compare up to four stocks (not embedded in Stock Analysis).
 Transaction-based portfolio tracker with analytics.
 
 - **Transactions**: BUY/SELL with qty, price, date
-- **Import**: `.xlsx`, `.xls`, or `.csv` (ISIN, buy price, quantity) via `xlsx`
+- **Import**: `.csv` (ISIN, buy price, quantity)
 - **Positions**: avg buy, qty, invested, live value, P&L (₹ and %)
 - **Live prices**: batch quotes for all holdings
 - **Sortable** positions table with **#** row index; expanded row shows numbered transaction history
@@ -144,44 +144,43 @@ Author profile, investing philosophy, and linked P&L proof spreadsheets.
 
 ### Frontend
 
-| Technology | Purpose |
-|---|---|
-| **React 18** | UI |
-| **React Router 7** | Client-side routes and shareable URLs |
-| **TypeScript 5.6** | Types |
-| **Vite 5** | Dev server & production build |
-| **Tailwind CSS 3.4** | Styling + semantic tokens (`surface`, `ink`, `accent`, …) |
-| **Framer Motion** | Overview page motion |
-| **Recharts 3** | Line, bar, and pie charts |
-| **xlsx** | Portfolio Excel/CSV import |
-| **@vercel/analytics** / **speed-insights** | Production telemetry |
+| Technology                                 | Purpose                                                   |
+| ------------------------------------------ | --------------------------------------------------------- |
+| **React 18**                               | UI                                                        |
+| **React Router 7**                         | Client-side routes and shareable URLs                     |
+| **TypeScript 5.6**                         | Types                                                     |
+| **Vite 5**                                 | Dev server & production build                             |
+| **Tailwind CSS 3.4**                       | Styling + semantic tokens (`surface`, `ink`, `accent`, …) |
+| **Framer Motion**                          | Overview page motion                                      |
+| **Recharts 3**                             | Line, bar, and pie charts                                 |
+| **@vercel/analytics** / **speed-insights** | Production telemetry                                      |
 
 ### Backend / API proxy
 
-| Layer | Role |
-|---|---|
-| **`server.js`** | Express proxy on port **3006** (local dev) |
-| **`api/`** | One Vercel serverless function (`index.js`); logic lives in `backend/` |
+| Layer           | Role                                                                   |
+| --------------- | ---------------------------------------------------------------------- |
+| **`server.js`** | Express proxy on port **3006** (local dev)                             |
+| **`api/`**      | One Vercel serverless function (`index.js`); logic lives in `backend/` |
 
 Yahoo Finance calls are proxied server-side for CORS and crumb/cookie auth (`getYahooCrumb()`, 10-minute cache).
 
 ### Data sources
 
-| Yahoo API | Used for |
-|---|---|
-| `v8/finance/chart` | OHLCV history |
-| `v7/finance/quote` | Live quotes (incl. batch) |
-| `v10/finance/quoteSummary` | Profile, key stats |
-| `v1/finance/search` | Symbol search |
-| `v1/finance/screener` | NSE universe |
+| Yahoo API                  | Used for                  |
+| -------------------------- | ------------------------- |
+| `v8/finance/chart`         | OHLCV history             |
+| `v7/finance/quote`         | Live quotes (incl. batch) |
+| `v10/finance/quoteSummary` | Profile, key stats        |
+| `v1/finance/search`        | Symbol search             |
+| `v1/finance/screener`      | NSE universe              |
 
 ### Data storage
 
-| Store | Contents |
-|---|---|
-| `localStorage` | Portfolio, theme |
-| `sessionStorage` | Screener list cache |
-| Server memory | Yahoo crumb/cookie cache |
+| Store            | Contents                 |
+| ---------------- | ------------------------ |
+| `localStorage`   | Portfolio, theme         |
+| `sessionStorage` | Screener list cache      |
+| Server memory    | Yahoo crumb/cookie cache |
 
 ---
 
@@ -285,18 +284,18 @@ KiteView/
 
 ## Routes
 
-| Path | Page |
-|---|---|
-| `/` | Overview |
-| `/screener` | Live Screener |
-| `/heatmap` | Market Heatmap (`?index=` optional — e.g. from Indices page) |
-| `/analysis` | Stock Analysis (`?symbol=` optional) |
-| `/lookup` | Redirects to `/analysis` (preserves `?symbol=`) |
-| `/compare` | Stock Comparison (`?symbol=` optional) |
-| `/portfolio` | Portfolio |
-| `/watchlist` | Watchlist |
-| `/indices` | Indices |
-| `/about` | About |
+| Path         | Page                                                         |
+| ------------ | ------------------------------------------------------------ |
+| `/`          | Overview                                                     |
+| `/screener`  | Live Screener                                                |
+| `/heatmap`   | Market Heatmap (`?index=` optional — e.g. from Indices page) |
+| `/analysis`  | Stock Analysis (`?symbol=` optional)                         |
+| `/lookup`    | Redirects to `/analysis` (preserves `?symbol=`)              |
+| `/compare`   | Stock Comparison (`?symbol=` optional)                       |
+| `/portfolio` | Portfolio                                                    |
+| `/watchlist` | Watchlist                                                    |
+| `/indices`   | Indices                                                      |
+| `/about`     | About                                                        |
 
 Unknown paths redirect to `/`. Vercel serves `index.html` for all non-API routes (SPA fallback in `vercel.json`).
 
@@ -306,23 +305,23 @@ Unknown paths redirect to `/`. Vercel serves `index.html` for all non-API routes
 
 Base URL: same-origin `/api` (Vite proxies to port **3006** in dev; Vercel serves the API in production).
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/chart/:symbol` | Historical OHLCV. Query: `range`, `interval` |
-| GET | `/api/index-constituents?indexId=` | Index members for heatmap from bundled lists (+ Yahoo quote enrichment). Slice indices use client NSE list; proxy indices return approximate regional lists |
-| GET | `/api/quote/:symbols` | Live quote(s); comma-separated symbols supported |
-| GET | `/api/profile/:symbol` | Sector and industry |
-| GET | `/api/stats/:symbol` | P/E, forward P/E, P/B, beta, 52W change, market cap |
-| GET | `/api/search?q=` | Symbol autocomplete (global equities) |
-| GET | `/api/resolve-symbol?q=` | Resolve user input to Yahoo symbol (e.g. `AAPL`, `TCS`) |
-| GET | `/api/screener-list` | NSE universe (cap > ₹1,000 Cr) |
-| POST | `/api/screener-scan` | Pattern scan. Body: `{ symbols, mode: 'today' \| 'historical', fromDate?, toDate? }` — historical requires both dates |
-| POST | `/api/heatmap-batch` | Batch quotes for heatmap. Body: `{ symbols, timeframe }` |
-| POST | `/api/chart-batch` | Batch chart data. Body: `{ symbols, range?, interval? }` → `{ charts }` |
-| POST | `/api/stats-batch` | Batch key stats. Body: `{ symbols }` → `{ stats }` |
-| GET | `/api/lookup-bundle?symbol=` | Chart 1y + max, quote, profile, financials, recommendations, news, quarterlyResults |
-| POST | `/api/watchlist-snapshot` | Watchlist live data. Body: `{ symbols }` (max 50) → `{ snapshots }` per symbol: CMP, signal, pattern, SWOT |
-| POST | `/api/swot-batch` | Trendlyne SWOT counts. Body: `{ symbols }` (max 50) → `{ swot }` with strengths/weaknesses per symbol |
+| Method | Endpoint                           | Description                                                                                                                                                 |
+| ------ | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/chart/:symbol`               | Historical OHLCV. Query: `range`, `interval`                                                                                                                |
+| GET    | `/api/index-constituents?indexId=` | Index members for heatmap from bundled lists (+ Yahoo quote enrichment). Slice indices use client NSE list; proxy indices return approximate regional lists |
+| GET    | `/api/quote/:symbols`              | Live quote(s); comma-separated symbols supported                                                                                                            |
+| GET    | `/api/profile/:symbol`             | Sector and industry                                                                                                                                         |
+| GET    | `/api/stats/:symbol`               | P/E, forward P/E, P/B, beta, 52W change, market cap                                                                                                         |
+| GET    | `/api/search?q=`                   | Symbol autocomplete (global equities)                                                                                                                       |
+| GET    | `/api/resolve-symbol?q=`           | Resolve user input to Yahoo symbol (e.g. `AAPL`, `TCS`)                                                                                                     |
+| GET    | `/api/screener-list`               | NSE universe (cap > ₹1,000 Cr)                                                                                                                              |
+| POST   | `/api/screener-scan`               | Pattern scan. Body: `{ symbols, mode: 'today' \| 'historical', fromDate?, toDate? }` — historical requires both dates                                       |
+| POST   | `/api/heatmap-batch`               | Batch quotes for heatmap. Body: `{ symbols, timeframe }`                                                                                                    |
+| POST   | `/api/chart-batch`                 | Batch chart data. Body: `{ symbols, range?, interval? }` → `{ charts }`                                                                                     |
+| POST   | `/api/stats-batch`                 | Batch key stats. Body: `{ symbols }` → `{ stats }`                                                                                                          |
+| GET    | `/api/lookup-bundle?symbol=`       | Chart 1y + max, quote, profile, financials, recommendations, news, quarterlyResults                                                                         |
+| POST   | `/api/watchlist-snapshot`          | Watchlist live data. Body: `{ symbols }` (max 50) → `{ snapshots }` per symbol: CMP, signal, pattern, SWOT                                                  |
+| POST   | `/api/swot-batch`                  | Trendlyne SWOT counts. Body: `{ symbols }` (max 50) → `{ swot }` with strengths/weaknesses per symbol                                                       |
 
 ---
 
@@ -420,12 +419,12 @@ Or connect the GitHub repo for automatic deploys on push.
 
 ## Key Design Decisions
 
-| Decision | Rationale |
-|---|---|
-| **Feature folders** | Each screen owns its UI; shared pieces live in `components/ui` and `layout` |
-| **Page registry** | `pages.tsx` maps `Page` → component; only the active route mounts |
-| **Semantic Tailwind tokens** | Consistent surfaces and typography without scattered `gray-*` strings |
-| **Custom treemap** | No treemap dependency; full control over heatmap tiles |
-| **Server-side screener** | 500+ symbols scanned with concurrency instead of slow client loops |
-| **`localStorage` portfolio** | No backend DB; suitable for personal tracking |
-| **Yahoo crumb cache** | Avoids repeated auth handshakes to `fc.yahoo.com` |
+| Decision                     | Rationale                                                                   |
+| ---------------------------- | --------------------------------------------------------------------------- |
+| **Feature folders**          | Each screen owns its UI; shared pieces live in `components/ui` and `layout` |
+| **Page registry**            | `pages.tsx` maps `Page` → component; only the active route mounts           |
+| **Semantic Tailwind tokens** | Consistent surfaces and typography without scattered `gray-*` strings       |
+| **Custom treemap**           | No treemap dependency; full control over heatmap tiles                      |
+| **Server-side screener**     | 500+ symbols scanned with concurrency instead of slow client loops          |
+| **`localStorage` portfolio** | No backend DB; suitable for personal tracking                               |
+| **Yahoo crumb cache**        | Avoids repeated auth handshakes to `fc.yahoo.com`                           |
