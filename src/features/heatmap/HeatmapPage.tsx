@@ -7,8 +7,15 @@ import { fetchIndexConstituents, type IndexConstituentsResponse } from '../../se
 import { PageLayout } from '../../components/layout/PageLayout';
 import { SectionHeader } from '../../components/ui';
 import { PAGE_COPY } from '../../content/pageCopy';
-import { fmtInrCompact, fmtTime } from '../../lib/format';
-import { fetchHeatmapBatch, HeatmapTimeframe, QuoteFull } from '../../utils/fetchStockData';
+import { ALL_INDICES } from '../../data/indicesCatalog';
+import { fmtInrCompact, fmtQuotePct, fmtTime } from '../../lib/format';
+import {
+  fetchIndexQuotes,
+  formatIndexPrice,
+  INDEX_QUOTE_REFRESH_MS,
+  type IndexQuote,
+} from '../../services/indexQuotes';
+import { fetchHeatmapBatch, type HeatmapTimeframe, type QuoteFull } from '../../utils/fetchStockData';
 
 const TIMEFRAME_OPTIONS: { key: HeatmapTimeframe; label: string }[] = [
   { key: '1d', label: '1D' },
@@ -176,6 +183,8 @@ export function HeatmapPage() {
   const [error, setError] = useState<string | null>(null);
   const [displayQuotes, setDisplayQuotes] = useState<QuoteFull[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [selectedIndexQuote, setSelectedIndexQuote] = useState<IndexQuote | null>(null);
+  const [indexQuoteLoading, setIndexQuoteLoading] = useState(false);
 
   const cache = useRef(new Map<string, QuoteFull>());
   const runId = useRef(0);
@@ -198,6 +207,10 @@ export function HeatmapPage() {
   );
 
   const selectedOption = getHeatmapIndexOption(selectedIndex) ?? HEATMAP_INDICES[0];
+  const selectedIndexInstrument = useMemo(
+    () => ALL_INDICES.find((instrument) => instrument.id === selectedIndex) ?? null,
+    [selectedIndex],
+  );
 
   const currentStocks = useMemo(() => {
     if (selectedOption.source.type === 'slice') {
@@ -311,6 +324,38 @@ export function HeatmapPage() {
     }
   }, [cacheKey]);
 
+  const refreshSelectedIndexQuote = useCallback(async (withLoading: boolean) => {
+    if (!selectedIndexInstrument) {
+      setSelectedIndexQuote(null);
+      setIndexQuoteLoading(false);
+      return;
+    }
+
+    if (withLoading) setIndexQuoteLoading(true);
+
+    try {
+      if (timeframe === '1d') {
+        const quotes = await fetchIndexQuotes([selectedIndexInstrument]);
+        setSelectedIndexQuote(quotes[0] ?? null);
+      } else {
+        const results = await fetchHeatmapBatch([selectedIndexInstrument.symbol], timeframe);
+        const result = results[0];
+        if (result) {
+          setSelectedIndexQuote({
+            instrument: selectedIndexInstrument,
+            price: result.regularMarketPrice,
+            change: null,
+            changePct: result.changePercent,
+          });
+        } else {
+          setSelectedIndexQuote(null);
+        }
+      }
+    } finally {
+      if (withLoading) setIndexQuoteLoading(false);
+    }
+  }, [selectedIndexInstrument, timeframe]);
+
   useEffect(() => {
     (async () => {
       try {
@@ -327,6 +372,33 @@ export function HeatmapPage() {
     if (currentStocks.length === 0) return;
     loadQuotes(currentStocks, timeframe, false);
   }, [currentStocks, timeframe, loadQuotes]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async (withLoading: boolean) => {
+      if (cancelled) return;
+      await refreshSelectedIndexQuote(withLoading);
+    };
+
+    void load(true);
+
+    if (!isActive || !selectedIndexInstrument) {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const intervalId = setInterval(() => {
+      if (document.hidden) return;
+      void load(false);
+    }, INDEX_QUOTE_REFRESH_MS);
+
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
+  }, [isActive, selectedIndexInstrument, refreshSelectedIndexQuote, timeframe]);
 
   useEffect(() => {
     if (!isActive || currentStocks.length === 0) return;
@@ -405,15 +477,23 @@ export function HeatmapPage() {
                   ))}
                 </optgroup>
               </select>
-              {usesRemoteConstituents(selectedOption) && constituentsLoading && (
-                <span className="text-xs text-gray-500 dark:text-gray-400">Loading constituents…</span>
-              )}
-              {usesRemoteConstituents(selectedOption) && !constituentsLoading && constituentsMeta && (
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  {constituentsMeta.total} members
-                  {constituentsMeta.asOf ? ` · ${constituentsMeta.asOf}` : ''}
-                  {constituentsMeta.isProxy ? ' · approximate' : ''}
+              <div className="h-5 w-px bg-gray-300 dark:bg-gray-700 hidden sm:block" />
+              {indexQuoteLoading ? (
+                <span className="text-xs text-gray-500 dark:text-gray-400">Loading…</span>
+              ) : selectedIndexQuote?.price != null ? (
+                <span className="text-xs font-mono font-semibold text-gray-900 dark:text-gray-100">
+                  {formatIndexPrice(selectedIndexQuote)}
+                  <span
+                    className={`ml-1 ${(selectedIndexQuote.changePct ?? 0) >= 0
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-red-600 dark:text-red-400'
+                    }`}
+                  >
+                    ({fmtQuotePct(selectedIndexQuote.changePct)})
+                  </span>
                 </span>
+              ) : (
+                <span className="text-xs text-gray-500 dark:text-gray-400">Unavailable</span>
               )}
             </div>
 
