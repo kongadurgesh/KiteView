@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useMatch, useSearchParams } from 'react-router-dom';
 import { useAppNavigation } from '../../app/navigation';
 import { fetchScreenerList, ScreenerStock } from '../../utils/screener';
-import { HEATMAP_INDICES, heatmapIndicesByGroup, getHeatmapIndexOption, isHeatmapIndexId, usesRemoteConstituents } from '../../data/heatmapIndices';
-import { fetchIndexConstituents, type IndexConstituentsResponse } from '../../services/indexConstituents';
+import { HEATMAP_INDICES, heatmapIndicesByGroup, getHeatmapIndexOption, isHeatmapIndexId } from '../../data/heatmapIndices';
+import { fetchIndexConstituents } from '../../services/indexConstituents';
 import { PageLayout } from '../../components/layout/PageLayout';
 import { SectionHeader } from '../../components/ui';
 import { PAGE_COPY } from '../../content/pageCopy';
@@ -171,11 +171,6 @@ export function HeatmapPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [allStocks, setAllStocks] = useState<ScreenerStock[]>([]);
   const [remoteStocks, setRemoteStocks] = useState<ScreenerStock[]>([]);
-  const [constituentsMeta, setConstituentsMeta] = useState<Pick<
-    IndexConstituentsResponse,
-    'source' | 'asOf' | 'isProxy' | 'total'
-  > | null>(null);
-  const [constituentsLoading, setConstituentsLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState('nifty50');
   const [timeframe, setTimeframe] = useState<HeatmapTimeframe>('1d');
   const [loading, setLoading] = useState(true);
@@ -226,13 +221,10 @@ export function HeatmapPage() {
   useEffect(() => {
     if (selectedOption.source.type === 'slice') {
       setRemoteStocks([]);
-      setConstituentsMeta(null);
-      setConstituentsLoading(false);
       return;
     }
 
     let cancelled = false;
-    setConstituentsLoading(true);
     setError(null);
 
     (async () => {
@@ -240,21 +232,12 @@ export function HeatmapPage() {
         const data = await fetchIndexConstituents(selectedIndex);
         if (!cancelled) {
           setRemoteStocks(data.stocks);
-          setConstituentsMeta({
-            source: data.source,
-            asOf: data.asOf,
-            isProxy: data.isProxy,
-            total: data.total,
-          });
         }
       } catch (err) {
         if (!cancelled) {
           setRemoteStocks([]);
-          setConstituentsMeta(null);
           setError(err instanceof Error ? err.message : 'Failed to load index constituents');
         }
-      } finally {
-        if (!cancelled) setConstituentsLoading(false);
       }
     })();
 
