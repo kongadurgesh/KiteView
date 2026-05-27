@@ -1,5 +1,7 @@
 import { ReactNode } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '../../lib/cn';
+import { Button } from '../ui/Button';
 import { PageHeader } from '../ui/PageHeader';
 
 interface PageLayoutProps {
@@ -24,7 +26,24 @@ export function PageLayout({
   narrow,
   className,
 }: PageLayoutProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const headerAlign = align ?? (centered ? 'center' : 'start');
+  const isOverview = location.pathname === '/';
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate('/');
+  };
+
+  const backButton = (
+    <Button variant="ghost" size="sm" onClick={handleBack} aria-label="Go back" className="-ml-1 px-2">
+      <span aria-hidden className="text-2xl leading-none">←</span>
+    </Button>
+  );
 
   return (
     <div
@@ -38,6 +57,7 @@ export function PageLayout({
         <PageHeader
           title={title}
           description={description}
+          leading={isOverview ? undefined : backButton}
           action={headerAction}
           align={headerAlign}
         />

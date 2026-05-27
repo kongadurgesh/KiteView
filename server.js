@@ -409,6 +409,7 @@ app.get('/api/lookup-bundle', async (req, res) => {
       recommendations: extras.recommendations,
       news: extras.news,
       quarterlyResults: normalizeQuarterlyResults(extras.quarterlyResults),
+      quarterlyResultsRaw: extras.quarterlyResultsRaw,
     });
   } catch (err) {
     res.status(500).json({ error: 'Lookup bundle failed', details: err.message });

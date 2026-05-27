@@ -44,3 +44,46 @@ export interface QuarterlyResults {
   basis: QuarterlyReportBasis;
   periods: QuarterlyPeriod[];
 }
+
+export interface QuarterlyRawValue {
+  raw?: number | null;
+  fmt?: string;
+  [key: string]: unknown;
+}
+
+export type QuarterlyRawMetric = QuarterlyRawValue | number | null;
+
+export interface QuarterlyConsolidatedRawPeriod {
+  endDate: string;
+  label: string;
+  quarterlyTotalRevenue?: QuarterlyRawMetric;
+  quarterlyPretaxIncome?: QuarterlyRawMetric;
+  quarterlyNetIncomeCommonStockholders?: QuarterlyRawMetric;
+  quarterlyBasicEPS?: QuarterlyRawMetric;
+  [key: string]: unknown;
+}
+
+export interface QuarterlyStandaloneRawPeriod {
+  endDate: string;
+  label: string;
+  totalRevenue?: QuarterlyRawMetric;
+  pretaxIncome?: QuarterlyRawMetric;
+  incomeBeforeTax?: QuarterlyRawMetric;
+  netIncomeCommonStockholders?: QuarterlyRawMetric;
+  netIncomeApplicableToCommonShares?: QuarterlyRawMetric;
+  netIncome?: QuarterlyRawMetric;
+  basicEPS?: QuarterlyRawMetric;
+  basicEps?: QuarterlyRawMetric;
+  [key: string]: unknown;
+}
+
+interface QuarterlyRawBasis<TPeriod> {
+  source: string;
+  periods: TPeriod[];
+}
+
+export interface QuarterlyResultsRaw {
+  basis: QuarterlyReportBasis;
+  consolidated: QuarterlyRawBasis<QuarterlyConsolidatedRawPeriod>;
+  standalone: QuarterlyRawBasis<QuarterlyStandaloneRawPeriod>;
+}

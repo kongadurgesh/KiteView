@@ -66,6 +66,8 @@ const FTS_METRICS = {
   quarterlyBasicEPS: 'basicEps',
 };
 
+const RAW_METRIC_KEYS = Object.keys(FTS_METRICS);
+
 function quarterLabel(endDate) {
   const d = new Date(`${endDate}T00:00:00Z`);
   return d.toLocaleDateString('en-IN', { month: 'short', year: 'numeric', timeZone: 'UTC' });
@@ -167,6 +169,7 @@ function mergePeriodsByDate(...sources) {
 
 function parseFundamentalsTimeSeriesResponse(response) {
   const byDate = {};
+  const rawByDate = {};
   for (const result of response?.timeseries?.result ?? []) {
     if (!result.timestamp?.length) continue;
     for (const [dataKey, field] of Object.entries(FTS_METRICS)) {
@@ -176,12 +179,23 @@ function parseFundamentalsTimeSeriesResponse(response) {
         const dateKey = periodDateKey(series[i], result.timestamp[i]);
         if (!dateKey) continue;
         if (!byDate[dateKey]) byDate[dateKey] = emptyPeriod(dateKey);
+        if (!rawByDate[dateKey]) rawByDate[dateKey] = { endDate: dateKey };
         const raw = reportedRaw(series[i]);
         if (typeof raw === 'number' && !Number.isNaN(raw)) byDate[dateKey][field] = raw;
+        const reported = series[i]?.reportedValue ?? null;
+        if (reported != null) rawByDate[dateKey][dataKey] = reported;
       }
     }
   }
-  return finalizePeriods(byDate);
+  const rawPeriods = sortQuarterlyPeriods(
+    Object.values(rawByDate)
+      .map((p) => ({ ...p, label: quarterLabel(p.endDate) }))
+      .filter((p) => RAW_METRIC_KEYS.some((key) => p[key] != null)),
+  ).slice(0, 5);
+  return {
+    periods: finalizePeriods(byDate),
+    rawPeriods,
+  };
 }
 
 async function fetchFundamentalsQuarterlyForRegion(symbol, cookie, region) {
@@ -198,7 +212,7 @@ async function fetchFundamentalsQuarterlyForRegion(symbol, cookie, region) {
   };
   if (cookie) headers.Cookie = cookie;
   const response = await fetch(url, { headers });
-  if (!response.ok) return [];
+  if (!response.ok) return { periods: [], rawPeriods: [] };
   const data = await response.json();
   return parseFundamentalsTimeSeriesResponse(data);
 }
@@ -214,12 +228,29 @@ function fundamentalsRegionsForSymbol(symbol) {
 export async function fetchFundamentalsQuarterly(symbol, cookie = null) {
   try {
     for (const region of fundamentalsRegionsForSymbol(symbol)) {
-      const periods = await fetchFundamentalsQuarterlyForRegion(symbol, cookie, region);
-      if (periods.length) return { periods };
+      const data = await fetchFundamentalsQuarterlyForRegion(symbol, cookie, region);
+      if (data.periods.length || data.rawPeriods.length) {
+        return {
+          basis: 'consolidated',
+          source: 'fundamentals-timeseries',
+          periods: data.periods,
+          rawPeriods: data.rawPeriods,
+        };
+      }
     }
-    return { periods: [] };
+    return {
+      basis: 'consolidated',
+      source: 'fundamentals-timeseries',
+      periods: [],
+      rawPeriods: [],
+    };
   } catch {
-    return { periods: [] };
+    return {
+      basis: 'consolidated',
+      source: 'fundamentals-timeseries',
+      periods: [],
+      rawPeriods: [],
+    };
   }
 }
 
@@ -253,6 +284,7 @@ function isqBasicEps(row) {
 export function parseIncomeStatementQuarterly(module = {}) {
   const rows = module.incomeStatementHistory ?? [];
   const byDate = {};
+  const rawByDate = {};
   for (const row of rows) {
     const endDate = row.endDate?.fmt
       ?? (row.endDate?.raw
@@ -267,8 +299,26 @@ export function parseIncomeStatementQuarterly(module = {}) {
       netIncomeCommon: isqNetIncomeCommon(row),
       basicEps: isqBasicEps(row),
     };
+
+    rawByDate[iso] = {
+      endDate: iso,
+      label: quarterLabel(iso),
+      totalRevenue: row.totalRevenue ?? null,
+      pretaxIncome: row.pretaxIncome ?? null,
+      incomeBeforeTax: row.incomeBeforeTax ?? null,
+      netIncomeCommonStockholders: row.netIncomeCommonStockholders ?? null,
+      netIncomeApplicableToCommonShares: row.netIncomeApplicableToCommonShares ?? null,
+      netIncome: row.netIncome ?? null,
+      basicEPS: row.basicEPS ?? null,
+      basicEps: row.basicEps ?? null,
+    };
   }
-  return { periods: finalizePeriods(byDate) };
+  return {
+    basis: 'standalone',
+    source: 'incomeStatementHistoryQuarterly',
+    periods: finalizePeriods(byDate),
+    rawPeriods: sortQuarterlyPeriods(Object.values(rawByDate)).slice(0, 5),
+  };
 }
 
 export function normalizeQuarterlyResults(qr = { basis: 'unknown', periods: [] }) {
@@ -292,6 +342,31 @@ export function pickQuarterlyResults(consolidated, standalone) {
   return normalizeQuarterlyResults({ basis, periods });
 }
 
+function normalizeQuarterlyRawBasis(data, fallbackSource) {
+  const source = data?.source ?? fallbackSource;
+  const periods = sortQuarterlyPeriods(data?.rawPeriods ?? []).slice(0, 5);
+  return { source, periods };
+}
+
+export function buildQuarterlyResultsRaw(consolidated, standalone, preferredBasis = 'unknown') {
+  const consolidatedRaw = normalizeQuarterlyRawBasis(consolidated, 'fundamentals-timeseries');
+  const standaloneRaw = normalizeQuarterlyRawBasis(standalone, 'incomeStatementHistoryQuarterly');
+  const hasConsolidated = consolidatedRaw.periods.length > 0;
+  const hasStandalone = standaloneRaw.periods.length > 0;
+  const basis = preferredBasis === 'unknown'
+    ? hasConsolidated
+      ? 'consolidated'
+      : hasStandalone
+        ? 'standalone'
+        : 'unknown'
+    : preferredBasis;
+  return {
+    basis,
+    consolidated: consolidatedRaw,
+    standalone: standaloneRaw,
+  };
+}
+
 const emptyQuarterly = { basis: 'unknown', periods: [] };
 
 export async function fetchQuarterlyResults(symbol, crumb, cookie) {
@@ -302,15 +377,34 @@ export async function fetchQuarterlyResults(symbol, crumb, cookie) {
   return pickQuarterlyResults(consolidated, standalone);
 }
 
+export async function fetchQuarterlyResultsBundle(symbol, crumb, cookie) {
+  const [consolidated, standalone] = await Promise.all([
+    fetchFundamentalsQuarterly(symbol, cookie),
+    fetchIncomeStatementQuarterly(symbol, crumb, cookie),
+  ]);
+  const quarterlyResults = pickQuarterlyResults(consolidated, standalone);
+  const quarterlyResultsRaw = buildQuarterlyResultsRaw(consolidated, standalone, quarterlyResults.basis);
+  return {
+    quarterlyResults,
+    quarterlyResultsRaw,
+  };
+}
+
 /** Profile, financials, recommendations, news, and quarterly results for lookup-bundle. */
 export async function fetchAnalysisExtras(symbol, getYahooCrumb) {
   const emptyQuarterly = { basis: 'unknown', periods: [] };
+  const emptyQuarterlyRaw = {
+    basis: 'unknown',
+    consolidated: { source: 'fundamentals-timeseries', periods: [] },
+    standalone: { source: 'incomeStatementHistoryQuarterly', periods: [] },
+  };
   const empty = {
     profile: parseProfile({}),
     financials: parseFinancial({}),
     recommendations: parseRecommendations({}),
     news: [],
     quarterlyResults: emptyQuarterly,
+    quarterlyResultsRaw: emptyQuarterlyRaw,
   };
 
   let crumb;
@@ -320,18 +414,20 @@ export async function fetchAnalysisExtras(symbol, getYahooCrumb) {
   } catch {
     const fts = await fetchFundamentalsQuarterly(symbol, null);
     empty.quarterlyResults = pickQuarterlyResults(fts, { periods: [] });
+    empty.quarterlyResultsRaw = buildQuarterlyResultsRaw(fts, { periods: [], rawPeriods: [] }, empty.quarterlyResults.basis);
     return empty;
   }
 
   const [quarterlySettled, summarySettled, newsSettled] = await Promise.allSettled([
-    fetchQuarterlyResults(symbol, crumb, cookie),
+    fetchQuarterlyResultsBundle(symbol, crumb, cookie),
     fetchQuoteSummary(symbol, 'assetProfile,financialData,recommendationTrend', crumb, cookie),
     fetchQuoteSummary(symbol, 'news', crumb, cookie),
   ]);
 
-  const quarterlyResults = normalizeQuarterlyResults(
-    quarterlySettled.status === 'fulfilled' ? quarterlySettled.value : emptyQuarterly,
-  );
+  const quarterlyBundle = quarterlySettled.status === 'fulfilled'
+    ? quarterlySettled.value
+    : { quarterlyResults: emptyQuarterly, quarterlyResultsRaw: emptyQuarterlyRaw };
+  const quarterlyResults = normalizeQuarterlyResults(quarterlyBundle.quarterlyResults);
 
   const summary = summarySettled.status === 'fulfilled' ? summarySettled.value : null;
   const newsData = newsSettled.status === 'fulfilled' ? newsSettled.value : null;
@@ -344,5 +440,6 @@ export async function fetchAnalysisExtras(symbol, getYahooCrumb) {
     recommendations: parseRecommendations(result.recommendationTrend ?? {}),
     news: parseNews(newsResult ?? {}),
     quarterlyResults,
+    quarterlyResultsRaw: quarterlyBundle.quarterlyResultsRaw,
   };
 }

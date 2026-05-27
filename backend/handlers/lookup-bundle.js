@@ -54,5 +54,6 @@ export default async function handler(req, res) {
     recommendations: extras.recommendations,
     news: extras.news,
     quarterlyResults: normalizeQuarterlyResults(extras.quarterlyResults),
+    quarterlyResultsRaw: extras.quarterlyResultsRaw,
   });
 }
