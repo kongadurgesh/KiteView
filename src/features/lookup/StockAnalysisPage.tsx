@@ -72,7 +72,7 @@ export function StockAnalysisPage() {
 
   return (
     <PageLayout
-      className="max-w-6xl"
+      className="max-w-7xl mt-6"
       title={PAGE_COPY.analysis.title}
       description={PAGE_COPY.analysis.description}
     >

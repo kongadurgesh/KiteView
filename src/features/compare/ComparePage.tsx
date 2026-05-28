@@ -447,7 +447,7 @@ export function StockComparePage() {
 
   return (
     <PageLayout
-      className="max-w-6xl pb-10"
+      className="max-w-7xl mt-6"
       title={PAGE_COPY.compare.title}
       description={PAGE_COPY.compare.description}
     >
