@@ -48,6 +48,8 @@ export function AppShell({
     return emailUser || 'User';
   })();
 
+  const topBarLeft = sidebarExpanded ? '12rem' : '4rem';
+
   return (
     <div className="flex min-h-screen bg-surface-muted dark:bg-surface-dark">
       <Sidebar
@@ -59,7 +61,10 @@ export function AppShell({
       />
 
       <div className="flex-1 flex flex-col min-h-screen lg:ml-16 min-w-0">
-        <div className="fixed top-0 left-0 right-0 lg:left-16 z-30">
+        <div
+          className="fixed top-0 left-0 right-0 z-30 lg:left-[var(--top-bar-left)] lg:transition-[left] lg:duration-200"
+          style={{ ['--top-bar-left' as string]: topBarLeft }}
+        >
           <header className="flex items-center gap-3 h-12 px-4 border-b border-border dark:border-border-dark bg-surface/90 dark:bg-surface-dark/90 backdrop-blur shrink-0">
             <button
               type="button"
@@ -105,7 +110,7 @@ export function AppShell({
             </div>
           </header>
 
-          <MarketTicker sidebarExpanded={sidebarExpanded} />
+          <MarketTicker />
         </div>
 
         <main

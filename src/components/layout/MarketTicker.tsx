@@ -9,10 +9,6 @@ import {
   type IndexQuote,
 } from '../../services/indexQuotes';
 
-interface MarketTickerProps {
-  sidebarExpanded?: boolean;
-}
-
 function TickerItem({ q }: { q: IndexQuote }) {
   const isUp = (q.change ?? 0) >= 0;
   const hasData = q.price != null;
@@ -49,8 +45,7 @@ function TickerTrack({ quotes, ariaHidden }: { quotes: IndexQuote[]; ariaHidden?
   );
 }
 
-export function MarketTicker({ sidebarExpanded }: MarketTickerProps) {
-  const sidebarOffset = sidebarExpanded ? '8.5rem' : '0px';
+export function MarketTicker() {
   const [quotes, setQuotes] = useState<IndexQuote[]>(() =>
     TICKER_INDICES.map((instrument) => ({
       instrument,
@@ -102,13 +97,11 @@ export function MarketTicker({ sidebarExpanded }: MarketTickerProps) {
   }, [quotes, marqueeAllowed]);
 
   const barClass =
-    'h-10 border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/50 shrink-0 overflow-hidden px-4 sm:px-6 lg:pl-[calc(1.5rem+var(--sidebar-offset))] lg:pr-6 lg:transition-[padding-left] lg:duration-200';
-
-  const barStyle = { ['--sidebar-offset' as string]: sidebarOffset };
+    'h-10 border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/50 shrink-0 overflow-hidden px-4 sm:px-6';
 
   return (
-    <div className={barClass} style={barStyle}>
-      <div ref={containerRef} className="h-full w-full overflow-hidden flex items-center">
+    <div className={barClass}>
+      <div ref={containerRef} className="h-full w-full overflow-visible flex items-center">
         <div
           ref={trackRef}
           className={`flex items-center h-full ${marquee ? 'ticker-marquee-track' : ''}`}
