@@ -188,7 +188,7 @@ export function IndicesPage() {
 
   return (
     <PageLayout
-      className="max-w-6xl"
+      className="max-w-7xl mt-6"
       title={PAGE_COPY.indices.title}
       description={PAGE_COPY.indices.description}
     >

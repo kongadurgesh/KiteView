@@ -391,7 +391,7 @@ export function OverviewPage() {
   const cards = PAGE_COPY.toolCards;
 
   return (
-    <PageLayout className="max-w-6xl pb-10" title={PAGE_COPY.overview.title} description={PAGE_COPY.overview.description}>
+    <PageLayout className="max-w-7xl mt-6" title={PAGE_COPY.overview.title} description={PAGE_COPY.overview.description}>
       <motion.div
         initial="hidden"
         animate="show"

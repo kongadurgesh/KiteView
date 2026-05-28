@@ -14,7 +14,7 @@ const { about: copy } = PAGE_COPY;
 
 export function AboutPage() {
   return (
-    <PageLayout className="max-w-3xl" title={copy.title}>
+    <PageLayout className="max-w-7xl mt-6" title={copy.title}>
       <div className="w-full space-y-6">
         <div className="flex items-center gap-5">
           <div className="size-20 rounded-full bg-accent flex items-center justify-center text-white text-2xl font-bold shrink-0">
