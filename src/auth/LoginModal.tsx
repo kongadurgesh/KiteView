@@ -11,6 +11,8 @@ interface Props {
 
 export function LoginModal({ open, onClose }: Props) {
   const [tab, setTab] = useState<Tab>('signin');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,6 +21,8 @@ export function LoginModal({ open, onClose }: Props) {
   if (!open) return null;
 
   const resetForm = () => {
+    setFirstName('');
+    setLastName('');
     setEmail('');
     setPassword('');
     setMessage(null);
@@ -46,7 +50,21 @@ export function LoginModal({ open, onClose }: Props) {
   const handleSignUp = async () => {
     setLoading(true);
     setMessage(null);
-    const { error } = await supabase.auth.signUp({ email, password });
+    const cleanFirstName = firstName.trim();
+    const cleanLastName = lastName.trim();
+    const fullName = `${cleanFirstName} ${cleanLastName}`.trim();
+
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          first_name: cleanFirstName,
+          last_name: cleanLastName,
+          full_name: fullName,
+        },
+      },
+    });
     setLoading(false);
     if (error) {
       setMessage({ text: error.message, ok: false });
@@ -129,6 +147,28 @@ export function LoginModal({ open, onClose }: Props) {
 
       {/* Fields */}
       <div className="flex flex-col gap-3">
+        {tab === 'signup' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input
+              type="text"
+              placeholder="First name"
+              autoComplete="given-name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && !loading && handleSubmit()}
+              className={inputClass}
+            />
+            <input
+              type="text"
+              placeholder="Last name"
+              autoComplete="family-name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && !loading && handleSubmit()}
+              className={inputClass}
+            />
+          </div>
+        )}
         <input
           type="email"
           placeholder="Email address"
