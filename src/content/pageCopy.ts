@@ -9,7 +9,7 @@ export const PAGE_COPY = {
   screener: {
     title: 'Live Screener',
     description:
-      'Scan NSE stocks (market cap above ₹1,000 Cr) for breakout stocks. Use Today for the latest session, or pick a date range for historical breakouts. Signal is BUY when CMP is within 2% of the calculated buy price.',
+      'Scan NSE stocks for breakout patterns with compact single-row filters. Use Today for the latest session or Date range for historical scans.',
   },
   heatmap: {
     title: 'Market Heatmap',

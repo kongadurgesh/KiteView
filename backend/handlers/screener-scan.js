@@ -4,6 +4,7 @@ import { fetchTrendlyneSwotCounts } from '../trendlyneSwot.js';
 let cachedCrumb = null;
 let cachedCookie = null;
 let crumbExpiry = 0;
+const profileCache = new Map();
 
 async function getYahooCrumb() {
   if (cachedCrumb && cachedCookie && Date.now() < crumbExpiry) {
@@ -106,10 +107,61 @@ async function fetchSectorBatch(symbols) {
     const data = await response.json();
     const result = {};
     for (const r of (data?.quoteResponse?.result ?? [])) {
-      result[r.symbol] = { sector: r.sector ?? '', marketCapCr: r.marketCap ? r.marketCap / 1e7 : 0 };
+      result[r.symbol] = {
+        sector: r.sector ?? '',
+        industry: r.industry ?? r.sector ?? '',
+        marketCapCr: r.marketCap ? r.marketCap / 1e7 : 0,
+      };
     }
     return result;
   } catch { return {}; }
+}
+
+async function fetchProfileSectorIndustry(symbol) {
+  if (profileCache.has(symbol)) {
+    return profileCache.get(symbol);
+  }
+
+  try {
+    const { crumb, cookie } = await getYahooCrumb();
+    const url = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=assetProfile&crumb=${encodeURIComponent(crumb)}`;
+    const response = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0', Cookie: cookie },
+    });
+    if (!response.ok) {
+      const empty = { sector: '', industry: '' };
+      profileCache.set(symbol, empty);
+      return empty;
+    }
+
+    const data = await response.json();
+    const profile = data?.quoteSummary?.result?.[0]?.assetProfile ?? {};
+    const normalized = {
+      sector: typeof profile.sector === 'string' ? profile.sector : '',
+      industry: typeof profile.industry === 'string' ? profile.industry : '',
+    };
+    profileCache.set(symbol, normalized);
+    return normalized;
+  } catch {
+    const empty = { sector: '', industry: '' };
+    profileCache.set(symbol, empty);
+    return empty;
+  }
+}
+
+async function fetchMissingProfiles(symbols) {
+  if (!Array.isArray(symbols) || symbols.length === 0) return {};
+
+  const out = {};
+  const results = await Promise.allSettled(symbols.map((symbol) => fetchProfileSectorIndustry(symbol)));
+  for (let i = 0; i < symbols.length; i++) {
+    const symbol = symbols[i];
+    const row = results[i];
+    if (row.status === 'fulfilled') {
+      out[symbol] = row.value;
+    }
+  }
+  return out;
 }
 
 function validateDateRange(fromDate, toDate) {
@@ -125,6 +177,63 @@ function validateDateRange(fromDate, toDate) {
   return null;
 }
 
+function parseNumber(value) {
+  if (value == null || value === '') return undefined;
+  const normalized = typeof value === 'string' ? value.replace(/,/g, '').trim() : value;
+  const num = Number(normalized);
+  return Number.isFinite(num) ? num : undefined;
+}
+
+function normalizeStringArray(value) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => (typeof item === 'string' ? item.trim() : ''))
+    .filter(Boolean);
+}
+
+function buildFilters(rawFilters) {
+  const filters = rawFilters && typeof rawFilters === 'object' ? rawFilters : {};
+  const marketCapMin = parseNumber(filters.marketCapCr?.min);
+  const marketCapMax = parseNumber(filters.marketCapCr?.max);
+  const priceMin = parseNumber(filters.priceRange?.min);
+  const priceMax = parseNumber(filters.priceRange?.max);
+  const patterns = normalizeStringArray(filters.patterns);
+  const sectors = normalizeStringArray(filters.sectors).map((s) => s.toLowerCase());
+  const industries = normalizeStringArray(filters.industries).map((s) => s.toLowerCase());
+
+  return {
+    patterns,
+    marketCapMin,
+    marketCapMax,
+    priceMin,
+    priceMax,
+    sectors,
+    industries,
+  };
+}
+
+function passesNumericRange(value, min, max) {
+  if (!Number.isFinite(value)) return false;
+  if (min != null && value < min) return false;
+  if (max != null && value > max) return false;
+  return true;
+}
+
+function resolveCurrentPrice(chart) {
+  const metaPrice = chart?.currentPrice;
+  if (Number.isFinite(metaPrice) && metaPrice > 0) return metaPrice;
+  const lastClose = chart?.candles?.[chart.candles.length - 1]?.close;
+  if (Number.isFinite(lastClose) && lastClose > 0) return lastClose;
+  return NaN;
+}
+
+function passesTagFilter(value, allowed) {
+  if (!allowed || allowed.length === 0) return true;
+  if (!value) return false;
+  const normalized = String(value).toLowerCase();
+  return allowed.some((pick) => normalized.includes(pick) || pick.includes(normalized));
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -132,9 +241,27 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const { symbols, mode, fromDate, toDate } = req.body ?? {};
+  const { symbols, mode, fromDate, toDate, filters: rawFilters } = req.body ?? {};
   if (!Array.isArray(symbols) || symbols.length === 0) {
     return res.status(200).json({ results: [] });
+  }
+
+  const filters = buildFilters(rawFilters);
+
+  if (
+    filters.marketCapMin != null &&
+    filters.marketCapMax != null &&
+    filters.marketCapMin > filters.marketCapMax
+  ) {
+    return res.status(400).json({ error: 'Market cap min must be <= market cap max' });
+  }
+
+  if (
+    filters.priceMin != null &&
+    filters.priceMax != null &&
+    filters.priceMin > filters.priceMax
+  ) {
+    return res.status(400).json({ error: 'Price min must be <= price max' });
   }
 
   const historical = mode === 'historical';
@@ -158,11 +285,18 @@ export default async function handler(req, res) {
           : await fetchChartLive(sym);
         if (!chart || chart.candles.length < 3) return null;
 
+        const resolvedPrice = resolveCurrentPrice(chart);
+        if (!Number.isFinite(resolvedPrice)) return null;
+
+        if (!passesNumericRange(resolvedPrice, filters.priceMin, filters.priceMax)) {
+          return null;
+        }
+
         const match = historical
-          ? detectPatternInRange(chart.candles, 0, fromDate, toDate)
+          ? detectPatternInRange(chart.candles, 0, fromDate, toDate, filters.patterns)
           : (() => {
               const lastDate = chart.candles[chart.candles.length - 1].date;
-              const m = detectPattern(chart.candles, 0);
+              const m = detectPattern(chart.candles, 0, filters.patterns);
               return m && m.candle3.date === lastDate ? m : null;
             })();
 
@@ -171,12 +305,13 @@ export default async function handler(req, res) {
           symbol: sym,
           shortName: chart.shortName,
           marketCapCr: 0,
-          currentPrice: chart.currentPrice,
+          currentPrice: resolvedPrice,
           match,
           fiftyTwoWeekHigh: chart.fiftyTwoWeekHigh,
           fiftyTwoWeekLow: chart.fiftyTwoWeekLow,
           allTimeHigh: 0,
           sector: '',
+          industry: '',
         };
       }),
     );
@@ -185,27 +320,66 @@ export default async function handler(req, res) {
     }
   }
 
-  if (matches.length > 0) {
-    const matchSymbols = matches.map((m) => m.symbol);
-    const [sectorMap, ...athAndSwot] = await Promise.all([
-      fetchSectorBatch(matchSymbols),
-      ...matchSymbols.map(async (s) => {
-        const [ath, swot] = await Promise.all([fetchATH(s), fetchTrendlyneSwotCounts(s)]);
-        return { ath, swot };
-      }),
-    ]);
-    for (let j = 0; j < matches.length; j++) {
-      const info = sectorMap[matches[j].symbol];
-      if (info) {
-        matches[j].sector = info.sector;
-        matches[j].marketCapCr = info.marketCapCr;
-      }
-      const extra = athAndSwot[j];
-      matches[j].allTimeHigh = extra?.ath ?? 0;
-      matches[j].swotStrengths = extra?.swot?.strengths ?? null;
-      matches[j].swotWeaknesses = extra?.swot?.weaknesses ?? null;
-    }
+  if (matches.length === 0) {
+    return res.status(200).json({ results: [] });
   }
 
-  res.status(200).json({ results: matches });
+  const matchSymbols = matches.map((m) => m.symbol);
+  const sectorMap = await fetchSectorBatch(matchSymbols);
+  const missingProfileSymbols = matchSymbols.filter((symbol) => {
+    const info = sectorMap[symbol];
+    return !info?.sector || !info?.industry;
+  });
+  const profileMap = await fetchMissingProfiles(missingProfileSymbols);
+
+  const filtered = [];
+  const hasMarketCapFilter = filters.marketCapMin != null || filters.marketCapMax != null;
+  for (let j = 0; j < matches.length; j++) {
+    const row = matches[j];
+    const info = sectorMap[row.symbol];
+    const profile = profileMap[row.symbol];
+    const rawMarketCapCr = info?.marketCapCr;
+    const resolvedMarketCapCr =
+      Number.isFinite(rawMarketCapCr) && rawMarketCapCr > 0 ? rawMarketCapCr : NaN;
+
+    row.sector = info?.sector || profile?.sector || '';
+    row.industry = info?.industry || profile?.industry || row.sector || '';
+    row.marketCapCr = Number.isFinite(resolvedMarketCapCr) ? resolvedMarketCapCr : 0;
+
+    // If user asked for market-cap filtering, do not include rows with missing/unknown market cap.
+    if (hasMarketCapFilter && !Number.isFinite(resolvedMarketCapCr)) {
+      continue;
+    }
+
+    if (!passesNumericRange(resolvedMarketCapCr, filters.marketCapMin, filters.marketCapMax)) {
+      continue;
+    }
+
+    const sectorOk = passesTagFilter(row.sector, filters.sectors);
+    const industryOk = passesTagFilter(row.industry, filters.industries);
+    if (!sectorOk || !industryOk) {
+      continue;
+    }
+
+    filtered.push(row);
+  }
+
+  const athAndSwot = await Promise.all(
+    filtered.map(async (row) => {
+      const [ath, swot] = await Promise.all([fetchATH(row.symbol), fetchTrendlyneSwotCounts(row.symbol)]);
+      return { symbol: row.symbol, ath, swot };
+    }),
+  );
+  const bySymbol = new Map(athAndSwot.map((x) => [x.symbol, x]));
+
+  for (const row of filtered) {
+    const extra = bySymbol.get(row.symbol);
+    row.allTimeHigh = extra?.ath ?? 0;
+    row.swotStrengths = extra?.swot?.strengths ?? null;
+    row.swotWeaknesses = extra?.swot?.weaknesses ?? null;
+    row.swotOpportunities = extra?.swot?.opportunities ?? null;
+    row.swotThreats = extra?.swot?.threats ?? null;
+  }
+
+  res.status(200).json({ results: filtered });
 }

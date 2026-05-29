@@ -54,6 +54,8 @@ export async function fetchWatchlistSnapshot(
 export interface SwotCounts {
   strengths: number;
   weaknesses: number;
+  opportunities: number;
+  threats: number;
 }
 
 export async function fetchSwotBatch(symbols: string[]): Promise<Record<string, SwotCounts>> {

@@ -22,9 +22,12 @@ export interface ScreenerResult {
   fiftyTwoWeekLow: number;
   allTimeHigh: number;
   sector: string;
+  industry?: string;
   signal: TradeSignal;
   swotStrengths: number | null;
   swotWeaknesses: number | null;
+  swotOpportunities: number | null;
+  swotThreats: number | null;
 }
 
 export interface ScreenerProgress {
@@ -35,10 +38,28 @@ export interface ScreenerProgress {
 
 export type ScreenerScanMode = 'today' | 'historical';
 
+export type ScreenerPatternName = 'Bullish Harami' | 'Bullish Engulfing';
+
+export interface ScreenerFilters {
+  indexIds?: string[];
+  marketCapCr?: {
+    min?: number;
+    max?: number;
+  };
+  priceRange?: {
+    min?: number;
+    max?: number;
+  };
+  patterns?: ScreenerPatternName[];
+  sectors?: string[];
+  industries?: string[];
+}
+
 export interface ScreenerScanOptions {
   mode: ScreenerScanMode;
   fromDate?: string;
   toDate?: string;
+  filters?: ScreenerFilters;
 }
 
 const LIST_CACHE_KEY = 'screener-stock-list';
@@ -76,10 +97,14 @@ async function scanChunkOnServer(
     mode: ScreenerScanMode;
     fromDate?: string;
     toDate?: string;
+    filters?: ScreenerFilters;
   } = { symbols, mode: options.mode };
   if (options.mode === 'historical') {
     body.fromDate = options.fromDate;
     body.toDate = options.toDate;
+  }
+  if (options.filters) {
+    body.filters = options.filters;
   }
   const res = await fetch(url, {
     method: 'POST',
@@ -95,7 +120,13 @@ async function scanChunkOnServer(
 }
 
 async function enrichScreenerSwot(results: Omit<ScreenerResult, 'signal'>[]): Promise<void> {
-  const missing = results.filter((r) => r.swotStrengths == null || r.swotWeaknesses == null);
+  const missing = results.filter(
+    (r) =>
+      r.swotStrengths == null ||
+      r.swotWeaknesses == null ||
+      r.swotOpportunities == null ||
+      r.swotThreats == null,
+  );
   if (missing.length === 0) return;
 
   for (let i = 0; i < missing.length; i += SWOT_BATCH_SIZE) {
@@ -106,6 +137,8 @@ async function enrichScreenerSwot(results: Omit<ScreenerResult, 'signal'>[]): Pr
       if (!counts) continue;
       row.swotStrengths = counts.strengths;
       row.swotWeaknesses = counts.weaknesses;
+      row.swotOpportunities = counts.opportunities;
+      row.swotThreats = counts.threats;
     }
   }
 }
@@ -145,6 +178,8 @@ export async function runScreener(
         signal: getTradeSignal(r.currentPrice, r.match.buyPrice),
         swotStrengths: r.swotStrengths ?? null,
         swotWeaknesses: r.swotWeaknesses ?? null,
+        swotOpportunities: r.swotOpportunities ?? null,
+        swotThreats: r.swotThreats ?? null,
       };
       found++;
       onResult(full);
