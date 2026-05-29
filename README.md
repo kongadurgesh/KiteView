@@ -43,12 +43,15 @@ Landing page with quick navigation into every major tool.
 
 ### 2. Live Screener
 
-Scans the NSE universe (market cap > ₹1,000 Cr) for breakout stocks.
+Scans the NSE universe for breakout stocks with filter-first controls.
 
 - **Today** mode: patterns on the latest trading session
 - **Date range** mode: historical scan — finds the latest breakout whose pattern date falls in your selected window (up to 365 days)
+- **Single-row scan controls** with compact dropdown filters and Scan/Reset actions below the filter rail
+- **Filter-based scan**: index, pattern, market cap range (Cr), and price range
+- **Multi-select filters**: index and pattern
 - **Signal** column: **BUY** when CMP is within 2% of buy price (`0.98 ×` breakout close); otherwise **WAIT**
-- Server-side batch scanning; **#** row index plus signal, pattern date, CMP, % vs buy price (green/red), buy price, 52W stats, ATH, market cap, **SWOT (S/W)**, **+ Watchlist**
+- Server-side filter-aware scanning; **#** row index plus signal, pattern date, CMP, % vs buy price (green/red), buy price, Dist Low, Dist High, Dist ATH, market cap, **SWOT (S/W/O/T)**, **+ Watchlist**
 - Click a row to open **Stock Analysis** (`/analysis?symbol=…`)
 
 ### 3. Market Heatmap
@@ -328,23 +331,23 @@ Unknown paths redirect to `/`. Vercel serves `index.html` for all non-API routes
 
 Base URL: same-origin `/api` (Vite proxies to port **3006** in dev; Vercel serves the API in production).
 
-| Method | Endpoint                           | Description                                                                                                                                                 |
-| ------ | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/chart/:symbol`               | Historical OHLCV. Query: `range`, `interval`                                                                                                                |
-| GET    | `/api/index-constituents?indexId=` | Index members for heatmap from bundled lists (+ Yahoo quote enrichment). Slice indices use client NSE list; proxy indices return approximate regional lists |
-| GET    | `/api/quote/:symbols`              | Live quote(s); comma-separated symbols supported                                                                                                            |
-| GET    | `/api/profile/:symbol`             | Sector and industry                                                                                                                                         |
-| GET    | `/api/stats/:symbol`               | P/E, forward P/E, P/B, beta, 52W change, market cap                                                                                                         |
-| GET    | `/api/search?q=`                   | Symbol autocomplete (global equities)                                                                                                                       |
-| GET    | `/api/resolve-symbol?q=`           | Resolve user input to Yahoo symbol (e.g. `AAPL`, `TCS`)                                                                                                     |
-| GET    | `/api/screener-list`               | NSE universe (cap > ₹1,000 Cr)                                                                                                                              |
-| POST   | `/api/screener-scan`               | Pattern scan. Body: `{ symbols, mode: 'today' \| 'historical', fromDate?, toDate? }` — historical requires both dates                                       |
-| POST   | `/api/heatmap-batch`               | Batch quotes for heatmap. Body: `{ symbols, timeframe }`                                                                                                    |
-| POST   | `/api/chart-batch`                 | Batch chart data. Body: `{ symbols, range?, interval? }` → `{ charts }`                                                                                     |
-| POST   | `/api/stats-batch`                 | Batch key stats. Body: `{ symbols }` → `{ stats }`                                                                                                          |
-| GET    | `/api/lookup-bundle?symbol=`       | Chart 1y + max, quote, profile, financials, recommendations, news, quarterlyResults                                                                         |
-| POST   | `/api/watchlist-snapshot`          | Watchlist live data. Body: `{ symbols }` (max 50) → `{ snapshots }` per symbol: CMP, signal, pattern, SWOT                                                  |
-| POST   | `/api/swot-batch`                  | Trendlyne SWOT counts. Body: `{ symbols }` (max 50) → `{ swot }` with strengths/weaknesses per symbol                                                       |
+| Method | Endpoint                           | Description                                                                                                                                                                         |
+| ------ | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/chart/:symbol`               | Historical OHLCV. Query: `range`, `interval`                                                                                                                                        |
+| GET    | `/api/index-constituents?indexId=` | Index members for heatmap from bundled lists (+ Yahoo quote enrichment). Slice indices use client NSE list; proxy indices return approximate regional lists                         |
+| GET    | `/api/quote/:symbols`              | Live quote(s); comma-separated symbols supported                                                                                                                                    |
+| GET    | `/api/profile/:symbol`             | Sector and industry                                                                                                                                                                 |
+| GET    | `/api/stats/:symbol`               | P/E, forward P/E, P/B, beta, 52W change, market cap                                                                                                                                 |
+| GET    | `/api/search?q=`                   | Symbol autocomplete (global equities)                                                                                                                                               |
+| GET    | `/api/resolve-symbol?q=`           | Resolve user input to Yahoo symbol (e.g. `AAPL`, `TCS`)                                                                                                                             |
+| GET    | `/api/screener-list`               | NSE universe (cap > ₹1,000 Cr)                                                                                                                                                      |
+| POST   | `/api/screener-scan`               | Pattern scan. Body: `{ symbols, mode: 'today' \| 'historical', fromDate?, toDate?, filters? }`; `filters` supports `patterns`, `marketCapCr`, `priceRange`, `sectors`, `industries` |
+| POST   | `/api/heatmap-batch`               | Batch quotes for heatmap. Body: `{ symbols, timeframe }`                                                                                                                            |
+| POST   | `/api/chart-batch`                 | Batch chart data. Body: `{ symbols, range?, interval? }` → `{ charts }`                                                                                                             |
+| POST   | `/api/stats-batch`                 | Batch key stats. Body: `{ symbols }` → `{ stats }`                                                                                                                                  |
+| GET    | `/api/lookup-bundle?symbol=`       | Chart 1y + max, quote, profile, financials, recommendations, news, quarterlyResults                                                                                                 |
+| POST   | `/api/watchlist-snapshot`          | Watchlist live data. Body: `{ symbols }` (max 50) → `{ snapshots }` per symbol: CMP, signal, pattern, SWOT                                                                          |
+| POST   | `/api/swot-batch`                  | Trendlyne SWOT counts. Body: `{ symbols }` (max 50) → `{ swot }` with strengths/weaknesses per symbol                                                                               |
 
 ---
 

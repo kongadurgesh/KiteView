@@ -32,6 +32,8 @@ export default async function handler(req, res) {
     swot[symbol] = {
       strengths: counts.strengths,
       weaknesses: counts.weaknesses,
+      opportunities: counts.opportunities,
+      threats: counts.threats,
     };
   }
 
