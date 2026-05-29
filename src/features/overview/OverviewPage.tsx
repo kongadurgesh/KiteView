@@ -1,10 +1,21 @@
-import { type KeyboardEvent, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
+import {
+  Box,
+  Card,
+  CardActionArea,
+  CardContent,
+  Chip,
+  Grid,
+  Paper,
+  Stack,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import { useAppNavigation } from '../../app/navigation';
 import type { Page } from '../../components/layout/types';
 import { PageLayout } from '../../components/layout/PageLayout';
 import { PAGE_COPY } from '../../content/pageCopy';
-import { cn } from '../../lib/cn';
 
 const PREVIEW_ROOT = 'relative h-full w-full min-h-0 overflow-hidden';
 
@@ -12,55 +23,55 @@ type CardAccent = 'blue' | 'teal' | 'violet' | 'amber' | 'emerald' | 'rose' | 's
 
 const ACCENT_STYLES: Record<
   CardAccent,
-  { border: string; glow: string; chip: string; arrow: string }
+  { borderColor: string; glowColor: string; chipBg: string; chipFg: string }
 > = {
   blue: {
-    border: 'group-hover:border-blue-500/35 dark:group-hover:border-blue-400/30',
-    glow: 'from-blue-500/[0.07] via-transparent to-transparent',
-    chip: 'bg-blue-500/10 text-blue-700 dark:text-blue-300 group-hover:bg-blue-600 group-hover:text-white',
-    arrow: 'text-blue-600 dark:text-blue-400 group-hover:text-white',
+    borderColor: '#3b82f6',
+    glowColor: 'rgba(59,130,246,0.16)',
+    chipBg: 'rgba(59,130,246,0.14)',
+    chipFg: '#1d4ed8',
   },
   teal: {
-    border: 'group-hover:border-teal-500/35 dark:group-hover:border-teal-400/30',
-    glow: 'from-teal-500/[0.07] via-transparent to-transparent',
-    chip: 'bg-teal-500/10 text-teal-700 dark:text-teal-300 group-hover:bg-teal-600 group-hover:text-white',
-    arrow: 'text-teal-600 dark:text-teal-400 group-hover:text-white',
+    borderColor: '#14b8a6',
+    glowColor: 'rgba(20,184,166,0.16)',
+    chipBg: 'rgba(20,184,166,0.14)',
+    chipFg: '#0f766e',
   },
   violet: {
-    border: 'group-hover:border-violet-500/35 dark:group-hover:border-violet-400/30',
-    glow: 'from-violet-500/[0.07] via-transparent to-transparent',
-    chip: 'bg-violet-500/10 text-violet-700 dark:text-violet-300 group-hover:bg-violet-600 group-hover:text-white',
-    arrow: 'text-violet-600 dark:text-violet-400 group-hover:text-white',
+    borderColor: '#8b5cf6',
+    glowColor: 'rgba(139,92,246,0.16)',
+    chipBg: 'rgba(139,92,246,0.14)',
+    chipFg: '#6d28d9',
   },
   amber: {
-    border: 'group-hover:border-amber-500/35 dark:group-hover:border-amber-400/30',
-    glow: 'from-amber-500/[0.07] via-transparent to-transparent',
-    chip: 'bg-amber-500/10 text-amber-800 dark:text-amber-300 group-hover:bg-amber-600 group-hover:text-white',
-    arrow: 'text-amber-700 dark:text-amber-400 group-hover:text-white',
+    borderColor: '#f59e0b',
+    glowColor: 'rgba(245,158,11,0.16)',
+    chipBg: 'rgba(245,158,11,0.14)',
+    chipFg: '#92400e',
   },
   emerald: {
-    border: 'group-hover:border-emerald-500/35 dark:group-hover:border-emerald-400/30',
-    glow: 'from-emerald-500/[0.07] via-transparent to-transparent',
-    chip: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 group-hover:bg-emerald-600 group-hover:text-white',
-    arrow: 'text-emerald-600 dark:text-emerald-400 group-hover:text-white',
+    borderColor: '#10b981',
+    glowColor: 'rgba(16,185,129,0.16)',
+    chipBg: 'rgba(16,185,129,0.14)',
+    chipFg: '#047857',
   },
   rose: {
-    border: 'group-hover:border-rose-500/35 dark:group-hover:border-rose-400/30',
-    glow: 'from-rose-500/[0.07] via-transparent to-transparent',
-    chip: 'bg-rose-500/10 text-rose-700 dark:text-rose-300 group-hover:bg-rose-600 group-hover:text-white',
-    arrow: 'text-rose-600 dark:text-rose-400 group-hover:text-white',
+    borderColor: '#f43f5e',
+    glowColor: 'rgba(244,63,94,0.16)',
+    chipBg: 'rgba(244,63,94,0.14)',
+    chipFg: '#be123c',
   },
   sky: {
-    border: 'group-hover:border-sky-500/35 dark:group-hover:border-sky-400/30',
-    glow: 'from-sky-500/[0.07] via-transparent to-transparent',
-    chip: 'bg-sky-500/10 text-sky-700 dark:text-sky-300 group-hover:bg-sky-600 group-hover:text-white',
-    arrow: 'text-sky-600 dark:text-sky-400 group-hover:text-white',
+    borderColor: '#0ea5e9',
+    glowColor: 'rgba(14,165,233,0.16)',
+    chipBg: 'rgba(14,165,233,0.14)',
+    chipFg: '#0369a1',
   },
   slate: {
-    border: 'group-hover:border-slate-500/30 dark:group-hover:border-slate-400/25',
-    glow: 'from-slate-500/[0.06] via-transparent to-transparent',
-    chip: 'bg-slate-500/10 text-slate-700 dark:text-slate-300 group-hover:bg-slate-600 group-hover:text-white',
-    arrow: 'text-slate-600 dark:text-slate-400 group-hover:text-white',
+    borderColor: '#64748b',
+    glowColor: 'rgba(100,116,139,0.16)',
+    chipBg: 'rgba(100,116,139,0.14)',
+    chipFg: '#334155',
   },
 };
 
@@ -70,99 +81,122 @@ function OverviewNavCard({
   accent,
   preview,
   onClick,
-  className = '',
 }: {
   title: string;
   blurb: string;
   accent: CardAccent;
   preview: ReactNode;
   onClick: () => void;
-  className?: string;
 }) {
+  const theme = useTheme();
   const styles = ACCENT_STYLES[accent];
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      onClick();
-    }
-  };
-
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={onClick}
-      onKeyDown={handleKeyDown}
-      aria-label={`Open ${title}`}
-      className={cn(
-        'group relative flex h-full min-h-[220px] flex-col overflow-hidden rounded-2xl',
-        'border border-border/80 dark:border-border-dark/80',
-        'bg-surface dark:bg-surface-dark',
-        'shadow-sm shadow-black/[0.03] dark:shadow-black/20',
-        'cursor-pointer select-none',
-        'transition-[transform,box-shadow,border-color] duration-300 ease-out',
-        'hover:-translate-y-1 hover:shadow-lg hover:shadow-black/[0.06] dark:hover:shadow-black/40',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
-        'dark:focus-visible:ring-offset-surface-dark',
-        'active:translate-y-0 active:shadow-md',
-        styles.border,
-        className,
-      )}
+    <Card
+      variant="outlined"
+      sx={{
+        position: 'relative',
+        minHeight: 220,
+        height: '100%',
+        overflow: 'hidden',
+        borderColor: 'divider',
+        boxShadow: '0 2px 10px rgba(15, 23, 42, 0.05)',
+        transition: theme.transitions.create(['transform', 'box-shadow', 'border-color'], {
+          duration: theme.transitions.duration.standard,
+        }),
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          inset: 0,
+          opacity: 0,
+          pointerEvents: 'none',
+          background: `radial-gradient(120% 85% at 0% 0%, ${styles.glowColor}, transparent 55%)`,
+          transition: theme.transitions.create('opacity', { duration: theme.transitions.duration.standard }),
+        },
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: '0 16px 30px rgba(15, 23, 42, 0.12)',
+          borderColor: styles.borderColor,
+        },
+        '&:hover::before': {
+          opacity: 1,
+        },
+      }}
     >
-      <div
-        className={cn(
-          'pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100',
-          'bg-gradient-to-br',
-          styles.glow,
-        )}
-      />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent dark:via-white/10" />
-
-      <div className="relative flex-1 p-4 pb-0">
-        <div
-          className={cn(
-            'h-28 overflow-hidden rounded-xl border border-border/60 dark:border-border-dark/60',
-            'bg-surface-muted/80 dark:bg-surface-dark-muted/80',
-            'transition-[transform,box-shadow] duration-300 ease-out',
-            'group-hover:scale-[1.02] group-hover:shadow-inner',
-          )}
-        >
-          {preview}
-        </div>
-      </div>
-
-      <div className="relative flex items-end gap-3 p-5 pt-4">
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold tracking-tight text-ink-primary dark:text-ink-dark-primary transition-colors group-hover:text-ink-primary dark:group-hover:text-white">
-            {title}
-          </p>
-          <p className="card-blurb mt-1.5 line-clamp-2">{blurb}</p>
-        </div>
-        <div
-          className={cn(
-            'flex size-10 shrink-0 items-center justify-center rounded-full',
-            'transition-all duration-300 ease-out',
-            'group-hover:scale-110 group-hover:shadow-md',
-            styles.chip,
-          )}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            className={cn('size-4 transition-transform duration-300 group-hover:translate-x-0.5', styles.arrow)}
-            aria-hidden
+      <CardActionArea onClick={onClick} aria-label={`Open ${title}`} sx={{ height: '100%', alignItems: 'stretch' }}>
+        <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.75, height: '100%', p: 2 }}>
+          <Box
+            sx={{
+              position: 'relative',
+              borderRadius: 2,
+              border: '1px solid',
+              borderColor: 'divider',
+              bgcolor: 'action.hover',
+              overflow: 'hidden',
+              height: 112,
+              transition: theme.transitions.create(['transform', 'box-shadow'], {
+                duration: theme.transitions.duration.standard,
+              }),
+              '.MuiCard-root:hover &': {
+                transform: 'scale(1.015)',
+                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+              },
+            }}
           >
-            <path
-              fillRule="evenodd"
-              d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </div>
-      </div>
-    </div>
+            {preview}
+          </Box>
+
+          <Stack direction="row" spacing={1.25} sx={{ mt: 'auto', alignItems: 'flex-end' }}>
+            <Box sx={{ minWidth: 0, flex: 1 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: '-0.01em' }}>
+                {title}
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mt: 0.75, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+              >
+                {blurb}
+              </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: '50%',
+                display: 'grid',
+                placeItems: 'center',
+                flexShrink: 0,
+                bgcolor: styles.chipBg,
+                color: styles.chipFg,
+                transition: theme.transitions.create(['transform', 'background-color', 'color'], {
+                  duration: theme.transitions.duration.standard,
+                }),
+                '.MuiCard-root:hover &': {
+                  transform: 'scale(1.08)',
+                  bgcolor: styles.borderColor,
+                  color: '#fff',
+                },
+              }}
+            >
+              <Box
+                component="span"
+                sx={{
+                  fontSize: 16,
+                  fontWeight: 700,
+                  lineHeight: 1,
+                  transition: theme.transitions.create('transform', { duration: theme.transitions.duration.short }),
+                  '.MuiCard-root:hover &': { transform: 'translateX(2px)' },
+                }}
+              >
+                →
+              </Box>
+            </Box>
+          </Stack>
+        </CardContent>
+      </CardActionArea>
+    </Card>
   );
 }
 
@@ -387,47 +421,137 @@ export function OverviewPage() {
     show: { opacity: 1, y: 0, transition: cardTransition },
   };
 
-  const gridCell = 'h-full min-h-[220px]';
   const cards = PAGE_COPY.toolCards;
 
   return (
-    <PageLayout className="max-w-7xl mt-6" title={PAGE_COPY.overview.title} description={PAGE_COPY.overview.description}>
-      <motion.div
-        initial="hidden"
-        animate="show"
-        variants={{
-          hidden: {},
-          show: reduceMotion
-            ? {}
-            : {
-                transition: { staggerChildren: 0.06, delayChildren: 0.03 },
-              },
-        }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch"
-      >
-        {TOOL_NAV.map(({ key, page, accent, preview, wide }) => {
-          const copy = cards[key];
-          return (
-            <motion.div
-              key={key}
-              className={cn(gridCell, wide && 'lg:col-span-2')}
-              variants={item}
-              transition={cardTransition}
-            >
-              <OverviewNavCard
-                title={copy.title}
-                blurb={copy.blurb}
-                accent={accent}
-                preview={preview(animated)}
-                onClick={() => goToPage(page)}
-                className={wide ? 'h-full' : undefined}
-              />
-            </motion.div>
-          );
-        })}
-      </motion.div>
+    <PageLayout className="max-w-7xl mt-6">
+      <Stack spacing={2.25} sx={{ position: 'relative', isolation: 'isolate' }}>
+        <Box
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            zIndex: -1,
+            width: { xs: 240, md: 320 },
+            height: { xs: 240, md: 320 },
+            borderRadius: '50%',
+            top: -100,
+            left: -100,
+            filter: 'blur(38px)',
+            opacity: 0.36,
+            background: 'radial-gradient(circle, rgba(14,165,233,0.35) 0%, rgba(59,130,246,0.14) 55%, transparent 72%)',
+          }}
+        />
+        <Box
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            zIndex: -1,
+            width: { xs: 260, md: 340 },
+            height: { xs: 260, md: 340 },
+            borderRadius: '50%',
+            bottom: -120,
+            right: -80,
+            filter: 'blur(42px)',
+            opacity: 0.28,
+            background: 'radial-gradient(circle, rgba(16,185,129,0.3) 0%, rgba(168,85,247,0.12) 58%, transparent 76%)',
+          }}
+        />
+
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 2, sm: 2.5 },
+            minHeight: { xs: 190, md: 176 },
+            border: '1px solid',
+            borderColor: 'divider',
+            background:
+              'radial-gradient(1200px 180px at 0% -10%, rgba(37,99,235,0.15), transparent 50%), radial-gradient(800px 180px at 100% 120%, rgba(13,148,136,0.12), transparent 55%)',
+            overflow: 'hidden',
+            position: 'relative',
+          }}
+        >
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            opacity: 0.5,
+            pointerEvents: 'none',
+            background:
+              'linear-gradient(120deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.12) 35%, rgba(255,255,255,0.03) 70%)',
+            transform: 'translateX(-40%)',
+            animation: reduceMotion ? 'none' : 'ovHeroSweep 6s ease-in-out infinite',
+          }}
+        />
+
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} justifyContent="space-between" alignItems={{ xs: 'flex-start', md: 'center' }} sx={{ minHeight: '100%' }}>
+          <Box>
+            <Typography variant="h5" sx={{ mb: 0.75 }}>
+              {PAGE_COPY.overview.title}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {PAGE_COPY.overview.description}
+            </Typography>
+            <Stack direction="row" spacing={1} sx={{ mt: 1.5, flexWrap: 'wrap', rowGap: 1 }}>
+              <Chip size="small" label="Live Scans" color="primary" variant="outlined" />
+              <Chip size="small" label="Smart Watchlists" color="secondary" variant="outlined" />
+              <Chip size="small" label="Portfolio Analytics" color="success" variant="outlined" />
+            </Stack>
+          </Box>
+
+          <Box />
+        </Stack>
+        </Paper>
+
+        <Grid
+          container
+          spacing={2}
+          initial="hidden"
+          animate="show"
+          component={motion.div}
+          variants={{
+            hidden: {},
+            show: reduceMotion
+              ? {}
+              : {
+                  transition: { staggerChildren: 0.06, delayChildren: 0.03 },
+                },
+          }}
+          sx={{ alignItems: 'stretch' }}
+        >
+          {TOOL_NAV.map(({ key, page, accent, preview, wide }) => {
+            const copy = cards[key];
+            return (
+              <Grid
+                key={key}
+                size={{ xs: 12, md: 6, lg: wide ? 8 : 4 }}
+                sx={{ display: 'flex', minHeight: 220 }}
+              >
+                <Box
+                  component={motion.div}
+                  variants={item}
+                  transition={cardTransition}
+                  sx={{ width: '100%', height: '100%' }}
+                >
+                  <OverviewNavCard
+                    title={copy.title}
+                    blurb={copy.blurb}
+                    accent={accent}
+                    preview={preview(animated)}
+                    onClick={() => goToPage(page)}
+                  />
+                </Box>
+              </Grid>
+            );
+          })}
+        </Grid>
+      </Stack>
 
       <style>{`
+        @keyframes ovHeroSweep {
+          0%, 100% { transform: translateX(-45%); }
+          50% { transform: translateX(45%); }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .ov-anim * { animation: none !important; transition: none !important; }
         }
