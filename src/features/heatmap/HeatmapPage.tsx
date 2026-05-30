@@ -1,5 +1,31 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useMatch, useSearchParams } from 'react-router-dom';
+import { useMatch, useNavigate, useSearchParams } from 'react-router-dom';
+import {
+  Alert,
+  Box,
+  Button,
+  ButtonBase,
+  Chip,
+  CircularProgress,
+  Divider,
+  FormControl,
+  LinearProgress,
+  ListSubheader,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
+  Typography,
+  alpha,
+  useTheme,
+} from '@mui/material';
+import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
+import ArrowDropUpRoundedIcon from '@mui/icons-material/ArrowDropUpRounded';
+import ArrowDropDownRoundedIcon from '@mui/icons-material/ArrowDropDownRounded';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import { useAppNavigation } from '../../app/navigation';
 import { fetchScreenerList, ScreenerStock } from '../../utils/screener';
 import { HEATMAP_INDICES, heatmapIndicesByGroup, getHeatmapIndexOption, isHeatmapIndexId } from '../../data/heatmapIndices';
@@ -166,7 +192,9 @@ function squarify(items: QuoteFull[], width: number, height: number): TreemapRec
 }
 
 export function HeatmapPage() {
+  const navigate = useNavigate();
   const { viewStock } = useAppNavigation();
+  const theme = useTheme();
   const isActive = useMatch({ path: '/heatmap', end: true }) != null;
   const [searchParams, setSearchParams] = useSearchParams();
   const [allStocks, setAllStocks] = useState<ScreenerStock[]>([]);
@@ -420,150 +448,274 @@ export function HeatmapPage() {
     lastUpdated ? ` Last updated ${fmtTime(lastUpdated)}.` : ''
   }`;
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate('/');
+  };
+
   return (
-    <PageLayout className="max-w-7xl mt-6" title={PAGE_COPY.heatmap.title} description={heatmapDesc}>
-      <div className="w-full space-y-4">
-      <div className="card p-5">
-        <div className="flex flex-col gap-4">
+    <PageLayout className="max-w-7xl mt-6">
+      <Stack spacing={2.25} sx={{ position: 'relative', isolation: 'isolate' }}>
+        <Box
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            zIndex: -1,
+            width: { xs: 240, md: 320 },
+            height: { xs: 240, md: 320 },
+            borderRadius: '50%',
+            top: -100,
+            left: -100,
+            filter: 'blur(38px)',
+            opacity: 0.36,
+            background: 'radial-gradient(circle, rgba(14,165,233,0.35) 0%, rgba(59,130,246,0.14) 55%, transparent 72%)',
+          }}
+        />
+        <Box
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            zIndex: -1,
+            width: { xs: 260, md: 340 },
+            height: { xs: 260, md: 340 },
+            borderRadius: '50%',
+            bottom: -120,
+            right: -80,
+            filter: 'blur(42px)',
+            opacity: 0.28,
+            background: 'radial-gradient(circle, rgba(16,185,129,0.3) 0%, rgba(168,85,247,0.12) 58%, transparent 76%)',
+          }}
+        />
+
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 2, sm: 2.5 },
+            minHeight: { xs: 190, md: 176 },
+            border: '1px solid',
+            borderColor: 'divider',
+            background:
+              'radial-gradient(1200px 180px at 0% -10%, rgba(37,99,235,0.15), transparent 50%), radial-gradient(800px 180px at 100% 120%, rgba(13,148,136,0.12), transparent 55%)',
+            overflow: 'hidden',
+            position: 'relative',
+          }}
+        >
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              opacity: 0.5,
+              pointerEvents: 'none',
+              background:
+                'linear-gradient(120deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.12) 35%, rgba(255,255,255,0.03) 70%)',
+              transform: 'translateX(-40%)',
+              animation: 'ovHeroSweep 6s ease-in-out infinite',
+            }}
+          />
+
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} justifyContent="space-between" alignItems={{ xs: 'flex-start', md: 'center' }} sx={{ minHeight: '100%' }}>
+            <Box>
+              <Button
+                variant="text"
+                size="small"
+                startIcon={<ArrowBackRoundedIcon fontSize="small" />}
+                onClick={handleBack}
+                sx={{ mb: 1, px: 0.5, minWidth: 0, textTransform: 'none', justifyContent: 'flex-start' }}
+              >
+                Back
+              </Button>
+              <Typography variant="h5" sx={{ mb: 0.75 }}>
+                {PAGE_COPY.heatmap.title}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {heatmapDesc}
+              </Typography>
+              <Stack direction="row" spacing={1} sx={{ mt: 1.5, flexWrap: 'wrap', rowGap: 1 }}>
+                <Chip size="small" label="Indian & Global Indices" color="primary" variant="outlined" />
+                <Chip size="small" label="Live Heatmap" color="secondary" variant="outlined" />
+                <Chip size="small" label="Timeframe View" color="success" variant="outlined" />
+              </Stack>
+            </Box>
+            <Box />
+          </Stack>
+        </Paper>
+
+        <Paper
+          elevation={0}
+          sx={{
+            border: '1px solid',
+            borderColor: 'divider',
+            p: { xs: 1.5, sm: 2 },
+            background:
+              theme.palette.mode === 'dark'
+                ? 'linear-gradient(165deg, rgba(17,24,39,0.9), rgba(3,7,18,0.9))'
+                : 'linear-gradient(165deg, rgba(255,255,255,0.96), rgba(248,250,252,0.95))',
+          }}
+        >
           <SectionHeader
             title="Filters"
             action={
-            <button
-              onClick={handleRefresh}
-              disabled={loading}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50 transition-colors shrink-0"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              {loading ? 'Loading...' : 'Refresh'}
-            </button>
+              <Button
+                onClick={handleRefresh}
+                disabled={loading}
+                variant="contained"
+                size="small"
+                startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <RefreshRoundedIcon fontSize="small" />}
+              >
+                {loading ? 'Loading...' : 'Refresh'}
+              </Button>
             }
           />
 
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
-              <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Index</label>
-              <select
-                value={selectedIndex}
-                onChange={(e) => handleIndexChange(e.target.value)}
-                className="rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 text-sm font-medium text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 max-w-[220px]"
-              >
-                <optgroup label="Indian">
+          <Stack direction="row" flexWrap="wrap" alignItems="center" spacing={1.5} useFlexGap sx={{ mt: 1.5 }}>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                Index
+              </Typography>
+              <FormControl size="small" sx={{ minWidth: 220 }}>
+                <Select
+                  value={selectedIndex}
+                  onChange={(e) => handleIndexChange(e.target.value)}
+                  sx={{ bgcolor: 'background.paper' }}
+                >
+                  <ListSubheader>Indian</ListSubheader>
                   {heatmapIndicesByGroup('indian').map((idx) => (
-                    <option key={idx.id} value={idx.id}>{idx.label}</option>
+                    <MenuItem key={idx.id} value={idx.id}>{idx.label}</MenuItem>
                   ))}
-                </optgroup>
-                <optgroup label="Global">
+                  <ListSubheader>Global</ListSubheader>
                   {heatmapIndicesByGroup('global').map((idx) => (
-                    <option key={idx.id} value={idx.id}>{idx.label}</option>
+                    <MenuItem key={idx.id} value={idx.id}>{idx.label}</MenuItem>
                   ))}
-                </optgroup>
-              </select>
-              <div className="h-5 w-px bg-gray-300 dark:bg-gray-700 hidden sm:block" />
+                </Select>
+              </FormControl>
+
+              <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', sm: 'block' } }} />
               {indexQuoteLoading ? (
-                <span className="text-xs text-gray-500 dark:text-gray-400">Loading…</span>
+                <Typography variant="caption" color="text.secondary">Loading...</Typography>
               ) : selectedIndexQuote?.price != null ? (
-                <span className="text-xs font-mono font-semibold text-gray-900 dark:text-gray-100">
+                <Typography variant="caption" sx={{ fontFamily: 'monospace', fontWeight: 700, color: 'text.primary' }}>
                   {formatIndexPrice(selectedIndexQuote)}
-                  <span
-                    className={`ml-1 ${(selectedIndexQuote.changePct ?? 0) >= 0
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : 'text-red-600 dark:text-red-400'
-                    }`}
-                  >
+                  <Box component="span" sx={{ ml: 0.75, color: (selectedIndexQuote.changePct ?? 0) >= 0 ? 'success.main' : 'error.main' }}>
                     ({fmtQuotePct(selectedIndexQuote.changePct)})
-                  </span>
-                </span>
+                  </Box>
+                </Typography>
               ) : (
-                <span className="text-xs text-gray-500 dark:text-gray-400">Unavailable</span>
+                <Typography variant="caption" color="text.secondary">Unavailable</Typography>
               )}
-            </div>
+            </Stack>
 
-            <div className="h-5 w-px bg-gray-300 dark:bg-gray-700 hidden sm:block" />
+            <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', sm: 'block' } }} />
 
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Period</span>
-              <div className="flex gap-0.5 bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5 border border-gray-200 dark:border-gray-700">
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                Period
+              </Typography>
+              <ToggleButtonGroup
+                size="small"
+                exclusive
+                value={timeframe}
+                onChange={(_, value: HeatmapTimeframe | null) => value && setTimeframe(value)}
+                sx={{
+                  bgcolor: 'action.hover',
+                  borderRadius: 1,
+                  p: 0.25,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  '& .MuiToggleButton-root': {
+                    border: 0,
+                    borderRadius: 1,
+                    px: 1.25,
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    fontSize: 12,
+                  },
+                }}
+              >
                 {TIMEFRAME_OPTIONS.map(({ key, label }) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setTimeframe(key)}
-                    className={`px-2.5 py-1.5 text-xs font-semibold rounded-md transition-colors ${
-                      timeframe === key
-                        ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-300 shadow-sm'
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-                    }`}
-                  >
-                    {label}
-                  </button>
+                  <ToggleButton key={key} value={key}>{label}</ToggleButton>
                 ))}
-              </div>
-            </div>
+              </ToggleButtonGroup>
+            </Stack>
 
-            <div className="h-5 w-px bg-gray-300 dark:bg-gray-700 hidden sm:block" />
+            <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', sm: 'block' } }} />
 
             {!loading && displayQuotes.length > 0 && (
-              <div className="flex items-center gap-3 text-xs font-medium">
-                <span className="text-gray-500 dark:text-gray-400">{displayQuotes.length} stocks</span>
-                <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                  <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L10 6.414l-3.293 3.293a1 1 0 01-1.414 0z" clipRule="evenodd"/></svg>
+              <Stack direction="row" alignItems="center" spacing={1.5}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                  {displayQuotes.length} stocks
+                </Typography>
+                <Typography variant="caption" sx={{ display: 'inline-flex', alignItems: 'center', color: 'success.main', fontWeight: 700 }}>
+                  <ArrowDropUpRoundedIcon sx={{ fontSize: 16 }} />
                   {gainers}
-                </span>
-                <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
-                  <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L10 13.586l3.293-3.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                </Typography>
+                <Typography variant="caption" sx={{ display: 'inline-flex', alignItems: 'center', color: 'error.main', fontWeight: 700 }}>
+                  <ArrowDropDownRoundedIcon sx={{ fontSize: 16 }} />
                   {losers}
-                </span>
+                </Typography>
                 {unchanged > 0 && (
-                  <span className="text-gray-400 dark:text-gray-500">{unchanged} flat</span>
+                  <Typography variant="caption" color="text.secondary">{unchanged} flat</Typography>
                 )}
-              </div>
+              </Stack>
             )}
 
-            <div className="ml-auto hidden sm:flex items-center gap-2 text-[10px] font-medium text-gray-400 dark:text-gray-500">
-              <span>-3%</span>
-              <div
-                className="h-2.5 w-32 rounded-full border border-gray-200 dark:border-gray-700"
-                style={{ background: HEAT_LEGEND_GRADIENT }}
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ ml: { xs: 0, sm: 'auto' }, display: { xs: 'none', sm: 'flex' } }}>
+              <Typography sx={{ fontSize: 10, fontWeight: 600, color: 'text.secondary' }}>-3%</Typography>
+              <Box
+                sx={{
+                  height: 10,
+                  width: 128,
+                  borderRadius: 999,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  background: HEAT_LEGEND_GRADIENT,
+                }}
               />
-              <span>+3%</span>
-            </div>
-          </div>
+              <Typography sx={{ fontSize: 10, fontWeight: 600, color: 'text.secondary' }}>+3%</Typography>
+            </Stack>
+          </Stack>
 
           {loading && progress.total > 0 && (
-            <div className="w-full">
-              <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 overflow-hidden">
-                <div
-                  className="bg-blue-600 h-1.5 rounded-full transition-all duration-300 ease-out"
-                  style={{ width: `${progressPct}%` }}
-                />
-              </div>
-              <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+            <Box sx={{ mt: 1.25 }}>
+              <LinearProgress
+                variant="determinate"
+                value={progressPct}
+                sx={{ height: 6, borderRadius: 999, bgcolor: alpha(theme.palette.text.primary, 0.12) }}
+              />
+              <Typography sx={{ mt: 0.75, fontSize: 10, color: 'text.secondary' }}>
                 Loading {progress.loaded} / {progress.total} stocks...
-              </p>
-            </div>
+              </Typography>
+            </Box>
           )}
-        </div>
-      </div>
+        </Paper>
 
-      {error && (
-        <div className="rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-300 dark:border-red-800 p-4">
-          <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
-        </div>
-      )}
+        {error && (
+          <Alert severity="error" variant="outlined">
+            {error}
+          </Alert>
+        )}
 
-      {loading && displayQuotes.length === 0 && (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-16 flex flex-col items-center gap-4">
-          <div className="size-10 border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin" />
-          <p className="text-gray-400 dark:text-gray-500 text-sm">Fetching market data...</p>
-        </div>
-      )}
+        {loading && displayQuotes.length === 0 && (
+          <Paper variant="outlined" sx={{ p: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+            <CircularProgress size={40} />
+            <Typography variant="body2" color="text.secondary">Fetching market data...</Typography>
+          </Paper>
+        )}
 
-      {displayQuotes.length > 0 && (
-        <div className="bg-gray-100 dark:bg-gray-950 rounded-2xl border border-gray-300 dark:border-gray-700 overflow-hidden p-1.5">
-          <div className="relative w-full" style={{ paddingBottom: `${(CH / CW) * 100}%` }}>
-            <div className="absolute inset-0">
+        {displayQuotes.length > 0 && (
+          <Paper
+            variant="outlined"
+            sx={{
+              bgcolor: theme.palette.mode === 'dark' ? 'grey.950' : 'grey.100',
+              borderColor: theme.palette.mode === 'dark' ? 'grey.700' : 'grey.300',
+              overflow: 'hidden',
+              p: 0.75,
+            }}
+          >
+            <Box sx={{ position: 'relative', width: '100%', pt: `${(CH / CW) * 100}%` }}>
+              <Box sx={{ position: 'absolute', inset: 0 }}>
               {rects.map((r) => {
                 const pctX = (r.x / CW) * 100;
                 const pctY = (r.y / CH) * 100;
@@ -584,57 +736,101 @@ export function HeatmapPage() {
                   (changePct < 0 && Math.abs(changePct) < 0.6);
                 const textColor = isLightTile ? '#111827' : '#ffffff';
                 const shadowColor = isLightTile ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
+                const tooltipTitle = `${companyName || r.quote.shortName} (${ticker})\n${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}%\n₹${r.quote.regularMarketPrice.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
 
                 return (
-                  <div
+                  <Tooltip
                     key={r.quote.symbol}
-                    className="absolute overflow-hidden cursor-pointer flex flex-col items-center justify-center transition-all duration-150 hover:brightness-125 hover:z-10 hover:ring-2 hover:ring-white/80"
-                    style={{
-                      left: `calc(${pctX}% + 1px)`,
-                      top: `calc(${pctY}% + 1px)`,
-                      width: `calc(${pctW}% - 2px)`,
-                      height: `calc(${pctH}% - 2px)`,
-                      backgroundColor: heatColor(changePct),
-                      borderRadius: '3px',
-                      fontSize: `${fontSize}px`,
-                      color: textColor,
-                      textShadow: `0 1px 2px ${shadowColor}`,
+                    title={tooltipTitle}
+                    placement="top"
+                    slotProps={{
+                      popper: {
+                        modifiers: [
+                          {
+                            name: 'offset',
+                            options: {
+                              offset: [0, -8],
+                            },
+                          },
+                        ],
+                      },
                     }}
-                    onClick={() => viewStock(r.quote.symbol)}
-                    title={`${companyName || r.quote.shortName}\n${ticker}\n${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}%\n₹${r.quote.regularMarketPrice.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`}
                   >
-                    {showName && companyName && (
-                      <span
-                        className="font-bold leading-tight truncate max-w-full px-1 text-center"
-                        style={{ fontSize: `${fontSize}px`, lineHeight: 1.15 }}
-                      >
-                        {companyName}
-                      </span>
-                    )}
-                    {showChange && (
-                      <span className="font-semibold leading-tight opacity-90" style={{ fontSize: `${Math.max(fontSize - 2, 7)}px` }}>
-                        {changePct >= 0 ? '+' : ''}{changePct.toFixed(2)}%
-                      </span>
-                    )}
-                    {showPrice && (
-                      <span className="leading-tight mt-0.5 opacity-70" style={{ fontSize: `${Math.max(fontSize - 3, 7)}px` }}>
-                        {fmtInrCompact(r.quote.regularMarketPrice)}
-                      </span>
-                    )}
-                  </div>
+                    <ButtonBase
+                      component={Box}
+                      style={{
+                        left: `calc(${pctX}% + 1px)`,
+                        top: `calc(${pctY}% + 1px)`,
+                        width: `calc(${pctW}% - 2px)`,
+                        height: `calc(${pctH}% - 2px)`,
+                        backgroundColor: heatColor(changePct),
+                        fontSize: `${fontSize}px`,
+                        color: textColor,
+                        textShadow: `0 1px 2px ${shadowColor}`,
+                      }}
+                      sx={{
+                        position: 'absolute',
+                        overflow: 'hidden',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: 0.5,
+                        transition: theme.transitions.create(['filter', 'boxShadow', 'elevation'], {
+                          duration: theme.transitions.duration.shortest,
+                        }),
+                        '&:hover': {
+                          filter: 'brightness(1.25)',
+                          boxShadow: `0 0 0 2px ${theme.palette.background.paper}, inset 0 0 0 2px ${theme.palette.common.white}`,
+                        },
+                        '&:active': {
+                          filter: 'brightness(1.15)',
+                        },
+                      }}
+                      onClick={() => viewStock(r.quote.symbol)}
+                      aria-label={`View ${companyName || r.quote.shortName} (${ticker})`}
+                    >
+                      {showName && companyName && (
+                        <Box
+                          component="span"
+                          style={{ fontSize: `${fontSize}px`, lineHeight: 1.15 }}
+                          sx={{ fontWeight: 700, maxWidth: '100%', px: 0.5, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                        >
+                          {companyName}
+                        </Box>
+                      )}
+                      {showChange && (
+                        <Box component="span" sx={{ fontWeight: 600, lineHeight: 1.1, opacity: 0.9 }} style={{ fontSize: `${Math.max(fontSize - 2, 7)}px` }}>
+                          {changePct >= 0 ? '+' : ''}{changePct.toFixed(2)}%
+                        </Box>
+                      )}
+                      {showPrice && (
+                        <Box component="span" sx={{ lineHeight: 1.1, mt: 0.5, opacity: 0.7 }} style={{ fontSize: `${Math.max(fontSize - 3, 7)}px` }}>
+                          {fmtInrCompact(r.quote.regularMarketPrice)}
+                        </Box>
+                      )}
+                    </ButtonBase>
+                  </Tooltip>
                 );
               })}
-            </div>
-          </div>
-        </div>
-      )}
+              </Box>
+            </Box>
+          </Paper>
+        )}
 
-      {!loading && displayQuotes.length === 0 && !error && (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-12 text-center">
-          <p className="text-gray-400 dark:text-gray-500 text-sm">No data available. Click Refresh to load.</p>
-        </div>
-      )}
-      </div>
+        {!loading && displayQuotes.length === 0 && !error && (
+          <Paper variant="outlined" sx={{ p: 6, textAlign: 'center' }}>
+            <Typography variant="body2" color="text.secondary">No data available. Click Refresh to load.</Typography>
+          </Paper>
+        )}
+
+        <style>{`
+          @keyframes ovHeroSweep {
+            0%, 100% { transform: translateX(-45%); }
+            50% { transform: translateX(45%); }
+          }
+        `}</style>
+      </Stack>
     </PageLayout>
   );
 }

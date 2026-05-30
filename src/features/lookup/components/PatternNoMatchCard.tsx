@@ -1,21 +1,26 @@
-import { Link } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
+import { Link, Paper, Stack, Typography } from '@mui/material';
 import { pageToPath } from '../../../app/routes';
 import { PAGE_COPY } from '../../../content/pageCopy';
 
 export function PatternNoMatchCard({ symbol }: { symbol: string }) {
   return (
-    <div className="card p-5 border-dashed">
-      <p className="label-caps mb-2">Breakout</p>
-      <p className="body-text">
+    <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.25 }, border: '1px dashed', borderColor: 'divider' }}>
+      <Stack spacing={1.5}>
+      <Typography variant="overline" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: '0.1em' }}>
+        Breakout
+      </Typography>
+      <Typography variant="body2" color="text.primary">
         {PAGE_COPY.analysis.noPattern} <strong>{symbol}</strong>
-      </p>
-      <p className="section-desc mt-3">
+      </Typography>
+      <Typography variant="body2" color="text.secondary">
         Use the{' '}
-        <Link to={pageToPath('screener')} className="text-accent font-medium hover:underline">
+        <Link component={RouterLink} to={pageToPath('screener')} underline="hover" sx={{ fontWeight: 600 }}>
           Screener
         </Link>{' '}
         to scan the market for fresh breakouts.
-      </p>
-    </div>
+      </Typography>
+      </Stack>
+    </Paper>
   );
 }

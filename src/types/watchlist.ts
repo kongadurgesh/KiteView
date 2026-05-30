@@ -41,6 +41,8 @@ export interface WatchlistSnapshot {
   patternToday: boolean;
   swotStrengths: number | null;
   swotWeaknesses: number | null;
+  swotOpportunities: number | null;
+  swotThreats: number | null;
   swotHealthy: boolean;
 }
 

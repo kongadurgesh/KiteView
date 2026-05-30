@@ -98,6 +98,8 @@ export async function buildWatchlistSnapshot(symbol) {
     patternToday,
     swotStrengths: swot?.strengths ?? null,
     swotWeaknesses: swot?.weaknesses ?? null,
+    swotOpportunities: swot?.opportunities ?? null,
+    swotThreats: swot?.threats ?? null,
     swotHealthy: swot != null && swot.strengths >= swot.weaknesses,
   };
 }

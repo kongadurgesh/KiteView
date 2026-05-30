@@ -1,5 +1,22 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
+import {
+  Alert,
+  Box,
+  Button,
+  Checkbox,
+  Chip,
+  LinearProgress,
+  Paper,
+  Stack,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+  alpha,
+  useTheme,
+} from '@mui/material';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import { useAppNavigation } from '../../app/navigation';
 import { PageLayout } from '../../components/layout/PageLayout';
 import { SectionHeader } from '../../components/ui';
@@ -37,9 +54,12 @@ type SortDir = 'asc' | 'desc';
 
 const PATTERN_OPTIONS: ScreenerPatternName[] = ['Bullish Harami', 'Bullish Engulfing'];
 
-const INDEX_OPTIONS = heatmapIndicesByGroup('indian').filter((opt) =>
-  HEATMAP_INDICES.some((item) => item.id === opt.id) && opt.id !== 'all',
-);
+const INDEX_OPTIONS = heatmapIndicesByGroup('indian')
+  .filter((opt) => HEATMAP_INDICES.some((item) => item.id === opt.id) && opt.id !== 'all')
+  .filter((opt, index, arr) => {
+    const key = opt.label.trim().toLowerCase();
+    return index === arr.findIndex((item) => item.label.trim().toLowerCase() === key);
+  });
 
 type MultiSelectOption = {
   value: string;
@@ -52,13 +72,20 @@ function MultiSelectDropdown({
   selected,
   onChange,
   emptyText = 'All',
+  minWidth = 136,
+  maxWidth = 176,
+  menuMinWidth = 176,
 }: {
   label: string;
   options: MultiSelectOption[];
   selected: string[];
   onChange: (next: string[]) => void;
   emptyText?: string;
+  minWidth?: number;
+  maxWidth?: number;
+  menuMinWidth?: number;
 }) {
+  const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -80,11 +107,11 @@ function MultiSelectDropdown({
   useEffect(() => {
     if (!open || !buttonRef.current) return;
     const rect = buttonRef.current.getBoundingClientRect();
-    const menuWidth = Math.min(Math.max(rect.width, 176), window.innerWidth - 16);
+    const menuWidth = Math.min(Math.max(rect.width, menuMinWidth), window.innerWidth - 16);
     const left = Math.min(rect.left, Math.max(8, window.innerWidth - menuWidth - 8));
     const top = Math.min(rect.bottom + 8, window.innerHeight - 16);
     setMenuStyle({ position: 'fixed', left, top, width: menuWidth, zIndex: 60 });
-  }, [open]);
+  }, [open, menuMinWidth]);
 
   const selectedLabels = options
     .filter((option) => selected.includes(option.value))
@@ -106,42 +133,66 @@ function MultiSelectDropdown({
   };
 
   return (
-    <div ref={rootRef} className="relative min-w-[8.5rem] w-full max-w-[11rem] shrink-0">
-      <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-ink-muted dark:text-ink-dark-muted">{label}</p>
-      <button
+    <Box ref={rootRef} sx={{ position: 'relative', minWidth, width: '100%', maxWidth, flexShrink: 0 }}>
+      <Typography variant="caption" sx={{ mb: 0.75, display: 'block', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }}>
+        {label}
+      </Typography>
+      <Button
         ref={buttonRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="group relative w-full rounded-xl border border-border dark:border-border-dark bg-surface dark:bg-surface-dark px-3 py-2.5 text-left text-xs text-ink-primary dark:text-ink-dark-primary hover:border-accent/60 hover:shadow-sm transition-all"
+        variant="outlined"
+        fullWidth
+        sx={{
+          justifyContent: 'space-between',
+          textTransform: 'none',
+          borderRadius: 1,
+          py: 1,
+          px: 1.25,
+          minHeight: 38,
+          borderColor: 'divider',
+          color: 'text.primary',
+          bgcolor: 'background.paper',
+          '&:hover': { borderColor: 'primary.main', bgcolor: alpha(theme.palette.primary.main, 0.03) },
+        }}
       >
-        <span className="truncate block pr-5 leading-4">{summary}</span>
-        <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-muted dark:text-ink-dark-muted transition-transform duration-150 group-data-[open=true]:rotate-180">▾</span>
-      </button>
+        <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', pr: 1, fontSize: 12 }}>
+          {summary}
+        </Box>
+        <Box component="span" sx={{ color: 'text.secondary', fontSize: 12 }}>▾</Box>
+      </Button>
       {open && createPortal(
-        <div ref={menuRef} style={menuStyle} className="rounded-xl border border-border dark:border-border-dark bg-surface dark:bg-surface-dark shadow-xl ring-1 ring-black/5">
-          <div className="max-h-64 overflow-auto p-2">
+        <Paper ref={menuRef} style={menuStyle} variant="outlined" sx={{ borderRadius: 1, boxShadow: '0 18px 36px rgba(15,23,42,0.22)' }}>
+          <Box sx={{ maxHeight: 256, overflow: 'auto', p: 1 }}>
             {options.map((option) => {
               const checked = selected.includes(option.value);
               return (
-                <label
+                <Box
                   key={option.value}
-                  className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs text-ink-primary dark:text-ink-dark-primary hover:bg-surface-muted dark:hover:bg-surface-dark-muted cursor-pointer"
+                  component="label"
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    borderRadius: 1,
+                    px: 1.25,
+                    py: 0.75,
+                    cursor: 'pointer',
+                    '&:hover': { bgcolor: 'action.hover' },
+                  }}
                 >
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => toggle(option.value)}
-                    className="h-3.5 w-3.5 rounded border-border dark:border-border-dark"
-                  />
-                  <span className="truncate">{option.label}</span>
-                </label>
+                  <Checkbox size="small" checked={checked} onChange={() => toggle(option.value)} sx={{ p: 0.5 }} />
+                  <Typography sx={{ fontSize: 12, whiteSpace: 'normal', wordBreak: 'break-word', lineHeight: 1.25 }}>
+                    {option.label}
+                  </Typography>
+                </Box>
               );
             })}
-          </div>
-        </div>,
+          </Box>
+        </Paper>,
         document.body,
       )}
-    </div>
+    </Box>
   );
 }
 
@@ -153,7 +204,6 @@ function RangeDropdown({
   onMaxChange,
   minPlaceholder = 'Min',
   maxPlaceholder = 'Max',
-  widthClassName = 'w-full max-w-[10rem]',
   sliderMin = 0,
   sliderMax = 100000,
   sliderStep = 1,
@@ -165,11 +215,11 @@ function RangeDropdown({
   onMaxChange: (value: string) => void;
   minPlaceholder?: string;
   maxPlaceholder?: string;
-  widthClassName?: string;
   sliderMin?: number;
   sliderMax?: number;
   sliderStep?: number;
 }) {
+  const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -214,27 +264,44 @@ function RangeDropdown({
   const effectiveMax = Math.max(maxValue, minValue);
 
   return (
-    <div ref={rootRef} className={`relative min-w-[8.5rem] shrink-0 ${widthClassName}`}>
-      <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-ink-muted dark:text-ink-dark-muted">{label}</p>
-      <button
+    <Box ref={rootRef} sx={{ position: 'relative', minWidth: 136, maxWidth: 176, width: '100%', flexShrink: 0 }}>
+      <Typography variant="caption" sx={{ mb: 0.75, display: 'block', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }}>
+        {label}
+      </Typography>
+      <Button
         ref={buttonRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="group relative w-full rounded-xl border border-border dark:border-border-dark bg-surface dark:bg-surface-dark px-3 py-2.5 text-left text-xs text-ink-primary dark:text-ink-dark-primary hover:border-accent/60 hover:shadow-sm transition-all"
+        variant="outlined"
+        fullWidth
+        sx={{
+          justifyContent: 'space-between',
+          textTransform: 'none',
+          borderRadius: 1,
+          py: 1,
+          px: 1.25,
+          minHeight: 38,
+          borderColor: 'divider',
+          color: 'text.primary',
+          bgcolor: 'background.paper',
+          '&:hover': { borderColor: 'primary.main', bgcolor: alpha(theme.palette.primary.main, 0.03) },
+        }}
       >
-        <span className="truncate block pr-5 leading-4">{summary}</span>
-        <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-muted dark:text-ink-dark-muted">▾</span>
-      </button>
+        <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', pr: 1, fontSize: 12 }}>
+          {summary}
+        </Box>
+        <Box component="span" sx={{ color: 'text.secondary', fontSize: 12 }}>▾</Box>
+      </Button>
       {open && createPortal(
-        <div ref={menuRef} style={menuStyle} className="rounded-xl border border-border dark:border-border-dark bg-surface dark:bg-surface-dark shadow-xl ring-1 ring-black/5 p-3">
-          <div className="mb-3">
-            <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-ink-muted dark:text-ink-dark-muted">
+        <Paper ref={menuRef} style={menuStyle} variant="outlined" sx={{ p: 1.5, borderRadius: 1, boxShadow: '0 18px 36px rgba(15,23,42,0.22)' }}>
+          <Box sx={{ mb: 1.5 }}>
+            <Typography variant="caption" sx={{ mb: 1, display: 'block', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }}>
               Range Scroll
-            </p>
-            <div className="relative h-7">
-              <div className="pointer-events-none absolute left-0 right-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-border dark:bg-border-dark" />
-              <div
-                className="pointer-events-none absolute top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-accent"
+            </Typography>
+            <Box sx={{ position: 'relative', height: 28 }}>
+              <Box sx={{ pointerEvents: 'none', position: 'absolute', left: 0, right: 0, top: '50%', height: 6, transform: 'translateY(-50%)', borderRadius: 99, bgcolor: 'divider' }} />
+              <Box
+                sx={{ pointerEvents: 'none', position: 'absolute', top: '50%', height: 6, transform: 'translateY(-50%)', borderRadius: 99, bgcolor: 'primary.main' }}
                 style={{
                   left: `${toPct(effectiveMin)}%`,
                   width: `${Math.max(0, toPct(effectiveMax) - toPct(effectiveMin))}%`,
@@ -264,14 +331,14 @@ function RangeDropdown({
                 }}
                 className="range-dual-input range-dual-input-max"
               />
-            </div>
-            <p className="text-[11px] text-ink-muted dark:text-ink-dark-muted">
+            </Box>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
               Range: {sliderMin.toLocaleString()} to {sliderMax.toLocaleString()}
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <label className="text-[11px] font-medium uppercase tracking-wide text-ink-muted dark:text-ink-dark-muted">
-              <span className="mb-1 block">Min</span>
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 1 }}>
+            <Box component="label" sx={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }}>
+              <Box component="span" sx={{ mb: 0.75, display: 'block' }}>Min</Box>
               <input
                 type="number"
                 min={sliderMin}
@@ -279,12 +346,21 @@ function RangeDropdown({
                 step={sliderStep}
                 value={min}
                 onChange={(event) => onMinChange(event.target.value)}
-                className="input-field !py-2 !px-3 text-xs"
                 placeholder={minPlaceholder}
+                style={{
+                  width: '100%',
+                  height: 34,
+                  borderRadius: 8,
+                  border: `1px solid ${theme.palette.divider}`,
+                  padding: '8px 12px',
+                  fontSize: 12,
+                  color: theme.palette.text.primary,
+                  background: theme.palette.background.paper,
+                }}
               />
-            </label>
-            <label className="text-[11px] font-medium uppercase tracking-wide text-ink-muted dark:text-ink-dark-muted">
-              <span className="mb-1 block">Max</span>
+            </Box>
+            <Box component="label" sx={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }}>
+              <Box component="span" sx={{ mb: 0.75, display: 'block' }}>Max</Box>
               <input
                 type="number"
                 min={sliderMin}
@@ -292,49 +368,63 @@ function RangeDropdown({
                 step={sliderStep}
                 value={max}
                 onChange={(event) => onMaxChange(event.target.value)}
-                className="input-field !py-2 !px-3 text-xs"
                 placeholder={maxPlaceholder}
+                style={{
+                  width: '100%',
+                  height: 34,
+                  borderRadius: 8,
+                  border: `1px solid ${theme.palette.divider}`,
+                  padding: '8px 12px',
+                  fontSize: 12,
+                  color: theme.palette.text.primary,
+                  background: theme.palette.background.paper,
+                }}
               />
-            </label>
-          </div>
-          <div className="mt-3 flex items-center justify-end gap-2">
-            <button
+            </Box>
+          </Box>
+          <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mt: 1.5 }}>
+            <Button
               type="button"
               onClick={() => {
                 onMinChange('');
                 onMaxChange('');
               }}
-              className="btn-ghost !px-2.5 !py-1.5 text-[11px]"
+              size="small"
+              variant="text"
             >
               Clear
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => setOpen(false)}
-              className="btn-primary !px-3 !py-1.5 text-[11px]"
+              size="small"
+              variant="contained"
             >
               Done
-            </button>
-          </div>
-        </div>,
+            </Button>
+          </Stack>
+        </Paper>,
         document.body,
       )}
-    </div>
+    </Box>
   );
 }
 
 function SignalBadge({ signal }: { signal: 'BUY' | 'WAIT' }) {
   const isBuy = signal === 'BUY';
   return (
-    <span
-      className={`inline-block px-2 py-0.5 rounded text-[11px] font-bold uppercase ${
-        isBuy
-          ? 'bg-emerald-600 text-white'
-          : 'bg-amber-100 dark:bg-amber-500/15 text-amber-700 dark:text-amber-400'
-      }`}
-    >
-      {signal}
-    </span>
+    <Chip
+      size="small"
+      label={signal}
+      sx={{
+        height: 22,
+        borderRadius: 1,
+        fontSize: 11,
+        fontWeight: 700,
+        color: isBuy ? '#fff' : 'warning.dark',
+        bgcolor: isBuy ? 'success.main' : (theme) => alpha(theme.palette.warning.main, theme.palette.mode === 'dark' ? 0.2 : 0.22),
+      }}
+    />
   );
 }
 
@@ -347,6 +437,8 @@ function parseFilterNumber(value: string): number | undefined {
 }
 
 export function ScreenerPage() {
+  const theme = useTheme();
+  const navigate = useNavigate();
   const { viewStock } = useAppNavigation();
   const defaultRange = useMemo(() => defaultHistoricalRange(), []);
   const [scanMode, setScanMode] = useState<ScanMode>('today');
@@ -616,192 +708,331 @@ export function ScreenerPage() {
     setPriceMax('');
   };
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate('/');
+  };
+
   return (
-    <PageLayout className="w-full mt-3" title={PAGE_COPY.screener.title} description={PAGE_COPY.screener.description}>
-      <div className="w-full space-y-4">
-      <div className="rounded-2xl border border-border dark:border-border-dark bg-gradient-to-r from-surface to-surface-muted dark:from-surface-dark dark:to-surface-dark-muted p-4 shadow-sm">
-        <SectionHeader title="Scan controls" />
+    <PageLayout className="max-w-7xl mt-6">
+      <Stack spacing={2.25} sx={{ position: 'relative', isolation: 'isolate' }}>
+        <Box
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            zIndex: -1,
+            width: { xs: 240, md: 320 },
+            height: { xs: 240, md: 320 },
+            borderRadius: '50%',
+            top: -100,
+            left: -100,
+            filter: 'blur(38px)',
+            opacity: 0.36,
+            background: 'radial-gradient(circle, rgba(14,165,233,0.35) 0%, rgba(59,130,246,0.14) 55%, transparent 72%)',
+          }}
+        />
+        <Box
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            zIndex: -1,
+            width: { xs: 260, md: 340 },
+            height: { xs: 260, md: 340 },
+            borderRadius: '50%',
+            bottom: -120,
+            right: -80,
+            filter: 'blur(42px)',
+            opacity: 0.28,
+            background: 'radial-gradient(circle, rgba(16,185,129,0.3) 0%, rgba(168,85,247,0.12) 58%, transparent 76%)',
+          }}
+        />
 
-        <div className="mt-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-border dark:scrollbar-thumb-border-dark">
-          <div className="flex items-end gap-1.5 min-w-max">
-          <div className="shrink-0">
-            <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-ink-muted dark:text-ink-dark-muted">Scan mode</p>
-            <div className="flex gap-0.5 bg-surface-muted dark:bg-surface-dark-muted rounded-lg p-0.5 border border-border dark:border-border-dark">
-            {(['today', 'range'] as const).map((mode) => (
-              <button
-                key={mode}
-                type="button"
-                onClick={() => {
-                  if (scanMode !== mode) setScanMode(mode);
-                }}
-                className={`px-3 py-2 text-xs font-semibold rounded-md transition-colors ${
-                  scanMode === mode
-                    ? 'bg-surface dark:bg-surface-dark text-accent shadow-sm'
-                    : 'text-ink-muted hover:text-ink-primary dark:hover:text-ink-dark-primary'
-                }`}
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 2, sm: 2.5 },
+            minHeight: { xs: 190, md: 176 },
+            border: '1px solid',
+            borderColor: 'divider',
+            backdropFilter: 'blur(8px)',
+            overflow: 'hidden',
+            position: 'relative',
+            background:
+              'radial-gradient(1200px 180px at 0% -10%, rgba(37,99,235,0.15), transparent 50%), radial-gradient(800px 180px at 100% 120%, rgba(13,148,136,0.12), transparent 55%)',
+          }}
+        >
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              opacity: 0.5,
+              pointerEvents: 'none',
+              background:
+                'linear-gradient(120deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.12) 35%, rgba(255,255,255,0.03) 70%)',
+              transform: 'translateX(-40%)',
+              animation: 'ovHeroSweep 6s ease-in-out infinite',
+            }}
+          />
+
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} justifyContent="space-between" alignItems={{ xs: 'flex-start', md: 'center' }} sx={{ minHeight: '100%' }}>
+            <Box>
+              <Button
+                variant="text"
+                size="small"
+                startIcon={<ArrowBackRoundedIcon fontSize="small" />}
+                onClick={handleBack}
+                sx={{ mb: 1, px: 0.5, minWidth: 0, textTransform: 'none', justifyContent: 'flex-start' }}
               >
-                {mode === 'today' ? 'Today' : 'Date range'}
-              </button>
-            ))}
-            </div>
-          </div>
+                Back
+              </Button>
+              <Typography variant="h5" sx={{ mb: 0.75 }}>
+                {PAGE_COPY.screener.title}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {PAGE_COPY.screener.description}
+              </Typography>
+              <Stack direction="row" spacing={1} sx={{ mt: 1.5, flexWrap: 'wrap', rowGap: 1 }}>
+                <Chip size="small" label="Live Scan" color="primary" variant="outlined" />
+                <Chip size="small" label="Historical Breakouts" color="secondary" variant="outlined" />
+                <Chip size="small" label="Multiple Patterns" color="success" variant="outlined" />
+              </Stack>
+            </Box>
 
-          {scanMode === 'range' && (
-            <>
-              <label className="shrink-0">
-                <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-ink-muted dark:text-ink-dark-muted">From</p>
-                <input
-                  type="date"
-                  value={fromDate}
-                  max={toDate}
-                  onChange={(e) => setFromDate(e.target.value)}
-                  className="input-field !w-[150px] !py-2 !px-2.5 text-xs"
-                />
-              </label>
-              <label className="shrink-0">
-                <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-ink-muted dark:text-ink-dark-muted">To</p>
-                <input
-                  type="date"
-                  value={toDate}
-                  min={fromDate}
-                  max={new Date().toISOString().slice(0, 10)}
-                  onChange={(e) => setToDate(e.target.value)}
-                  className="input-field !w-[150px] !py-2 !px-2.5 text-xs"
-                />
-              </label>
-            </>
-          )}
+            <Box />
+          </Stack>
+        </Paper>
 
-          <MultiSelectDropdown
-            label="Index"
-            options={INDEX_OPTIONS.map((index) => ({ value: index.id, label: index.label }))}
-            selected={selectedIndexIds}
-            onChange={(values) => {
-              setSelectedIndexIds(values);
-            }}
-            emptyText="All NSE Stocks"
-          />
+        <Paper
+          elevation={0}
+          sx={{
+            border: '1px solid',
+            borderColor: 'divider',
+            p: { xs: 1.5, sm: 2 },
+            background:
+              theme.palette.mode === 'dark'
+                ? 'linear-gradient(165deg, rgba(17,24,39,0.9), rgba(3,7,18,0.9))'
+                : 'linear-gradient(165deg, rgba(255,255,255,0.96), rgba(248,250,252,0.95))',
+          }}
+        >
+          <SectionHeader title="Scan controls" />
 
-          <MultiSelectDropdown
-            label="Pattern"
-            options={PATTERN_OPTIONS.map((pattern) => ({ value: pattern, label: pattern }))}
-            selected={selectedPatterns}
-            onChange={(values) => {
-              setSelectedPatterns(values.filter((value): value is ScreenerPatternName =>
-                PATTERN_OPTIONS.includes(value as ScreenerPatternName),
-              ));
-            }}
-          />
+          <Box sx={{ mt: 1.5, overflowX: 'auto', overflowY: 'hidden', pb: 1 }}>
+            <Stack direction="row" spacing={1} alignItems="flex-end" sx={{ minWidth: 'max-content' }}>
+              <Box sx={{ minWidth: 130 }}>
+                <Typography variant="caption" sx={{ mb: 0.75, display: 'block', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }}>
+                  Scan mode
+                </Typography>
+                <ToggleButtonGroup
+                  exclusive
+                  value={scanMode}
+                  onChange={(_, value: ScanMode | null) => value && setScanMode(value)}
+                  size="small"
+                  sx={{
+                    bgcolor: 'action.hover',
+                    borderRadius: 1,
+                    p: 0.25,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    '& .MuiToggleButton-root': {
+                      border: 0,
+                      borderRadius: 1,
+                      px: 1.25,
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      fontSize: 12,
+                    },
+                  }}
+                >
+                  <ToggleButton value="today">Today</ToggleButton>
+                  <ToggleButton value="range">Date range</ToggleButton>
+                </ToggleButtonGroup>
+              </Box>
 
-          <RangeDropdown
-            label="Price (Rs)"
-            min={priceMin}
-            max={priceMax}
-            onMinChange={setPriceMin}
-            onMaxChange={setPriceMax}
-            minPlaceholder="0"
-            maxPlaceholder="Any"
-            sliderMin={0}
-            sliderMax={200000}
-            sliderStep={1}
-          />
+              {scanMode === 'range' && (
+                <>
+                  <Box component="label" sx={{ minWidth: 150 }}>
+                    <Typography variant="caption" sx={{ mb: 0.75, display: 'block', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }}>
+                      From
+                    </Typography>
+                    <Box
+                      component="input"
+                      type="date"
+                      value={fromDate}
+                      max={toDate}
+                      onChange={(e) => setFromDate(e.target.value)}
+                      sx={{
+                        width: '100%',
+                        height: 38,
+                        borderRadius: 1,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        px: 1.25,
+                        fontSize: 12,
+                        color: 'text.primary',
+                        bgcolor: 'background.paper',
+                      }}
+                    />
+                  </Box>
+                  <Box component="label" sx={{ minWidth: 150 }}>
+                    <Typography variant="caption" sx={{ mb: 0.75, display: 'block', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }}>
+                      To
+                    </Typography>
+                    <Box
+                      component="input"
+                      type="date"
+                      value={toDate}
+                      min={fromDate}
+                      max={new Date().toISOString().slice(0, 10)}
+                      onChange={(e) => setToDate(e.target.value)}
+                      sx={{
+                        width: '100%',
+                        height: 38,
+                        borderRadius: 1,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        px: 1.25,
+                        fontSize: 12,
+                        color: 'text.primary',
+                        bgcolor: 'background.paper',
+                      }}
+                    />
+                  </Box>
+                </>
+              )}
 
-          <RangeDropdown
-            label="Market Cap (Cr)"
-            min={marketCapMin}
-            max={marketCapMax}
-            onMinChange={setMarketCapMin}
-            onMaxChange={setMarketCapMax}
-            minPlaceholder="0"
-            maxPlaceholder="Any"
-            sliderMin={0}
-            sliderMax={2000000}
-            sliderStep={100}
-          />
-          </div>
-        </div>
-
-        <div className="mt-2 flex items-center gap-2">
-          {scanning ? (
-            <button
-              onClick={stopScan}
-              className="px-4 py-2 text-sm font-medium rounded-lg border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
-            >
-              Stop
-            </button>
-          ) : (
-            <button
-              onClick={() => startScan()}
-              className="btn-primary !py-2 !px-4"
-            >
-              Scan
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={clearFilters}
-            className="btn-secondary !py-2 !px-3"
-          >
-            Reset
-          </button>
-        </div>
-
-        <div className="mt-2 flex items-center justify-between gap-3 text-xs flex-wrap">
-          <span className="text-ink-secondary dark:text-ink-dark-secondary">
-            {activeFilterCount > 0 ? `${activeFilterCount} filter groups active` : 'No extra filters active'}
-          </span>
-
-          <span className="text-ink-muted dark:text-ink-dark-muted">
-            {selectedIndexIds.length === 0 ? 'Universe: All NSE' : `Universe: ${selectedIndexIds.length} selected index${selectedIndexIds.length > 1 ? 'es' : ''}`}
-          </span>
-        </div>
-
-        {(scanning || progress.total > 0) && (
-          <div className="mt-3">
-            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-1.5">
-              <span>
-                {loadingList || loadingIndexUniverse
-                  ? 'Fetching stock list...'
-                  : scanning
-                    ? `Scanning ${progress.scanned} / ${progress.total} stocks...`
-                    : `Scan complete — ${progress.scanned} stocks scanned`}
-              </span>
-              <span className="font-semibold text-blue-600">
-                {(scanning ? progress.found : visibleFoundCount)} pattern{(scanning ? progress.found : visibleFoundCount) !== 1 ? 's' : ''} found
-              </span>
-            </div>
-            <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2 overflow-hidden">
-              <div
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  scanning ? 'bg-blue-500' : 'bg-green-500'
-                }`}
-                style={{ width: `${pct}%` }}
+              <MultiSelectDropdown
+                label="Index"
+                options={INDEX_OPTIONS.map((index) => ({ value: index.id, label: index.label }))}
+                selected={selectedIndexIds}
+                onChange={(values) => {
+                  setSelectedIndexIds(values);
+                }}
+                emptyText="All NSE Stocks"
+                minWidth={148}
+                maxWidth={188}
+                menuMinWidth={260}
               />
-            </div>
-          </div>
-        )}
-      </div>
+
+              <MultiSelectDropdown
+                label="Pattern"
+                options={PATTERN_OPTIONS.map((pattern) => ({ value: pattern, label: pattern }))}
+                selected={selectedPatterns}
+                onChange={(values) => {
+                  setSelectedPatterns(values.filter((value): value is ScreenerPatternName =>
+                    PATTERN_OPTIONS.includes(value as ScreenerPatternName),
+                  ));
+                }}
+              />
+
+              <RangeDropdown
+                label="Price (Rs)"
+                min={priceMin}
+                max={priceMax}
+                onMinChange={setPriceMin}
+                onMaxChange={setPriceMax}
+                minPlaceholder="0"
+                maxPlaceholder="Any"
+                sliderMin={0}
+                sliderMax={200000}
+                sliderStep={1}
+              />
+
+              <RangeDropdown
+                label="Market Cap (Cr)"
+                min={marketCapMin}
+                max={marketCapMax}
+                onMinChange={setMarketCapMin}
+                onMaxChange={setMarketCapMax}
+                minPlaceholder="0"
+                maxPlaceholder="Any"
+                sliderMin={0}
+                sliderMax={2000000}
+                sliderStep={100}
+              />
+            </Stack>
+          </Box>
+
+          <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
+            {scanning ? (
+              <Button onClick={stopScan} color="error" variant="outlined">
+                Stop
+              </Button>
+            ) : (
+              <Button onClick={() => startScan()} variant="contained">
+                Scan
+              </Button>
+            )}
+            <Button type="button" onClick={clearFilters} variant="outlined" color="inherit">
+              Reset
+            </Button>
+          </Stack>
+
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} justifyContent="space-between" sx={{ mt: 1.5 }}>
+            <Typography variant="caption" color="text.secondary">
+              {activeFilterCount > 0 ? `${activeFilterCount} filter groups active` : 'No extra filters active'}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {selectedIndexIds.length === 0 ? 'Universe: All NSE' : `Universe: ${selectedIndexIds.length} selected index${selectedIndexIds.length > 1 ? 'es' : ''}`}
+            </Typography>
+          </Stack>
+
+          {(scanning || progress.total > 0) && (
+            <Box sx={{ mt: 1.5 }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.75 }}>
+                <Typography variant="caption" color="text.secondary">
+                  {loadingList || loadingIndexUniverse
+                    ? 'Fetching stock list...'
+                    : scanning
+                      ? `Scanning ${progress.scanned} / ${progress.total} stocks...`
+                      : `Scan complete - ${progress.scanned} stocks scanned`}
+                </Typography>
+                <Typography variant="caption" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                  {(scanning ? progress.found : visibleFoundCount)} pattern{(scanning ? progress.found : visibleFoundCount) !== 1 ? 's' : ''} found
+                </Typography>
+              </Stack>
+              <LinearProgress
+                variant="determinate"
+                value={pct}
+                color={scanning ? 'primary' : 'success'}
+                sx={{ height: 8, borderRadius: 999, bgcolor: alpha(theme.palette.text.primary, 0.12) }}
+              />
+            </Box>
+          )}
+        </Paper>
 
       {error && (
-        <div className="rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-300 dark:border-red-800 p-4">
-          <p className="text-red-600 dark:text-red-400 text-sm font-medium">Error</p>
-          <p className="text-red-600 dark:text-red-400 text-sm mt-1">{error}</p>
-        </div>
+        <Alert severity="error" variant="outlined">
+          <Typography variant="body2" sx={{ fontWeight: 700 }}>Error</Typography>
+          <Typography variant="body2">{error}</Typography>
+        </Alert>
       )}
 
       {sortedResults.length === 0 && !scanning && progress.total > 0 && (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-7 text-center min-h-[160px] flex items-center justify-center">
-          <p className="text-gray-400 dark:text-gray-500 text-sm">
+        <Paper
+          variant="outlined"
+          sx={{
+            p: 3.5,
+            minHeight: 160,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+          }}
+        >
+          <Typography variant="body2" color="text.secondary">
             No patterns found{scanMode === 'range' ? ' in the selected date range' : ' for today'}.
-          </p>
-        </div>
+          </Typography>
+        </Paper>
       )}
 
       {sortedResults.length > 0 && (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[1280px]">
-              <thead className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-800">
+        <Paper variant="outlined" sx={{ overflow: 'hidden', boxShadow: '0 3px 14px rgba(15,23,42,0.05)' }}>
+          <Box sx={{ overflowX: 'auto' }}>
+            <Box component="table" sx={{ width: '100%', minWidth: 1280, borderCollapse: 'separate', borderSpacing: 0, fontSize: 14 }}>
+              <Box component="thead" sx={{ bgcolor: 'action.hover' }}>
                 <tr>
                   <TableSerialHeader sticky />
                   <SortHeader label="Stock" k="name" current={sortKey} dir={sortDir} onSort={toggleSort} align="left" stickyAfterSerial />
@@ -816,20 +1047,49 @@ export function ScreenerPage() {
                   <SortHeader label="DIST ATH" k="ath" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="Market Cap" k="mcap" current={sortKey} dir={sortDir} onSort={toggleSort} />
                 </tr>
-              </thead>
-              <tbody>
+              </Box>
+              <Box component="tbody">
                 {sortedResults.map((r, rowIndex) => (
-                  <tr
+                  <Box
+                    component="tr"
                     key={r.symbol}
-                    className="group border-b border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                    sx={{
+                      cursor: 'pointer',
+                      transition: 'background-color 180ms ease',
+                      '&:hover': { bgcolor: 'action.hover' },
+                      '& td': { borderBottom: '1px solid', borderColor: 'divider' },
+                    }}
                     onClick={() => viewStock(r.symbol)}
                   >
                     <TableSerialCell index={rowIndex} sticky />
-                    <td className="relative p-3 pr-12 text-left sticky left-11 z-10 bg-white dark:bg-gray-900 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)] dark:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.3)]">
-                      <p className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[180px]">{r.shortName}</p>
-                      <p className="text-[11px] text-gray-400 dark:text-gray-500">{r.symbol}</p>
-                      <div
-                        className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity"
+                    <Box
+                      component="td"
+                      sx={{
+                        position: 'sticky',
+                        left: 44,
+                        zIndex: 10,
+                        p: 1.5,
+                        pr: 6,
+                        textAlign: 'left',
+                        bgcolor: 'background.paper',
+                        boxShadow: '2px 0 4px -2px rgba(0,0,0,0.14)',
+                      }}
+                    >
+                      <Typography sx={{ fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 180 }}>
+                        {r.shortName}
+                      </Typography>
+                      <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>{r.symbol}</Typography>
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          right: 12,
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          display: 'inline-flex',
+                          opacity: { xs: 1, sm: 0 },
+                          transition: 'opacity 160ms ease',
+                          'tr:hover &': { opacity: 1 },
+                        }}
                         onClick={(e) => e.stopPropagation()}
                       >
                         <AddToWatchlistButton
@@ -841,78 +1101,112 @@ export function ScreenerPage() {
                             patternDate: r.match.candle3.date,
                           }}
                         />
-                      </div>
-                    </td>
-                    <td className="p-3 text-right">
+                      </Box>
+                    </Box>
+                    <Box component="td" sx={{ p: 1.5, textAlign: 'right' }}>
                       <SignalBadge signal={r.signal} />
-                    </td>
-                    <td className="p-3 text-right font-mono text-xs">
+                    </Box>
+                    <Box component="td" sx={{ p: 1.5, textAlign: 'right', fontFamily: 'monospace', fontSize: 12 }}>
                       {r.swotStrengths != null && r.swotWeaknesses != null && r.swotOpportunities != null && r.swotThreats != null ? (
-                        <span>
-                          <span className="text-emerald-600 dark:text-emerald-400">{r.swotStrengths}</span>
-                          <span className="text-ink-muted dark:text-ink-dark-muted">/</span>
-                          <span className="text-red-600 dark:text-red-400">{r.swotWeaknesses}</span>
-                          <span className="text-ink-muted dark:text-ink-dark-muted">/</span>
-                          <span className="text-emerald-600 dark:text-emerald-400">{r.swotOpportunities}</span>
-                          <span className="text-ink-muted dark:text-ink-dark-muted">/</span>
-                          <span className="text-red-600 dark:text-red-400">{r.swotThreats}</span>
-                        </span>
+                        <Box component="span">
+                          <Box component="span" sx={{ color: 'success.main' }}>{r.swotStrengths}</Box>
+                          <Box component="span" sx={{ color: 'text.secondary' }}>/</Box>
+                          <Box component="span" sx={{ color: 'error.main' }}>{r.swotWeaknesses}</Box>
+                          <Box component="span" sx={{ color: 'text.secondary' }}>/</Box>
+                          <Box component="span" sx={{ color: 'success.main' }}>{r.swotOpportunities}</Box>
+                          <Box component="span" sx={{ color: 'text.secondary' }}>/</Box>
+                          <Box component="span" sx={{ color: 'error.main' }}>{r.swotThreats}</Box>
+                        </Box>
                       ) : (
                         '—'
                       )} 
-                    </td>
-                    <td className="p-3 text-right font-mono text-xs text-gray-600 dark:text-gray-400">
+                    </Box>
+                    <Box component="td" sx={{ p: 1.5, textAlign: 'right', fontFamily: 'monospace', fontSize: 12, color: 'text.secondary' }}>
                       {r.match.candle3.date}
-                    </td>
-                    <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">
+                    </Box>
+                    <Box component="td" sx={{ p: 1.5, textAlign: 'right', fontFamily: 'monospace', color: 'text.primary' }}>
                       {r.currentPrice ? fmtNumber(r.currentPrice) : '—'}
-                    </td>
-                    <td className={`p-3 text-right font-mono text-xs font-semibold ${
-                      !r.match.buyPrice || !r.currentPrice
-                        ? 'text-gray-500 dark:text-gray-400'
-                        : r.currentPrice >= r.match.buyPrice
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : 'text-red-600 dark:text-red-400'
-                    }`}>
+                    </Box>
+                    <Box
+                      component="td"
+                      sx={{
+                        p: 1.5,
+                        textAlign: 'right',
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color:
+                          !r.match.buyPrice || !r.currentPrice
+                            ? 'text.secondary'
+                            : r.currentPrice >= r.match.buyPrice
+                              ? 'success.main'
+                              : 'error.main',
+                      }}
+                    >
                       {fmtDistPct(r.currentPrice, r.match.buyPrice)}
-                    </td>
-                    <td className="p-3 text-right font-mono text-gray-700 dark:text-gray-300">
+                    </Box>
+                    <Box component="td" sx={{ p: 1.5, textAlign: 'right', fontFamily: 'monospace', color: 'text.primary' }}>
                       {fmtNumber(r.match.buyPrice)}
-                    </td>
-                    <td className={`p-3 text-right font-mono text-xs font-semibold ${
-                      r.fiftyTwoWeekLow && r.currentPrice > r.fiftyTwoWeekLow ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
-                    }`}>
+                    </Box>
+                    <Box
+                      component="td"
+                      sx={{
+                        p: 1.5,
+                        textAlign: 'right',
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: r.fiftyTwoWeekLow && r.currentPrice > r.fiftyTwoWeekLow ? 'success.main' : 'error.main',
+                      }}
+                    >
                       {fmtDistPct(r.currentPrice, r.fiftyTwoWeekLow)}
-                    </td>
-                    <td className={`p-3 text-right font-mono text-xs font-semibold ${
-                      r.fiftyTwoWeekHigh && r.currentPrice >= r.fiftyTwoWeekHigh ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
-                    }`}>
+                    </Box>
+                    <Box
+                      component="td"
+                      sx={{
+                        p: 1.5,
+                        textAlign: 'right',
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: r.fiftyTwoWeekHigh && r.currentPrice >= r.fiftyTwoWeekHigh ? 'success.main' : 'error.main',
+                      }}
+                    >
                       {fmtDistPct(r.currentPrice, r.fiftyTwoWeekHigh)}
-                    </td>
-                    <td className={`p-3 text-right font-mono text-xs font-semibold ${
-                      r.allTimeHigh && r.currentPrice >= r.allTimeHigh ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
-                    }`}>
+                    </Box>
+                    <Box
+                      component="td"
+                      sx={{
+                        p: 1.5,
+                        textAlign: 'right',
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: r.allTimeHigh && r.currentPrice >= r.allTimeHigh ? 'success.main' : 'error.main',
+                      }}
+                    >
                       {fmtDistPct(r.currentPrice, r.allTimeHigh)}
-                    </td>
-                    <td className="p-3 text-right font-mono text-gray-500 dark:text-gray-400 text-xs">
+                    </Box>
+                    <Box component="td" sx={{ p: 1.5, textAlign: 'right', fontFamily: 'monospace', color: 'text.secondary', fontSize: 12 }}>
                       {r.marketCapCr ? fmtMarketCapCr(r.marketCapCr) : '—'}
-                    </td>
-                  </tr>
+                    </Box>
+                  </Box>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+              </Box>
+            </Box>
+          </Box>
+        </Paper>
       )}
 
       {results.length === 0 && !scanning && progress.total === 0 && (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-7 text-center">
-          <p className="text-gray-400 dark:text-gray-500 text-sm">
+        <Paper variant="outlined" sx={{ p: 3.5, textAlign: 'center' }}>
+          <Typography variant="body2" color="text.secondary">
             Click <strong>Scan Now</strong> to start scanning for patterns.
-          </p>
-        </div>
+          </Typography>
+        </Paper>
       )}
-      </div>
+
+      </Stack>
     </PageLayout>
   );
 }
@@ -923,19 +1217,30 @@ function SortHeader({ label, k, current, dir, onSort, align = 'right', stickyAft
   stickyAfterSerial?: boolean;
 }) {
   const isActive = current === k;
+  const stickyLeft = align === 'left' ? (stickyAfterSerial ? 44 : 0) : undefined;
   return (
     <th
-      className={`p-3 font-medium text-xs uppercase tracking-wider cursor-pointer select-none whitespace-nowrap
-        ${align === 'left'
-          ? stickyAfterSerial
-            ? 'text-left sticky left-11 z-10 bg-gray-100 dark:bg-gray-800 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)] dark:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.3)]'
-            : 'text-left sticky left-0 z-10 bg-gray-100 dark:bg-gray-800 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)] dark:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.3)]'
-          : 'text-right'}
-        ${isActive ? 'text-blue-600' : 'text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400'}`}
+      style={{
+        padding: '12px',
+        fontWeight: 600,
+        fontSize: 12,
+        letterSpacing: '0.06em',
+        textTransform: 'uppercase',
+        cursor: 'pointer',
+        userSelect: 'none',
+        whiteSpace: 'nowrap',
+        textAlign: align,
+        position: align === 'left' ? 'sticky' : 'static',
+        left: stickyLeft,
+        zIndex: align === 'left' ? 10 : undefined,
+        background: align === 'left' ? 'var(--mui-palette-action-hover)' : undefined,
+        boxShadow: align === 'left' ? '2px 0 4px -2px rgba(0,0,0,0.14)' : undefined,
+        color: isActive ? 'var(--mui-palette-primary-main)' : 'var(--mui-palette-text-secondary)',
+      }}
       onClick={() => onSort(k)}
     >
       {label}
-      {isActive && <span className="ml-1">{dir === 'asc' ? '↑' : '↓'}</span>}
+      {isActive && <span style={{ marginLeft: 4 }}>{dir === 'asc' ? '↑' : '↓'}</span>}
     </th>
   );
 }

@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
+import { Box, Button, Chip, Grid, Paper, Stack, Typography } from '@mui/material';
 import { useAppNavigation } from '../../app/navigation';
 import { analysisPath } from '../../app/routes';
 import { PAGE_COPY } from '../../content/pageCopy';
@@ -21,6 +23,7 @@ import { useStockAnalysis } from './useStockAnalysis';
 
 export function StockAnalysisPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { compareStock } = useAppNavigation();
   const analysis = useStockAnalysis();
   const symbolParam = searchParams.get('symbol');
@@ -70,14 +73,133 @@ export function StockAnalysisPage() {
     window.open(`https://finance.yahoo.com/quote/${encodeURIComponent(analysis.symbol)}`, '_blank', 'noopener,noreferrer');
   }, [analysis.symbol]);
 
+  const handleBack = useCallback(() => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate('/');
+  }, [navigate]);
+
   return (
-    <PageLayout
-      className="max-w-7xl mt-6"
-      title={PAGE_COPY.analysis.title}
-      description={PAGE_COPY.analysis.description}
-    >
-      <div className="w-full flex flex-col gap-4 items-stretch">
-        <SearchField onSelect={handleSelect} isLoading={analysis.isLoading} maxWidth="w-full" className="mx-auto w-full" />
+    <PageLayout className="max-w-7xl mt-6">
+      <Stack spacing={2.25} sx={{ position: 'relative' }}>
+        <Box
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            zIndex: -1,
+            width: { xs: 240, md: 320 },
+            height: { xs: 240, md: 320 },
+            borderRadius: '50%',
+            top: -100,
+            left: -100,
+            filter: 'blur(38px)',
+            opacity: 0.34,
+            background: 'radial-gradient(circle, rgba(34,197,94,0.26) 0%, rgba(59,130,246,0.14) 55%, transparent 72%)',
+          }}
+        />
+        <Box
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            zIndex: -1,
+            width: { xs: 260, md: 340 },
+            height: { xs: 260, md: 340 },
+            borderRadius: '50%',
+            bottom: -120,
+            right: -80,
+            filter: 'blur(42px)',
+            opacity: 0.24,
+            background: 'radial-gradient(circle, rgba(245,158,11,0.24) 0%, rgba(14,165,233,0.12) 58%, transparent 76%)',
+          }}
+        />
+
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 2, sm: 2.5 },
+            minHeight: { xs: 190, md: 176 },
+            border: '1px solid',
+            borderColor: 'divider',
+            backdropFilter: 'blur(8px)',
+            overflow: 'hidden',
+            position: 'relative',
+            background:
+              'radial-gradient(1200px 180px at 0% -10%, rgba(34,197,94,0.15), transparent 50%), radial-gradient(800px 180px at 100% 120%, rgba(245,158,11,0.12), transparent 55%)',
+          }}
+        >
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              opacity: 0.5,
+              pointerEvents: 'none',
+              background:
+                'linear-gradient(120deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.12) 35%, rgba(255,255,255,0.03) 70%)',
+              transform: 'translateX(-40%)',
+              animation: 'ovHeroSweep 6s ease-in-out infinite',
+            }}
+          />
+
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            spacing={2}
+            justifyContent="space-between"
+            alignItems={{ xs: 'flex-start', md: 'center' }}
+            sx={{ minHeight: '100%' }}
+          >
+            <Box>
+              <Button
+                variant="text"
+                size="small"
+                startIcon={<ArrowBackRoundedIcon fontSize="small" />}
+                onClick={handleBack}
+                sx={{ mb: 1, px: 0.5, minWidth: 0, textTransform: 'none', justifyContent: 'flex-start' }}
+              >
+                Back
+              </Button>
+              <Typography variant="h5" sx={{ mb: 0.75 }}>
+                {PAGE_COPY.analysis.title}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {PAGE_COPY.analysis.description}
+              </Typography>
+              <Stack direction="row" spacing={1} sx={{ mt: 1.5, flexWrap: 'wrap', rowGap: 1 }}>
+                <Chip size="small" label="Overview" color="primary" variant="outlined" />
+                <Chip size="small" label="Technical Readouts" color="secondary" variant="outlined" />
+                <Chip size="small" label="Price Calculations" color="success" variant="outlined" />
+              </Stack>
+            </Box>
+          </Stack>
+        </Paper>
+
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 1.75, sm: 2 },
+            border: '1px solid',
+            borderColor: 'divider',
+            background: 'background.paper',
+          }}
+        >
+          <Box sx={{ width: '100%', maxWidth: 420 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                display: 'block',
+                mb: 0.75,
+                fontWeight: 700,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: 'text.secondary',
+              }}
+            >
+              Search company
+            </Typography>
+            <SearchField onSelect={handleSelect} isLoading={analysis.isLoading} maxWidth="w-full" className="mx-auto w-full" />
+          </Box>
+        </Paper>
 
         {analysis.isLoading && <LoadingBlock message="Loading market data and analysis…" />}
 
@@ -110,8 +232,9 @@ export function StockAnalysisPage() {
         )}
 
         {showAnalysis && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full">
-            <div className="lg:col-span-2 flex flex-col gap-4">
+          <Grid container spacing={2} sx={{ alignItems: 'stretch' }}>
+            <Grid size={{ xs: 12, lg: 8 }}>
+              <Stack spacing={2}>
               <StockOverviewSection
                 symbol={analysis.symbol}
                 currentPrice={analysis.currentPrice}
@@ -135,9 +258,11 @@ export function StockAnalysisPage() {
               <CompanyProfileSection profile={analysis.profile} financials={analysis.financials} />
               <AnalystSection recs={analysis.recommendations} />
               <NewsSection news={analysis.news} />
-            </div>
+              </Stack>
+            </Grid>
 
-            <div className="lg:col-span-1 flex flex-col gap-4">
+            <Grid size={{ xs: 12, lg: 4 }}>
+              <Stack spacing={2}>
               {analysis.match ? (
                 <BullishPatternSection
                   match={analysis.match}
@@ -147,10 +272,18 @@ export function StockAnalysisPage() {
               ) : (
                 <PatternNoMatchCard symbol={analysis.symbol} />
               )}
-            </div>
-          </div>
+              </Stack>
+            </Grid>
+          </Grid>
         )}
-      </div>
+
+        <style>{`
+          @keyframes ovHeroSweep {
+            0%, 100% { transform: translateX(-45%); }
+            50% { transform: translateX(45%); }
+          }
+        `}</style>
+      </Stack>
     </PageLayout>
   );
 }

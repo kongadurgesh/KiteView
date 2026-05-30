@@ -1,7 +1,27 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Alert as MuiAlert,
+  alpha,
+  Box,
+  Button as MuiButton,
+  Chip,
+  CircularProgress,
+  FormControl,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  TextField,
+  Typography,
+  useTheme,
+} from '@mui/material';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useAppNavigation } from '../../app/navigation';
 import { PageLayout } from '../../components/layout/PageLayout';
-import { Alert, Button, TableSerialCell, TableSerialHeader } from '../../components/ui';
+import { Alert, TableSerialCell, TableSerialHeader } from '../../components/ui';
+import { SectionHeader } from '../../components/ui';
 import { PAGE_COPY } from '../../content/pageCopy';
 import { fmtDistPct, fmtNumber } from '../../lib/format';
 import { fetchWatchlistSnapshot } from '../../services/apiBatch';
@@ -14,15 +34,13 @@ import { useAuth } from '../../auth/AuthContext';
 function SignalBadge({ signal }: { signal: 'BUY' | 'WAIT' }) {
   const isBuy = signal === 'BUY';
   return (
-    <span
-      className={`inline-block px-2 py-0.5 rounded text-[11px] font-bold uppercase ${
-        isBuy
-          ? 'bg-emerald-600 text-white'
-          : 'bg-amber-100 dark:bg-amber-500/15 text-amber-700 dark:text-amber-400'
-      }`}
-    >
-      {signal}
-    </span>
+    <Chip
+      label={signal}
+      size="small"
+      color={isBuy ? 'success' : 'warning'}
+      variant={isBuy ? 'filled' : 'outlined'}
+      sx={{ fontWeight: 700, fontSize: 11, borderRadius: 1, textTransform: 'uppercase' }}
+    />
   );
 }
 
@@ -60,87 +78,87 @@ function ThesisPanel({
   };
 
   return (
-    <div className="px-3 pb-4 pt-2 bg-gray-50 dark:bg-gray-800/40 border-t border-gray-200 dark:border-gray-800">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <label className="block md:col-span-2">
-          <span className="text-xs text-ink-muted dark:text-ink-dark-muted">Thesis note</span>
-          <textarea
+    <Box sx={{ px: 2, pb: 2.5, pt: 1.5, bgcolor: 'action.hover', borderTop: '1px solid', borderColor: 'divider' }}>
+      <Stack spacing={1.5}>
+        <Stack spacing={0.75} sx={{ gridColumn: { md: 'span 2' } }}>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+            Thesis note
+          </Typography>
+          <TextField
+            multiline
+            rows={3}
+            size="small"
+            fullWidth
             value={note}
             onChange={(e) => setNote(e.target.value)}
             onBlur={saveThesis}
-            rows={3}
-            className="input-field mt-1 w-full text-sm"
             placeholder="Why are you watching this name?"
+            sx={{ '& .MuiInputBase-root': { borderRadius: 1 } }}
           />
-        </label>
-        <label className="block">
-          <span className="text-xs text-ink-muted dark:text-ink-dark-muted">Target price</span>
-          <input
-            type="number"
-            step="any"
-            value={targetPrice}
-            onChange={(e) => setTargetPrice(e.target.value)}
-            onBlur={saveThesis}
-            className="input-field mt-1 w-full text-sm"
-          />
-        </label>
-        <label className="block">
-          <span className="text-xs text-ink-muted dark:text-ink-dark-muted">Stop price</span>
-          <input
-            type="number"
-            step="any"
-            value={stopPrice}
-            onChange={(e) => setStopPrice(e.target.value)}
-            onBlur={saveThesis}
-            className="input-field mt-1 w-full text-sm"
-          />
-        </label>
-        <label className="block">
-          <span className="text-xs text-ink-muted dark:text-ink-dark-muted">Entry buy price</span>
-          <input
-            type="number"
-            step="any"
-            value={entryBuyPrice}
-            onChange={(e) => setEntryBuyPrice(e.target.value)}
-            onBlur={saveThesis}
-            className="input-field mt-1 w-full text-sm"
-          />
-        </label>
-        <label className="block">
-          <span className="text-xs text-ink-muted dark:text-ink-dark-muted">Pattern date</span>
-          <input
-            type="date"
-            value={patternDate}
-            onChange={(e) => setPatternDate(e.target.value)}
-            onBlur={saveThesis}
-            className="input-field mt-1 w-full text-sm"
-          />
-        </label>
-      </div>
-      <div className="mt-3 flex flex-wrap gap-4">
-        {(
-          [
-            ['buyWindow', 'BUY window'],
-            ['swotFlip', 'SWOT flip'],
-            ['patternToday', 'Pattern today'],
-          ] as const
-        ).map(([key, label]) => (
-          <label key={key} className="flex items-center gap-2 text-sm text-ink-secondary dark:text-ink-dark-secondary">
-            <input
-              type="checkbox"
-              checked={item.alerts[key]}
-              onChange={(e) => onPatch({ alerts: { [key]: e.target.checked } })}
-              className="rounded border-gray-300 dark:border-gray-600"
+        </Stack>
+
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} useFlexGap flexWrap="wrap">
+          {(
+            [
+              ['Target price', targetPrice, setTargetPrice],
+              ['Stop price', stopPrice, setStopPrice],
+              ['Entry buy price', entryBuyPrice, setEntryBuyPrice],
+            ] as [string, string, (v: string) => void][]
+          ).map(([label, val, setter]) => (
+            <Stack key={label} spacing={0.75} sx={{ flex: '1 1 160px' }}>
+              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                {label}
+              </Typography>
+              <TextField
+                type="number"
+                size="small"
+                value={val}
+                onChange={(e) => setter(e.target.value)}
+                onBlur={saveThesis}
+                sx={{ '& .MuiInputBase-root': { borderRadius: 1 } }}
+              />
+            </Stack>
+          ))}
+          <Stack spacing={0.75} sx={{ flex: '1 1 160px' }}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+              Pattern date
+            </Typography>
+            <TextField
+              type="date"
+              size="small"
+              value={patternDate}
+              onChange={(e) => setPatternDate(e.target.value)}
+              onBlur={saveThesis}
+              sx={{ '& .MuiInputBase-root': { borderRadius: 1 } }}
             />
-            {label}
-          </label>
-        ))}
-      </div>
-    </div>
+          </Stack>
+        </Stack>
+
+        <Stack direction="row" spacing={2} useFlexGap flexWrap="wrap">
+          {(
+            [
+              ['buyWindow', 'BUY window'],
+              ['swotFlip', 'SWOT flip'],
+              ['patternToday', 'Pattern today'],
+            ] as const
+          ).map(([key, label]) => (
+            <Stack key={key} direction="row" spacing={0.75} alignItems="center" component="label" sx={{ cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={item.alerts[key]}
+                onChange={(e) => onPatch({ alerts: { [key]: e.target.checked } })}
+              />
+              <Typography variant="body2" color="text.secondary">{label}</Typography>
+            </Stack>
+          ))}
+        </Stack>
+      </Stack>
+    </Box>
   );
 }
 
 export function WatchlistPage() {
+  const navigate = useNavigate();
   const { user, loading: authLoading, openLoginModal } = useAuth();
   const { viewStock } = useAppNavigation();
   const { lists, active, activeId, cloudLoading, setActiveId, addList, removeList, renameList, removeSymbol, patchItem } =
@@ -157,6 +175,8 @@ export function WatchlistPage() {
   const [newListName, setNewListName] = useState('');
   const [showNewList, setShowNewList] = useState(false);
   const [showRenameModal, setShowRenameModal] = useState(false);
+
+  const theme = useTheme();
 
   const symbolsKey = active?.items.map((i) => i.symbol).join(',') ?? '';
 
@@ -208,237 +228,281 @@ export function WatchlistPage() {
     setShowNewList(false);
   };
 
+  const handleBack = useCallback(() => {
+    if (window.history.length > 1) { navigate(-1); return; }
+    navigate('/');
+  }, [navigate]);
+
   return (
-    <PageLayout
-      className="max-w-7xl mt-6"
-      title={PAGE_COPY.watchlist.title}
-      description={PAGE_COPY.watchlist.description}
-    >
-      {(authLoading || cloudLoading) ? (
-        <div className="flex items-center justify-center py-24 text-gray-400 dark:text-gray-500 text-sm">
-          Loading…
-        </div>
-      ) : !user ? (
-        <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <svg xmlns="http://www.w3.org/2000/svg" className="size-12 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-          </svg>
-          <p className="text-gray-500 dark:text-gray-400 font-medium">Sign in to access your watchlists</p>
-          <p className="text-gray-400 dark:text-gray-500 text-sm">Your data is stored securely in the cloud and accessible from any browser.</p>
-          <button
-            type="button"
-            onClick={openLoginModal}
-            className="mt-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-500 transition-colors"
-          >
-            Sign In
-          </button>
-        </div>
-      ) : (
-      <>
-      <div className="space-y-4">
-        {notifPerm !== 'granted' && notifPerm !== 'unsupported' && (
-          <Alert variant="info" title="Browser alerts">
-            Enable notifications to get BUY, SWOT, and pattern alerts when this page refreshes.{' '}
-            <button type="button" className="underline font-medium" onClick={() => void handleEnableNotifications()}>
-              Enable
-            </button>
-          </Alert>
-        )}
+    <PageLayout className="max-w-7xl mt-6">
+      <Stack spacing={2.25} sx={{ position: 'relative', isolation: 'isolate' }}>
+        {/* ambient blobs */}
+        <Box aria-hidden sx={{ position: 'absolute', zIndex: -1, width: { xs: 240, md: 320 }, height: { xs: 240, md: 320 }, borderRadius: '50%', top: -100, left: -100, filter: 'blur(38px)', opacity: 0.34, background: 'radial-gradient(circle, rgba(99,102,241,0.3) 0%, rgba(59,130,246,0.14) 55%, transparent 72%)' }} />
+        <Box aria-hidden sx={{ position: 'absolute', zIndex: -1, width: { xs: 260, md: 340 }, height: { xs: 260, md: 340 }, borderRadius: '50%', bottom: -120, right: -80, filter: 'blur(42px)', opacity: 0.24, background: 'radial-gradient(circle, rgba(16,185,129,0.24) 0%, rgba(245,158,11,0.12) 58%, transparent 76%)' }} />
 
-        {alertMessages.length > 0 && (
-          <Alert variant="info" title="Alerts fired">
-            <ul className="list-disc pl-4 space-y-1 text-sm">
-              {alertMessages.map((msg, i) => (
-                <li key={`${msg}-${i}`}>{msg}</li>
-              ))}
-            </ul>
-            <button type="button" className="mt-2 text-xs underline" onClick={() => setAlertMessages([])}>
-              Dismiss
-            </button>
-          </Alert>
-        )}
+        {/* hero */}
+        <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, minHeight: { xs: 190, md: 176 }, border: '1px solid', borderColor: 'divider', backdropFilter: 'blur(8px)', overflow: 'hidden', position: 'relative', background: 'radial-gradient(1200px 180px at 0% -10%, rgba(99,102,241,0.15), transparent 50%), radial-gradient(800px 180px at 100% 120%, rgba(16,185,129,0.12), transparent 55%)' }}>
+          <Box sx={{ position: 'absolute', inset: 0, opacity: 0.5, pointerEvents: 'none', background: 'linear-gradient(120deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.12) 35%, rgba(255,255,255,0.03) 70%)', transform: 'translateX(-40%)', animation: 'ovHeroSweep 6s ease-in-out infinite' }} />
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} justifyContent="space-between" alignItems={{ xs: 'flex-start', md: 'center' }} sx={{ minHeight: '100%' }}>
+            <Box>
+              <MuiButton variant="text" size="small" startIcon={<ArrowBackRoundedIcon fontSize="small" />} onClick={handleBack} sx={{ mb: 1, px: 0.5, minWidth: 0, textTransform: 'none', justifyContent: 'flex-start' }}>
+                Back
+              </MuiButton>
+              <Typography variant="h5" sx={{ mb: 0.75 }}>{PAGE_COPY.watchlist.title}</Typography>
+              <Typography variant="body2" color="text.secondary">{PAGE_COPY.watchlist.description}</Typography>
+              <Stack direction="row" spacing={1} sx={{ mt: 1.5, flexWrap: 'wrap', rowGap: 1 }}>
+                <Chip size="small" label="Cloud Sync" color="primary" variant="outlined" />
+                <Chip size="small" label="Live Alerts" color="secondary" variant="outlined" />
+                <Chip size="small" label="Price Tracking" color="success" variant="outlined" />
+              </Stack>
+            </Box>
+            <Box />
+          </Stack>
+        </Paper>
 
-        <div className="card p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap items-center gap-2">
-            <select
-              value={activeId}
-              onChange={(e) => setActiveId(e.target.value)}
-              className="input-field !w-auto text-sm"
-            >
-              {lists.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {l.name} ({l.items.length})
-                </option>
-              ))}
-            </select>
-            {showNewList ? (
-              <>
-                <input
-                  type="text"
-                  value={newListName}
-                  onChange={(e) => setNewListName(e.target.value)}
-                  placeholder="List name"
-                  className="input-field !w-auto text-sm"
-                  onKeyDown={(e) => e.key === 'Enter' && handleCreateList()}
-                />
-                <Button size="sm" onClick={handleCreateList}>
-                  Create
-                </Button>
-                <Button size="sm" variant="secondary" onClick={() => setShowNewList(false)}>
-                  Cancel
-                </Button>
-              </>
-            ) : (
-              <Button size="sm" variant="secondary" onClick={() => setShowNewList(true)}>
-                New list
-              </Button>
+        {/* loading / unauth states */}
+        {(authLoading || cloudLoading) ? (
+          <Stack alignItems="center" justifyContent="center" spacing={1.5} sx={{ py: 12 }}>
+            <CircularProgress size={28} />
+            <Typography variant="body2" color="text.secondary">Loading…</Typography>
+          </Stack>
+        ) : !user ? (
+          <Paper elevation={0} sx={{ py: 10, px: 4, border: '1px solid', borderColor: 'divider', textAlign: 'center' }}>
+            <LockOutlinedIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.75 }}>
+              Sign in to access your watchlists
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Your data is stored securely in the cloud and accessible from any browser.
+            </Typography>
+            <MuiButton variant="contained" onClick={openLoginModal} sx={{ textTransform: 'none', borderRadius: 1, fontWeight: 700 }}>
+              Sign In
+            </MuiButton>
+          </Paper>
+        ) : (
+          <>
+            {/* notification banner */}
+            {notifPerm !== 'granted' && notifPerm !== 'unsupported' && (
+              <MuiAlert severity="info" action={
+                <MuiButton size="small" color="inherit" sx={{ textTransform: 'none', fontWeight: 700 }} onClick={() => void handleEnableNotifications()}>
+                  Enable
+                </MuiButton>
+              }>
+                Enable notifications to get BUY, SWOT, and pattern alerts when this page refreshes.
+              </MuiAlert>
             )}
-            {active && lists.length > 1 && (
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => {
-                  if (window.confirm(`Delete "${active.name}"?`)) removeList(active.id);
-                }}
-              >
-                Delete list
-              </Button>
-            )}
-            {active && (
-              <Button size="sm" variant="secondary" onClick={() => setShowRenameModal(true)}>
-                Rename
-              </Button>
-            )}
-          </div>
-          <div className="flex items-center gap-3">
-            {lastRefresh && (
-              <span className="text-xs text-ink-muted dark:text-ink-dark-muted">
-                Updated {lastRefresh.toLocaleTimeString()}
-              </span>
-            )}
-            <Button size="sm" onClick={() => void refreshSnapshots()} disabled={loading}>
-              {loading ? 'Refreshing…' : 'Refresh'}
-            </Button>
-          </div>
-        </div>
 
-        {error && (
-          <Alert variant="error" title="Error">
-            {error}
-          </Alert>
-        )}
+            {/* fired alerts */}
+            {alertMessages.length > 0 && (
+              <MuiAlert severity="info" action={
+                <MuiButton size="small" color="inherit" sx={{ textTransform: 'none' }} onClick={() => setAlertMessages([])}>
+                  Dismiss
+                </MuiButton>
+              }>
+                <Stack component="ul" spacing={0.5} sx={{ pl: 2, m: 0 }}>
+                  {alertMessages.map((msg, i) => <li key={`${msg}-${i}`}>{msg}</li>)}
+                </Stack>
+              </MuiAlert>
+            )}
 
-        {!active?.items.length && (
-          <div className="card p-10 text-center">
-            <p className="text-ink-muted dark:text-ink-dark-muted text-sm">{PAGE_COPY.watchlist.empty}</p>
-          </div>
-        )}
+            {/* errors */}
+            {error && (
+              <Alert variant="error" title="Error">{error}</Alert>
+            )}
 
-        {active && active.items.length > 0 && (
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm min-w-[760px]">
-                <thead className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-800">
-                  <tr>
-                    <TableSerialHeader />
-                    <th className="p-3 text-left font-semibold">Stock</th>
-                    <th className="p-3 text-right font-semibold">CMP</th>
-                    <th className="p-3 text-right font-semibold">Signal</th>
-                    <th className="p-3 text-right font-semibold">Buy</th>
-                    <th className="p-3 text-right font-semibold">% vs Buy</th>
-                    <th className="p-3 text-right font-semibold">Pattern</th>
-                    <th className="p-3 text-right font-semibold">SWOT</th>
-                    <th className="p-3 text-right font-semibold">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {active.items.map((item, rowIndex) => {
-                    const snap = snapshots[item.symbol];
-                    const isExpanded = expanded === item.symbol;
-                    return (
-                      <Fragment key={item.symbol}>
-                        <tr className="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                          <TableSerialCell index={rowIndex} />
-                          <td className="p-3">
-                            <button type="button" className="text-left" onClick={() => viewStock(item.symbol)}>
-                              <p className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[180px]">
-                                {snap?.shortName ?? item.shortName}
-                              </p>
-                              <p className="text-[11px] text-gray-400">{item.symbol}</p>
-                            </button>
-                          </td>
-                          <td className="p-3 text-right font-mono">
-                            {snap?.currentPrice ? fmtNumber(snap.currentPrice) : '—'}
-                          </td>
-                          <td className="p-3 text-right">{snap ? <SignalBadge signal={snap.signal} /> : '—'}</td>
-                          <td className="p-3 text-right font-mono">
-                            {snap?.buyPrice ? fmtNumber(snap.buyPrice) : '—'}
-                          </td>
-                          <td className="p-3 text-right font-mono text-xs">
-                            {snap?.buyPrice && snap.currentPrice
-                              ? fmtDistPct(snap.currentPrice, snap.buyPrice)
-                              : '—'}
-                          </td>
-                          <td className="p-3 text-right font-mono text-xs text-gray-600 dark:text-gray-400">
-                            {snap?.patternDate ?? '—'}
-                          </td>
-                          <td className="p-3 text-right font-mono text-xs">
-                            {snap?.swotStrengths != null && snap.swotWeaknesses != null ? (
-                              <span className={snap.swotHealthy ? 'text-emerald-600' : 'text-red-600'}>
-                                {snap.swotStrengths}/{snap.swotWeaknesses}
-                              </span>
-                            ) : (
-                              '—'
+            {/* list controls panel */}
+            <Paper elevation={0} sx={{ p: { xs: 1.75, sm: 2 }, border: '1px solid', borderColor: 'divider', background: theme.palette.mode === 'dark' ? 'linear-gradient(165deg, rgba(17,24,39,0.9), rgba(3,7,18,0.9))' : 'linear-gradient(165deg, rgba(255,255,255,0.96), rgba(248,250,252,0.95))' }}>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="space-between" alignItems={{ xs: 'stretch', sm: 'center' }} useFlexGap flexWrap="wrap">
+                {/* left: list selector + actions */}
+                <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" alignItems="center">
+                  <FormControl size="small" sx={{ minWidth: 160 }}>
+                    <Select
+                      value={activeId}
+                      onChange={(e) => setActiveId(e.target.value)}
+                      sx={{ borderRadius: 1, fontWeight: 600 }}
+                    >
+                      {lists.map((l) => (
+                        <MenuItem key={l.id} value={l.id}>
+                          {l.name} ({l.items.length})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  {showNewList ? (
+                    <>
+                      <TextField
+                        size="small"
+                        value={newListName}
+                        onChange={(e) => setNewListName(e.target.value)}
+                        placeholder="List name"
+                        onKeyDown={(e) => e.key === 'Enter' && handleCreateList()}
+                        sx={{ width: 150, '& .MuiInputBase-root': { borderRadius: 1 } }}
+                      />
+                      <MuiButton size="small" variant="contained" onClick={handleCreateList} sx={{ textTransform: 'none', borderRadius: 1, fontWeight: 700 }}>Create</MuiButton>
+                      <MuiButton size="small" variant="outlined" onClick={() => setShowNewList(false)} sx={{ textTransform: 'none', borderRadius: 1 }}>Cancel</MuiButton>
+                    </>
+                  ) : (
+                    <MuiButton size="small" variant="outlined" onClick={() => setShowNewList(true)} sx={{ textTransform: 'none', borderRadius: 1 }}>New list</MuiButton>
+                  )}
+
+                  {active && lists.length > 1 && (
+                    <MuiButton size="small" variant="outlined" color="error" onClick={() => { if (window.confirm(`Delete "${active.name}"?`)) removeList(active.id); }} sx={{ textTransform: 'none', borderRadius: 1 }}>Delete</MuiButton>
+                  )}
+
+                  {active && (
+                    <MuiButton size="small" variant="outlined" onClick={() => setShowRenameModal(true)} sx={{ textTransform: 'none', borderRadius: 1 }}>Rename</MuiButton>
+                  )}
+                </Stack>
+
+                {/* right: refresh */}
+                <Stack direction="row" spacing={1.5} alignItems="center">
+                  {lastRefresh && (
+                    <Typography variant="caption" color="text.secondary">
+                      Updated {lastRefresh.toLocaleTimeString()}
+                    </Typography>
+                  )}
+                  <MuiButton
+                    size="small"
+                    variant="contained"
+                    disabled={loading}
+                    onClick={() => void refreshSnapshots()}
+                    startIcon={loading ? <CircularProgress size={12} color="inherit" /> : undefined}
+                    sx={{ textTransform: 'none', borderRadius: 1, fontWeight: 700 }}
+                  >
+                    {loading ? 'Refreshing…' : 'Refresh'}
+                  </MuiButton>
+                </Stack>
+              </Stack>
+            </Paper>
+
+            {/* empty state */}
+            {!active?.items.length && (
+              <Paper elevation={0} sx={{ py: 8, textAlign: 'center', border: '1px dashed', borderColor: 'divider' }}>
+                <Typography variant="body2" color="text.secondary">{PAGE_COPY.watchlist.empty}</Typography>
+              </Paper>
+            )}
+
+            {/* watchlist table */}
+            {active && active.items.length > 0 && (
+              <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', overflow: 'hidden', background: theme.palette.mode === 'dark' ? 'linear-gradient(165deg, rgba(17,24,39,0.9), rgba(3,7,18,0.9))' : 'linear-gradient(165deg, rgba(255,255,255,0.96), rgba(248,250,252,0.95))' }}>
+                <Box sx={{ px: { xs: 2, sm: 2.5 }, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+                  <SectionHeader title={active.name} />
+                </Box>
+                <Box sx={{ overflowX: 'auto' }}>
+                  <Box component="table" sx={{ width: '100%', minWidth: 760, borderCollapse: 'collapse', fontSize: 13 }}>
+                    <Box component="thead" sx={{ bgcolor: 'action.hover', borderBottom: '1px solid', borderColor: 'divider' }}>
+                      <Box component="tr">
+                        <TableSerialHeader />
+                        {['Stock', 'CMP', 'Signal', 'Buy', '% vs Buy', 'Pattern', 'SWOT', 'Actions'].map((h, i) => (
+                          <Box component="th" key={h} sx={{ px: 1.5, py: 1.25, textAlign: i === 0 ? 'left' : 'right', fontWeight: 700, fontSize: 12, letterSpacing: '0.04em', color: 'text.secondary', whiteSpace: 'nowrap' }}>
+                            {h}
+                          </Box>
+                        ))}
+                      </Box>
+                    </Box>
+                    <Box component="tbody">
+                      {active.items.map((item, rowIndex) => {
+                        const snap = snapshots[item.symbol];
+                        const isExpanded = expanded === item.symbol;
+                        return (
+                          <Fragment key={item.symbol}>
+                            <Box
+                              component="tr"
+                              sx={{
+                                borderBottom: '1px solid',
+                                borderColor: alpha(theme.palette.divider, 0.65),
+                                '&:last-child': { borderBottom: 0 },
+                                '&:hover': { bgcolor: 'action.hover' },
+                              }}
+                            >
+                              <TableSerialCell index={rowIndex} />
+                              <Box component="td" sx={{ px: 1.5, py: 1.25, textAlign: 'left' }}>
+                                <Box component="button" type="button" onClick={() => viewStock(item.symbol)} sx={{ textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', p: 0 }}>
+                                  <Typography variant="body2" sx={{ fontWeight: 700, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    {snap?.shortName ?? item.shortName}
+                                  </Typography>
+                                  <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
+                                    {item.symbol}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                              <Box component="td" sx={{ px: 1.5, py: 1.25, textAlign: 'right', fontFamily: 'monospace', fontWeight: 600 }}>
+                                {snap?.currentPrice ? fmtNumber(snap.currentPrice) : '—'}
+                              </Box>
+                              <Box component="td" sx={{ px: 1.5, py: 1.25, textAlign: 'right' }}>
+                                {snap ? <SignalBadge signal={snap.signal} /> : '—'}
+                              </Box>
+                              <Box component="td" sx={{ px: 1.5, py: 1.25, textAlign: 'right', fontFamily: 'monospace', fontWeight: 600 }}>
+                                {snap?.buyPrice ? fmtNumber(snap.buyPrice) : '—'}
+                              </Box>
+                              <Box component="td" sx={{ px: 1.5, py: 1.25, textAlign: 'right', fontFamily: 'monospace', fontSize: 12 }}>
+                                {snap?.buyPrice && snap.currentPrice ? fmtDistPct(snap.currentPrice, snap.buyPrice) : '—'}
+                              </Box>
+                              <Box component="td" sx={{ px: 1.5, py: 1.25, textAlign: 'right', fontFamily: 'monospace', fontSize: 12, color: 'text.secondary' }}>
+                                {snap?.patternDate ?? '—'}
+                              </Box>
+                              <Box component="td" sx={{ px: 1.5, py: 1.25, textAlign: 'right', fontFamily: 'monospace', fontSize: 12 }}>
+                                {snap?.swotStrengths != null && snap.swotWeaknesses != null ? (
+                                  <Box component="span">
+                                    <Box component="span" sx={{ color: 'success.main' }}>{snap.swotStrengths}</Box>
+                                    <Box component="span" sx={{ color: 'text.secondary' }}>/</Box>
+                                    <Box component="span" sx={{ color: 'error.main' }}>{snap.swotWeaknesses}</Box>
+                                    {snap.swotOpportunities != null && snap.swotThreats != null && (
+                                      <>
+                                        <Box component="span" sx={{ color: 'text.secondary' }}>/</Box>
+                                        <Box component="span" sx={{ color: 'success.main' }}>{snap.swotOpportunities}</Box>
+                                        <Box component="span" sx={{ color: 'text.secondary' }}>/</Box>
+                                        <Box component="span" sx={{ color: 'error.main' }}>{snap.swotThreats}</Box>
+                                      </>
+                                    )}
+                                  </Box>
+                                ) : '—'}
+                              </Box>
+                              <Box component="td" sx={{ px: 1.5, py: 1.25, textAlign: 'right' }}>
+                                <Stack direction="row" spacing={1} justifyContent="flex-end">
+                                  <MuiButton size="small" variant="text" sx={{ textTransform: 'none', minWidth: 0, px: 0.5, fontSize: 12 }} onClick={() => setExpanded(isExpanded ? null : item.symbol)}>
+                                    {isExpanded ? 'Hide' : 'Thesis'}
+                                  </MuiButton>
+                                  <MuiButton size="small" variant="text" color="error" sx={{ textTransform: 'none', minWidth: 0, px: 0.5, fontSize: 12 }} onClick={() => removeSymbol(item.symbol)}>
+                                    Remove
+                                  </MuiButton>
+                                </Stack>
+                              </Box>
+                            </Box>
+                            {isExpanded && (
+                              <Box component="tr">
+                                <Box component="td" colSpan={9}>
+                                  <ThesisPanel item={item} onPatch={(patch) => patchItem(item.symbol, patch)} />
+                                </Box>
+                              </Box>
                             )}
-                          </td>
-                          <td className="p-3 text-right">
-                            <div className="flex justify-end gap-2">
-                              <button
-                                type="button"
-                                className="text-xs text-blue-600 dark:text-blue-400"
-                                onClick={() => setExpanded(isExpanded ? null : item.symbol)}
-                              >
-                                {isExpanded ? 'Hide' : 'Thesis'}
-                              </button>
-                              <button
-                                type="button"
-                                className="text-xs text-red-600 dark:text-red-400"
-                                onClick={() => removeSymbol(item.symbol)}
-                              >
-                                Remove
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                        {isExpanded && (
-                          <tr>
-                            <td colSpan={9}>
-                              <ThesisPanel item={item} onPatch={(patch) => patchItem(item.symbol, patch)} />
-                            </td>
-                          </tr>
-                        )}
-                      </Fragment>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </div>
+                          </Fragment>
+                        );
+                      })}
+                    </Box>
+                  </Box>
+                </Box>
+              </Paper>
+            )}
 
-      {showRenameModal && active && (
-        <RenameWatchlistModal
-          currentName={active.name}
-          onSave={(name) => {
-            renameList(active.id, name);
-            setShowRenameModal(false);
-          }}
-          onClose={() => setShowRenameModal(false)}
-        />
-      )}
-      </>
-      )}
+            {showRenameModal && active && (
+              <RenameWatchlistModal
+                currentName={active.name}
+                onSave={(name) => { renameList(active.id, name); setShowRenameModal(false); }}
+                onClose={() => setShowRenameModal(false)}
+              />
+            )}
+          </>
+        )}
+
+        <style>{`
+          @keyframes ovHeroSweep {
+            0%, 100% { transform: translateX(-45%); }
+            50% { transform: translateX(45%); }
+          }
+        `}</style>
+      </Stack>
     </PageLayout>
   );
 }

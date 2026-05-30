@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { Box, Paper, Stack, Typography } from '@mui/material';
 import { isIndianSymbol, nseSymbolToTrendlyneTicker } from '../../../lib/nseSymbol';
 
 const SWOT_WIDGET_COLORS = 'posCol=00A25B&primaryCol=006AFF&negCol=EB3B00&neuCol=F7941E';
@@ -73,10 +74,18 @@ export function SwotSection({ symbol }: { symbol: string }) {
   if (!indian || !ticker) return null;
 
   return (
-    <div
-      ref={hostRef}
-      className="trendlyne-swot-host w-full min-h-[280px] [&_.trendlyne-widgets]:!m-0"
-      aria-label="SWOT analysis"
-    />
+    <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.25 }, border: '1px solid', borderColor: 'divider' }}>
+      <Stack spacing={1.5}>
+        <Typography variant="overline" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: '0.1em' }}>
+          SWOT analysis
+        </Typography>
+        <Box
+          ref={hostRef}
+          className="trendlyne-swot-host [&_.trendlyne-widgets]:!m-0"
+          aria-label="SWOT analysis"
+          sx={{ width: '100%', minHeight: 280 }}
+        />
+      </Stack>
+    </Paper>
   );
 }

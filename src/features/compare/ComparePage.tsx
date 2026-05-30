@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ResponsiveContainer,
   LineChart,
@@ -10,12 +10,30 @@ import {
   Legend,
   CartesianGrid,
 } from 'recharts';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
+import CloseIcon from '@mui/icons-material/Close';
+import {
+  alpha,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  InputAdornment,
+  MenuItem,
+  Paper,
+  Stack,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import { fetchChartBatch, fetchStatsBatch } from '../../services/apiBatch';
 import { PageLayout } from '../../components/layout/PageLayout';
-import { EmptyState } from '../../components/ui';
 import { PAGE_COPY } from '../../content/pageCopy';
 import { fmtInr, fmtMarketCap, fmtPct, fmtRatio } from '../../lib/format';
 import type { StockStats } from '../../types/stockStats';
+import { SectionHeader } from '../../components/ui';
 
 import { API_BASE } from '../../lib/apiBase';
 
@@ -161,6 +179,7 @@ function getDarkModeSnapshot() {
 }
 
 export function StockComparePage() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [symbols, setSymbols] = useState<string[]>([]);
   const [input, setInput] = useState('');
@@ -445,270 +464,570 @@ export function StockComparePage() {
   const gridStroke = isDark ? '#374151' : '#e5e7eb';
   const legendColor = isDark ? '#9ca3af' : '#6b7280';
 
+  const theme = useTheme();
+
+  const handleBack = useCallback(() => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate('/');
+  }, [navigate]);
+
   return (
-    <PageLayout
-      className="max-w-7xl mt-6"
-      title={PAGE_COPY.compare.title}
-      description={PAGE_COPY.compare.description}
-    >
-      <div className="w-full flex flex-col gap-6">
-      {symbols.length === 0 && (
-        <EmptyState
-          title={PAGE_COPY.compare.emptyTitle}
-          description={PAGE_COPY.compare.emptyDescription}
+    <PageLayout className="max-w-7xl mt-6">
+      <Stack spacing={2.25} sx={{ position: 'relative', isolation: 'isolate' }}>
+        {/* ambient blobs */}
+        <Box
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            zIndex: -1,
+            width: { xs: 240, md: 320 },
+            height: { xs: 240, md: 320 },
+            borderRadius: '50%',
+            top: -100,
+            left: -100,
+            filter: 'blur(38px)',
+            opacity: 0.34,
+            background: 'radial-gradient(circle, rgba(245,158,11,0.3) 0%, rgba(59,130,246,0.14) 55%, transparent 72%)',
+          }}
         />
-      )}
+        <Box
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            zIndex: -1,
+            width: { xs: 260, md: 340 },
+            height: { xs: 260, md: 340 },
+            borderRadius: '50%',
+            bottom: -120,
+            right: -80,
+            filter: 'blur(42px)',
+            opacity: 0.24,
+            background: 'radial-gradient(circle, rgba(244,63,94,0.24) 0%, rgba(14,165,233,0.12) 58%, transparent 76%)',
+          }}
+        />
 
-      <div ref={wrapperRef} className="relative w-full">
-        <div className="flex flex-wrap gap-2 mb-3 min-h-[36px]">
-          {symbols.map((sym, i) => (
-            <span
-              key={sym}
-              className="inline-flex items-center gap-1.5 pl-3 pr-1 py-1 rounded-full text-sm font-semibold bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800"
-            >
-              <span style={{ color: CHART_COLORS[i % CHART_COLORS.length] }}>{sym}</span>
-              <button
-                type="button"
-                onClick={() => removeSymbol(sym)}
-                className="p-1 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 transition-colors"
-                aria-label={`Remove ${sym}`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </span>
-          ))}
-          {symbols.length === 0 && (
-            <span className="text-xs text-gray-400 dark:text-gray-500 italic py-1">No stocks selected</span>
-          )}
-        </div>
-
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <input
-            type="text"
-            value={input}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
-            placeholder={symbols.length >= 4 ? 'Maximum 4 stocks' : 'Search to add stock…'}
-            disabled={symbols.length >= 4}
-            className="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-base
-                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                       placeholder:text-gray-400 dark:placeholder:text-gray-500 disabled:opacity-60"
+        {/* hero */}
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 2, sm: 2.5 },
+            minHeight: { xs: 190, md: 176 },
+            border: '1px solid',
+            borderColor: 'divider',
+            backdropFilter: 'blur(8px)',
+            overflow: 'hidden',
+            position: 'relative',
+            background:
+              'radial-gradient(1200px 180px at 0% -10%, rgba(245,158,11,0.15), transparent 50%), radial-gradient(800px 180px at 100% 120%, rgba(244,63,94,0.12), transparent 55%)',
+          }}
+        >
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              opacity: 0.5,
+              pointerEvents: 'none',
+              background:
+                'linear-gradient(120deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.12) 35%, rgba(255,255,255,0.03) 70%)',
+              transform: 'translateX(-40%)',
+              animation: 'ovHeroSweep 6s ease-in-out infinite',
+            }}
           />
-          <button
-            type="submit"
-            disabled={symbols.length >= 4 || !input.trim()}
-            className="px-5 py-3 rounded-lg bg-blue-600 text-white font-semibold text-sm hover:bg-blue-500 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} justifyContent="space-between" alignItems={{ xs: 'flex-start', md: 'center' }} sx={{ minHeight: '100%' }}>
+            <Box>
+              <Button
+                variant="text"
+                size="small"
+                startIcon={<ArrowBackRoundedIcon fontSize="small" />}
+                onClick={handleBack}
+                sx={{ mb: 1, px: 0.5, minWidth: 0, textTransform: 'none', justifyContent: 'flex-start' }}
+              >
+                Back
+              </Button>
+              <Typography variant="h5" sx={{ mb: 0.75 }}>
+                {PAGE_COPY.compare.title}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {PAGE_COPY.compare.description}
+              </Typography>
+              <Stack direction="row" spacing={1} sx={{ mt: 1.5, flexWrap: 'wrap', rowGap: 1 }}>
+                <Chip size="small" label="Up to 4 stocks" color="primary" variant="outlined" />
+                <Chip size="small" label="Normalized chart" color="secondary" variant="outlined" />
+                <Chip size="small" label="Key metrics" color="success" variant="outlined" />
+              </Stack>
+            </Box>
+            <Box />
+          </Stack>
+        </Paper>
+
+        {/* search / symbol selector panel */}
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 1.75, sm: 2 },
+            border: '1px solid',
+            borderColor: 'divider',
+            background:
+              theme.palette.mode === 'dark'
+                ? 'linear-gradient(165deg, rgba(17,24,39,0.9), rgba(3,7,18,0.9))'
+                : 'linear-gradient(165deg, rgba(255,255,255,0.96), rgba(248,250,252,0.95))',
+          }}
+        >
+          <SectionHeader title="Add stocks to compare" />
+
+          {/* selected chips */}
+          <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1.5, mb: 1.5, minHeight: 36 }}>
+            {symbols.length === 0 && (
+              <Typography variant="caption" color="text.disabled" sx={{ py: 0.5, fontStyle: 'italic' }}>
+                No stocks selected
+              </Typography>
+            )}
+            {symbols.map((sym, i) => (
+              <Chip
+                key={sym}
+                label={sym}
+                size="small"
+                onDelete={() => removeSymbol(sym)}
+                deleteIcon={<CloseIcon fontSize="small" />}
+                sx={{
+                  fontWeight: 700,
+                  fontFamily: 'monospace',
+                  color: CHART_COLORS[i % CHART_COLORS.length],
+                  borderColor: CHART_COLORS[i % CHART_COLORS.length],
+                  bgcolor: alpha(CHART_COLORS[i % CHART_COLORS.length], theme.palette.mode === 'dark' ? 0.14 : 0.08),
+                  '& .MuiChip-deleteIcon': { color: CHART_COLORS[i % CHART_COLORS.length] },
+                }}
+                variant="outlined"
+              />
+            ))}
+          </Stack>
+
+          {/* search input + dropdown */}
+          <Box ref={wrapperRef} sx={{ position: 'relative', maxWidth: 560 }}>
+            <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', gap: 1 }}>
+              <TextField
+                size="small"
+                value={input}
+                onChange={handleChange}
+                onKeyDown={handleKeyDown}
+                onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
+                placeholder={symbols.length >= 4 ? 'Maximum 4 stocks' : 'Search to add stock…'}
+                disabled={symbols.length >= 4}
+                fullWidth
+                slotProps={{
+                  input: {
+                    endAdornment: suggestions.length > 0 && showDropdown ? (
+                      <InputAdornment position="end">
+                        <CircularProgress size={14} />
+                      </InputAdornment>
+                    ) : undefined,
+                    sx: { borderRadius: 1, fontFamily: 'monospace', fontWeight: 600 },
+                  },
+                }}
+              />
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={symbols.length >= 4 || !input.trim()}
+                sx={{ textTransform: 'none', borderRadius: 1, fontWeight: 700, flexShrink: 0 }}
+              >
+                Add
+              </Button>
+            </Box>
+
+            {showDropdown && symbols.length < 4 && (
+              <Paper
+                elevation={4}
+                sx={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  mt: 0.5,
+                  zIndex: 20,
+                  maxHeight: 224,
+                  overflowY: 'auto',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: 1,
+                }}
+              >
+                {suggestions.length === 0 ? (
+                  <Box sx={{ px: 2, py: 1.5 }}>
+                    <Typography variant="body2" color="text.disabled" sx={{ fontStyle: 'italic' }}>
+                      No matches
+                    </Typography>
+                  </Box>
+                ) : (
+                  suggestions.map((s, idx) => (
+                    <MenuItem
+                      key={s.symbol}
+                      selected={idx === activeIdx}
+                      onMouseDown={() => {
+                        if (!symbols.includes(s.symbol)) addSymbol(s.symbol);
+                      }}
+                      onMouseEnter={() => setActiveIdx(idx)}
+                      sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}
+                    >
+                      <Box>
+                        <Typography component="span" variant="body2" sx={{ fontWeight: 700, fontFamily: 'monospace' }}>
+                          {s.symbol}
+                        </Typography>
+                        <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                          {s.shortname}
+                        </Typography>
+                      </Box>
+                      <Typography variant="caption" color="text.secondary">
+                        {s.exchange === 'NSI' ? 'NSE' : 'BSE'}
+                      </Typography>
+                    </MenuItem>
+                  ))
+                )}
+              </Paper>
+            )}
+          </Box>
+        </Paper>
+
+        {/* empty state */}
+        {symbols.length === 0 && (
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 3, sm: 4 },
+              border: '1px dashed',
+              borderColor: 'divider',
+              textAlign: 'center',
+            }}
           >
-            Add
-          </button>
-        </form>
-
-        {showDropdown && symbols.length < 4 && (
-          <ul className="absolute z-20 left-0 right-0 mt-1 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg max-h-56 overflow-y-auto">
-            {suggestions.length === 0 ? (
-              <li className="px-4 py-3 text-sm text-gray-400 dark:text-gray-500 italic">No matches</li>
-            ) : (
-              suggestions.map((s, idx) => (
-                <li
-                  key={s.symbol}
-                  className={`px-4 py-2.5 cursor-pointer flex justify-between items-center text-sm
-                    ${idx === activeIdx ? 'bg-blue-50 dark:bg-blue-900/30' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}
-                  onMouseDown={() => {
-                    if (!symbols.includes(s.symbol)) addSymbol(s.symbol);
-                  }}
-                  onMouseEnter={() => setActiveIdx(idx)}
-                >
-                  <div>
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">{s.symbol}</span>
-                    <span className="ml-2 text-gray-400 dark:text-gray-500 text-xs">{s.shortname}</span>
-                  </div>
-                  <span className="text-xs text-gray-400 dark:text-gray-500">{s.exchange === 'NSI' ? 'NSE' : 'BSE'}</span>
-                </li>
-              ))
-            )}
-          </ul>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.75 }}>
+              {PAGE_COPY.compare.emptyTitle}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {PAGE_COPY.compare.emptyDescription}
+            </Typography>
+          </Paper>
         )}
-      </div>
 
-      {showNormalizedChart && (
-        <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-700 p-4 md:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Normalized % change</h3>
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Index</span>
-                <div className="flex gap-0.5 bg-white dark:bg-gray-900 rounded-lg p-0.5 border border-gray-200 dark:border-gray-700">
-                  {BENCHMARK_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.mode}
-                      type="button"
-                      onClick={() => setBenchmarkMode(opt.mode)}
-                      className={`px-2.5 py-1.5 text-[11px] font-semibold rounded-md transition-colors ${
-                        benchmarkMode === opt.mode
-                          ? 'bg-gray-200 dark:bg-gray-700 text-blue-600 dark:text-blue-300'
-                          : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-                      }`}
-                    >
-                      {opt.mode === 'off' ? 'Off' : opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="flex gap-1 bg-white dark:bg-gray-900 rounded-lg p-1 border border-gray-200 dark:border-transparent">
-                {RANGE_OPTIONS.map(({ key, label }) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setRange(key)}
-                    className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
-                      range === key
-                        ? 'bg-gray-200 dark:bg-gray-700 text-blue-600 dark:text-blue-300'
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+        {/* add-another nudge */}
+        {symbols.length === 1 && !activeBenchmark && (
+          <Paper
+            elevation={0}
+            sx={{ p: { xs: 2, sm: 2.5 }, border: '1px dashed', borderColor: 'divider' }}
+          >
+            <Typography variant="body2" color="text.secondary">
+              Add another stock for the comparison table, or turn on an index overlay to chart vs Nifty / Sensex.
+            </Typography>
+          </Paper>
+        )}
 
-          <div className="h-[240px] sm:h-[320px] w-full">
-            {chartLoading ? (
-              <div className="h-full flex items-center justify-center text-gray-400 dark:text-gray-500 text-sm">Loading chart…</div>
-            ) : chartRows.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-gray-400 dark:text-gray-500 text-sm">
-                Not enough overlapping data for this range.
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartRows} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} opacity={0.5} />
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fill: axisStroke, fontSize: 11 }}
-                    tickFormatter={(d: string) => d.slice(5)}
-                    minTickGap={24}
-                  />
-                  <YAxis
-                    tick={{ fill: axisStroke, fontSize: 11 }}
-                    tickFormatter={(v: number) => `${v.toFixed(0)}%`}
-                    width={48}
-                  />
-                  <Tooltip
-                    {...tooltipStyles}
-                    formatter={(value: unknown, name: unknown) => {
-                      const pct = `${Number(value).toFixed(2)}%`;
-                      const key = String(name);
-                      if (key === 'NIFTY_50') return [pct, 'Nifty 50'];
-                      if (key === 'SENSEX_IDX') return [pct, 'Sensex'];
-                      return [pct, key];
+        {/* normalized chart */}
+        {showNormalizedChart && (
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 2, sm: 2.5 },
+              border: '1px solid',
+              borderColor: 'divider',
+              background:
+                theme.palette.mode === 'dark'
+                  ? 'linear-gradient(165deg, rgba(17,24,39,0.9), rgba(3,7,18,0.9))'
+                  : 'linear-gradient(165deg, rgba(255,255,255,0.96), rgba(248,250,252,0.95))',
+            }}
+          >
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} sx={{ mb: 2.5 }}>
+              <SectionHeader title="Normalized % change" />
+
+              <Stack direction="row" spacing={1.5} useFlexGap flexWrap="wrap" alignItems="center">
+                {/* benchmark toggle */}
+                <Stack direction="row" spacing={0.75} alignItems="center">
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                    Index
+                  </Typography>
+                  <ToggleButtonGroup
+                    exclusive
+                    size="small"
+                    value={benchmarkMode}
+                    onChange={(_, v: BenchmarkMode | null) => v && setBenchmarkMode(v)}
+                    sx={{
+                      bgcolor: 'action.hover',
+                      borderRadius: 1,
+                      p: 0.25,
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      '& .MuiToggleButton-root': { border: 0, borderRadius: 1, px: 1.25, textTransform: 'none', fontWeight: 600, fontSize: 11 },
                     }}
-                    labelFormatter={(label) => String(label)}
-                  />
-                  <Legend wrapperStyle={{ color: legendColor }} />
-                  {symbols.map((sym, i) => (
-                    <Line
-                      key={sym}
-                      type="monotone"
-                      dataKey={sym}
-                      stroke={CHART_COLORS[i % CHART_COLORS.length]}
-                      strokeWidth={2}
-                      dot={false}
-                      name={statsBySymbol[sym]?.shortName ?? sym}
-                    />
-                  ))}
-                  {activeBenchmark && (
-                    <Line
-                      type="monotone"
-                      dataKey={activeBenchmark.dataKey}
-                      stroke={BENCHMARK_STRIKE}
-                      strokeWidth={2}
-                      strokeDasharray="5 4"
-                      dot={false}
-                      name={activeBenchmark.label}
-                    />
-                  )}
-                </LineChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </div>
-      )}
+                  >
+                    {BENCHMARK_OPTIONS.map((opt) => (
+                      <ToggleButton key={opt.mode} value={opt.mode}>
+                        {opt.mode === 'off' ? 'Off' : opt.label}
+                      </ToggleButton>
+                    ))}
+                  </ToggleButtonGroup>
+                </Stack>
 
-      {symbols.length >= 2 && (
-        <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-700 overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-300 dark:border-gray-700 bg-gray-100/90 dark:bg-gray-800/80">
-            <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Comparison</h3>
-            {statsLoading && (
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Updating statistics…</p>
-            )}
-          </div>
-          <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
-            <table className="w-full text-sm min-w-[640px]">
-              <thead className="bg-gray-100/80 dark:bg-gray-800/50 border-b border-gray-300 dark:border-gray-700">
-                <tr>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap sticky left-0 z-10 bg-gray-100/95 dark:bg-gray-800/95 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)]">
-                    Metric
-                  </th>
-                  {symbols.map((sym, i) => (
-                    <th
-                      key={sym}
-                      className="text-right px-4 py-3 font-semibold whitespace-nowrap text-gray-900 dark:text-gray-100"
-                      style={{ borderBottom: `2px solid ${CHART_COLORS[i % CHART_COLORS.length]}` }}
-                    >
-                      <span className="block text-xs font-normal text-gray-400 dark:text-gray-500">{sym}</span>
-                      <span className="font-semibold">{statsBySymbol[sym]?.shortName ?? sym}</span>
-                    </th>
+                {/* range toggle */}
+                <ToggleButtonGroup
+                  exclusive
+                  size="small"
+                  value={range}
+                  onChange={(_, v: RangeKey | null) => v && setRange(v)}
+                  sx={{
+                    bgcolor: 'action.hover',
+                    borderRadius: 1,
+                    p: 0.25,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    '& .MuiToggleButton-root': { border: 0, borderRadius: 1, px: 1.5, textTransform: 'none', fontWeight: 600, fontSize: 12 },
+                  }}
+                >
+                  {RANGE_OPTIONS.map(({ key, label }) => (
+                    <ToggleButton key={key} value={key}>{label}</ToggleButton>
                   ))}
-                </tr>
-              </thead>
-              <tbody>
-                {comparisonRows.map((row) => {
-                  const highlights = computeRowHighlights(symbols, row.rank, row.value);
-                  return (
-                    <tr
-                      key={row.label}
-                      className="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800/40"
-                    >
-                      <td className="px-4 py-2.5 font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap sticky left-0 z-10 bg-gray-100 dark:bg-gray-800 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)]">
-                        {row.label}
-                      </td>
-                      {symbols.map((sym) => {
-                        const h = highlights[sym];
-                        const cellBg =
-                          h === 'best'
-                            ? 'bg-emerald-100/80 dark:bg-emerald-500/15'
-                            : h === 'worst'
-                              ? 'bg-rose-100/80 dark:bg-rose-500/15'
-                              : '';
-                        return (
-                          <td
-                            key={`${row.label}-${sym}`}
-                            className={`px-4 py-2.5 text-right font-mono text-gray-800 dark:text-gray-200 ${cellBg}`}
-                          >
-                            {row.fmt(sym)}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+                </ToggleButtonGroup>
+              </Stack>
+            </Stack>
 
-      {symbols.length === 1 && !activeBenchmark && (
-        <p className="body-text py-8 px-6 rounded-xl border border-dashed border-border dark:border-border-dark">
-          Add another stock for the comparison table, or turn on an index overlay above to chart vs Nifty / Sensex.
-        </p>
-      )}
-      </div>
+            <Box sx={{ height: { xs: 240, sm: 320 }, width: '100%' }}>
+              {chartLoading ? (
+                <Stack height="100%" alignItems="center" justifyContent="center" spacing={1}>
+                  <CircularProgress size={24} />
+                  <Typography variant="body2" color="text.secondary">Loading chart…</Typography>
+                </Stack>
+              ) : chartRows.length === 0 ? (
+                <Stack height="100%" alignItems="center" justifyContent="center">
+                  <Typography variant="body2" color="text.secondary">
+                    Not enough overlapping data for this range.
+                  </Typography>
+                </Stack>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartRows} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} opacity={0.5} />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fill: axisStroke, fontSize: 11 }}
+                      tickFormatter={(d: string) => d.slice(5)}
+                      minTickGap={24}
+                    />
+                    <YAxis
+                      tick={{ fill: axisStroke, fontSize: 11 }}
+                      tickFormatter={(v: number) => `${v.toFixed(0)}%`}
+                      width={48}
+                    />
+                    <Tooltip
+                      {...tooltipStyles}
+                      formatter={(value: unknown, name: unknown) => {
+                        const pct = `${Number(value).toFixed(2)}%`;
+                        const key = String(name);
+                        if (key === 'NIFTY_50') return [pct, 'Nifty 50'];
+                        if (key === 'SENSEX_IDX') return [pct, 'Sensex'];
+                        return [pct, key];
+                      }}
+                      labelFormatter={(label) => String(label)}
+                    />
+                    <Legend wrapperStyle={{ color: legendColor }} />
+                    {symbols.map((sym, i) => (
+                      <Line
+                        key={sym}
+                        type="monotone"
+                        dataKey={sym}
+                        stroke={CHART_COLORS[i % CHART_COLORS.length]}
+                        strokeWidth={2}
+                        dot={false}
+                        name={statsBySymbol[sym]?.shortName ?? sym}
+                      />
+                    ))}
+                    {activeBenchmark && (
+                      <Line
+                        type="monotone"
+                        dataKey={activeBenchmark.dataKey}
+                        stroke={BENCHMARK_STRIKE}
+                        strokeWidth={2}
+                        strokeDasharray="5 4"
+                        dot={false}
+                        name={activeBenchmark.label}
+                      />
+                    )}
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </Box>
+          </Paper>
+        )}
+
+        {/* comparison metrics table */}
+        {symbols.length >= 2 && (
+          <Paper
+            elevation={0}
+            sx={{
+              border: '1px solid',
+              borderColor: 'divider',
+              overflow: 'hidden',
+              background:
+                theme.palette.mode === 'dark'
+                  ? 'linear-gradient(165deg, rgba(17,24,39,0.9), rgba(3,7,18,0.9))'
+                  : 'linear-gradient(165deg, rgba(255,255,255,0.96), rgba(248,250,252,0.95))',
+            }}
+          >
+            <Box
+              sx={{
+                px: { xs: 2, sm: 2.5 },
+                py: 1.5,
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2,
+              }}
+            >
+              <SectionHeader title="Comparison" />
+              {statsLoading && (
+                <Stack direction="row" spacing={0.75} alignItems="center">
+                  <CircularProgress size={12} />
+                  <Typography variant="caption" color="text.secondary">
+                    Updating…
+                  </Typography>
+                </Stack>
+              )}
+            </Box>
+
+            <Box sx={{ overflowX: 'auto' }}>
+              <Box
+                component="table"
+                sx={{ width: '100%', minWidth: 640, borderCollapse: 'collapse', fontSize: 14 }}
+              >
+                <Box
+                  component="thead"
+                  sx={{
+                    bgcolor: 'action.hover',
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                  }}
+                >
+                  <Box component="tr">
+                    <Box
+                      component="th"
+                      sx={{
+                        textAlign: 'left',
+                        px: { xs: 2, sm: 2.5 },
+                        py: 1.5,
+                        fontWeight: 700,
+                        fontSize: 13,
+                        whiteSpace: 'nowrap',
+                        position: 'sticky',
+                        left: 0,
+                        zIndex: 2,
+                        bgcolor: theme.palette.mode === 'dark' ? 'rgba(17,24,39,0.98)' : 'rgba(248,250,252,0.98)',
+                        boxShadow: '2px 0 4px -2px rgba(0,0,0,0.08)',
+                        color: 'text.secondary',
+                      }}
+                    >
+                      Metric
+                    </Box>
+                    {symbols.map((sym, i) => (
+                      <Box
+                        component="th"
+                        key={sym}
+                        sx={{
+                          textAlign: 'right',
+                          px: { xs: 2, sm: 2.5 },
+                          py: 1.5,
+                          fontWeight: 700,
+                          whiteSpace: 'nowrap',
+                          borderBottom: `2px solid ${CHART_COLORS[i % CHART_COLORS.length]}`,
+                        }}
+                      >
+                        <Typography component="span" variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                          {sym}
+                        </Typography>
+                        <Typography component="span" variant="body2" sx={{ fontWeight: 700 }}>
+                          {statsBySymbol[sym]?.shortName ?? sym}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+
+                <Box component="tbody">
+                  {comparisonRows.map((row) => {
+                    const highlights = computeRowHighlights(symbols, row.rank, row.value);
+                    return (
+                      <Box
+                        component="tr"
+                        key={row.label}
+                        sx={{
+                          borderBottom: '1px solid',
+                          borderColor: alpha(theme.palette.divider, 0.65),
+                          '&:last-child': { borderBottom: 0 },
+                          '&:hover': { bgcolor: 'action.hover' },
+                        }}
+                      >
+                        <Box
+                          component="td"
+                          sx={{
+                            px: { xs: 2, sm: 2.5 },
+                            py: 1.25,
+                            fontWeight: 600,
+                            fontSize: 13,
+                            whiteSpace: 'nowrap',
+                            color: 'text.secondary',
+                            position: 'sticky',
+                            left: 0,
+                            zIndex: 1,
+                            bgcolor: theme.palette.mode === 'dark' ? 'rgba(17,24,39,0.98)' : 'rgba(255,255,255,0.98)',
+                            boxShadow: '2px 0 4px -2px rgba(0,0,0,0.08)',
+                          }}
+                        >
+                          {row.label}
+                        </Box>
+                        {symbols.map((sym) => {
+                          const h = highlights[sym];
+                          return (
+                            <Box
+                              component="td"
+                              key={`${row.label}-${sym}`}
+                              sx={{
+                                px: { xs: 2, sm: 2.5 },
+                                py: 1.25,
+                                textAlign: 'right',
+                                fontFamily: 'monospace',
+                                fontWeight: 600,
+                                fontSize: 13,
+                                bgcolor:
+                                  h === 'best'
+                                    ? theme.palette.mode === 'dark'
+                                      ? 'rgba(16,185,129,0.16)'
+                                      : 'rgba(16,185,129,0.1)'
+                                    : h === 'worst'
+                                      ? theme.palette.mode === 'dark'
+                                        ? 'rgba(244,63,94,0.16)'
+                                        : 'rgba(244,63,94,0.08)'
+                                      : 'transparent',
+                              }}
+                            >
+                              {row.fmt(sym)}
+                            </Box>
+                          );
+                        })}
+                      </Box>
+                    );
+                  })}
+                </Box>
+              </Box>
+            </Box>
+          </Paper>
+        )}
+
+        <style>{`
+          @keyframes ovHeroSweep {
+            0%, 100% { transform: translateX(-45%); }
+            50% { transform: translateX(45%); }
+          }
+        `}</style>
+      </Stack>
     </PageLayout>
   );
 }

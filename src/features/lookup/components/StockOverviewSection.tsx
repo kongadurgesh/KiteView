@@ -1,8 +1,9 @@
+import { Box, Chip, Grid, Paper, Stack, Typography, alpha, useTheme } from '@mui/material';
 import type { StockStats } from '../../../types/stockStats';
 import type { QuoteSnapshot } from '../quoteSnapshot';
 import { fmtMarketCap, fmtMarketCapCr, fmtMoney, fmtPct, fmtQuotePct, fmtRatio, fmtVolume } from '../../../lib/format';
 import { isIndianSymbol } from '../../../lib/nseSymbol';
-import { capCategoryBadgeClass, getCapCategory } from '../../../lib/marketCap';
+import { capCategoryColor, getCapCategory } from '../../../lib/marketCap';
 
 interface Props {
   symbol: string;
@@ -29,8 +30,10 @@ export function StockOverviewSection({
   quoteSnapshot,
   stockStats,
 }: Props) {
+  const theme = useTheme();
   const indian = isIndianSymbol(symbol);
-  const cap = capCategoryBadgeClass(getCapCategory(marketCapCr));
+  const capCategory = getCapCategory(marketCapCr);
+  const capColor = capCategoryColor(capCategory);
   const ch = quoteSnapshot?.change;
   const chPct = quoteSnapshot?.changePercent;
   const dayColor =
@@ -45,23 +48,33 @@ export function StockOverviewSection({
     );
 
   return (
-    <div className="card p-5 space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <p className="label-caps">Overview</p>
+    <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.25 }, border: '1px solid', borderColor: 'divider' }}>
+      <Stack spacing={2}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', sm: 'center' }} useFlexGap flexWrap="wrap">
+        <Typography variant="overline" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: '0.1em' }}>
+          Overview
+        </Typography>
         {indian && marketCapCr > 0 && (
-          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cap.color}`}>
-            {cap.label} · {fmtMarketCapCr(marketCapCr)}
-          </span>
+          <Chip
+            size="small"
+            label={`${capCategory} · ${fmtMarketCapCr(marketCapCr)}`}
+            sx={{
+              fontWeight: 700,
+              color: capColor,
+              bgcolor: alpha(capColor, theme.palette.mode === 'dark' ? 0.18 : 0.12),
+              borderRadius: 1,
+            }}
+          />
         )}
         {(sector || industry) && (
-          <span className="text-xs text-ink-muted dark:text-ink-dark-muted">
+          <Typography variant="caption" color="text.secondary">
             {[industry, sector].filter(Boolean).join(' · ')}
-          </span>
+          </Typography>
         )}
-      </div>
+      </Stack>
 
       {hasQuote && quoteSnapshot && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <Grid container spacing={1.25}>
           <MiniStat
             label="Day chg"
             value={ch != null ? `${ch >= 0 ? '+' : '-'}${fmtMoney(Math.abs(ch), symbol)}` : '—'}
@@ -72,21 +85,21 @@ export function StockOverviewSection({
           <MiniStat label="Day high" value={quoteSnapshot.dayHigh != null ? fmtMoney(quoteSnapshot.dayHigh, symbol) : '—'} />
           <MiniStat label="Day low" value={quoteSnapshot.dayLow != null ? fmtMoney(quoteSnapshot.dayLow, symbol) : '—'} />
           <MiniStat label="Volume" value={fmtVolume(quoteSnapshot.volume)} />
-        </div>
+        </Grid>
       )}
 
       {stockStats && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <Grid container spacing={1.25}>
           <MiniStat label="P/E" value={fmtRatio(stockStats.pe)} />
           <MiniStat label="Fwd P/E" value={fmtRatio(stockStats.forwardPE)} />
           <MiniStat label="P/B" value={fmtRatio(stockStats.pb)} />
           <MiniStat label="Beta" value={fmtRatio(stockStats.beta)} />
           <MiniStat label="52W chg" value={fmtPct(stockStats.fiftyTwoWeekChange)} />
           <MiniStat label="Mkt cap" value={fmtMarketCap(stockStats.marketCap, indian)} />
-        </div>
+        </Grid>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <Grid container spacing={1.25}>
         <MiniStat
           label="52W high"
           value={fmtMoney(fiftyTwoWeekHigh, symbol)}
@@ -114,17 +127,38 @@ export function StockOverviewSection({
               : undefined
           }
         />
-      </div>
-    </div>
+      </Grid>
+      </Stack>
+    </Paper>
   );
 }
 
 function MiniStat({ label, value, valueClass, note }: { label: string; value: string; valueClass?: string; note?: string }) {
   return (
-    <div className="card-muted px-3 py-2.5 rounded-lg">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-ink-muted dark:text-ink-dark-muted">{label}</p>
-      <p className={`text-sm font-mono font-semibold tabular-nums mt-0.5 ${valueClass ?? 'text-ink-primary dark:text-ink-dark-primary'}`}>{value}</p>
-      {note && <p className="text-[11px] text-ink-muted dark:text-ink-dark-muted mt-0.5">{note}</p>}
-    </div>
+    <Grid size={{ xs: 6, sm: 4, lg: note ? 4 : 2 }}>
+      <Box
+        sx={{
+          height: '100%',
+          px: 1.5,
+          py: 1.25,
+          borderRadius: 1.5,
+          border: '1px solid',
+          borderColor: 'divider',
+          bgcolor: 'action.hover',
+        }}
+      >
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+          {label}
+        </Typography>
+        <Typography sx={{ mt: 0.5, fontSize: 14, fontFamily: 'monospace', fontWeight: 700 }} className={valueClass}>
+          {value}
+        </Typography>
+        {note && (
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+            {note}
+          </Typography>
+        )}
+      </Box>
+    </Grid>
   );
 }
