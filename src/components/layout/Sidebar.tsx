@@ -83,7 +83,7 @@ export function Sidebar({
               <ListItemButton
                 selected={isActive}
                 sx={{
-                  borderRadius: 2,
+                  borderRadius: 1,
                   mb: 0.5,
                   minHeight: 42,
                   justifyContent: showLabels ? 'initial' : 'center',
@@ -123,7 +123,7 @@ export function Sidebar({
             <ListItemButton
               selected={isActive}
               sx={{
-                borderRadius: 2,
+                borderRadius: 1,
                 minHeight: 42,
                 mb: 0.5,
                 justifyContent: showLabels ? 'initial' : 'center',
@@ -156,7 +156,7 @@ export function Sidebar({
           sx={{
             mt: 0.5,
             width: '100%',
-            borderRadius: 2,
+            borderRadius: 1,
             height: 42,
             justifyContent: showLabels ? 'flex-start' : 'center',
             px: showLabels ? 1.25 : 0,

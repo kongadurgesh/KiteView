@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   Alert,
   Box,
@@ -437,7 +438,8 @@ function parseFilterNumber(value: string): number | undefined {
 
 export function ScreenerPage() {
   const theme = useTheme();
-  const { viewStock, goToPage } = useAppNavigation();
+  const navigate = useNavigate();
+  const { viewStock } = useAppNavigation();
   const defaultRange = useMemo(() => defaultHistoricalRange(), []);
   const [scanMode, setScanMode] = useState<ScanMode>('today');
   const [fromDate, setFromDate] = useState(defaultRange.fromDate);
@@ -706,6 +708,14 @@ export function ScreenerPage() {
     setPriceMax('');
   };
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate('/');
+  };
+
   return (
     <PageLayout className="max-w-7xl mt-6">
       <Stack spacing={2.25} sx={{ position: 'relative', isolation: 'isolate' }}>
@@ -773,10 +783,10 @@ export function ScreenerPage() {
                 variant="text"
                 size="small"
                 startIcon={<ArrowBackRoundedIcon fontSize="small" />}
-                onClick={() => goToPage('overview')}
+                onClick={handleBack}
                 sx={{ mb: 1, px: 0.5, minWidth: 0, textTransform: 'none', justifyContent: 'flex-start' }}
               >
-                Back to Overview
+                Back
               </Button>
               <Typography variant="h5" sx={{ mb: 0.75 }}>
                 {PAGE_COPY.screener.title}

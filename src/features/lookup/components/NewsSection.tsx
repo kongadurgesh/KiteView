@@ -1,28 +1,40 @@
+import { Link, Paper, Stack, Typography } from '@mui/material';
 import type { AnalysisNewsItem } from '../../../types/analysisExtras';
 
 export function NewsSection({ news }: { news: AnalysisNewsItem[] }) {
   if (news.length === 0) return null;
 
   return (
-    <div className="card p-5">
-      <p className="label-caps mb-3">Recent news</p>
-      <ul className="space-y-3">
+    <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.25 }, border: '1px solid', borderColor: 'divider' }}>
+      <Stack spacing={1.5}>
+      <Typography variant="overline" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: '0.1em' }}>
+        Recent news
+      </Typography>
+      <Stack component="ul" spacing={1.5} sx={{ listStyle: 'none', m: 0, p: 0 }}>
         {news.map((n, i) => (
-          <li key={i} className="text-sm border-b border-border/50 dark:border-border-dark/50 pb-3 last:border-0 last:pb-0">
-            <a
+          <Stack
+            key={i}
+            component="li"
+            spacing={0.5}
+            sx={{ pb: 1.5, borderBottom: i === news.length - 1 ? 'none' : '1px solid', borderColor: 'divider' }}
+          >
+            <Link
               href={n.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-medium text-ink-primary dark:text-ink-dark-primary hover:text-accent line-clamp-2"
+              underline="hover"
+              color="text.primary"
+              sx={{ fontSize: 14, fontWeight: 600 }}
             >
               {n.title}
-            </a>
-            <p className="text-xs text-ink-muted mt-0.5">
+            </Link>
+            <Typography variant="caption" color="text.secondary">
               {[n.publisher, n.publishedAt].filter(Boolean).join(' · ')}
-            </p>
-          </li>
+            </Typography>
+          </Stack>
         ))}
-      </ul>
-    </div>
+      </Stack>
+      </Stack>
+    </Paper>
   );
 }

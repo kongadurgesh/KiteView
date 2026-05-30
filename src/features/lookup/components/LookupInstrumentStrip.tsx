@@ -1,4 +1,4 @@
-import { Button } from '../../../components/ui';
+import { Box, Button, Paper, Stack, Typography, alpha, useTheme } from '@mui/material';
 import { fmtMoney } from '../../../lib/format';
 import { AddToWatchlistButton } from '../../watchlist/components/AddToWatchlistButton';
 
@@ -30,30 +30,72 @@ export function LookupInstrumentStrip({
   onOpenYahoo,
   watchlistThesis,
 }: LookupInstrumentStripProps) {
+  const theme = useTheme();
+
   return (
-    <div className="card w-full p-4 sm:p-5">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <p className="label-caps">Selected</p>
-          <h2 className="text-lg font-semibold text-ink-primary dark:text-ink-dark-primary mt-1 truncate">
+    <Paper
+      elevation={0}
+      sx={{
+        width: '100%',
+        p: { xs: 2, sm: 2.25 },
+        border: '1px solid',
+        borderColor: 'divider',
+        background:
+          theme.palette.mode === 'dark'
+            ? 'linear-gradient(160deg, rgba(17,24,39,0.92), rgba(7,12,24,0.9))'
+            : 'linear-gradient(160deg, rgba(255,255,255,0.98), rgba(248,250,252,0.94))',
+      }}
+    >
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={2.25} justifyContent="space-between" alignItems={{ xs: 'stretch', md: 'flex-start' }}>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography
+            variant="caption"
+            sx={{ display: 'block', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'text.secondary' }}
+          >
+            Selected
+          </Typography>
+          <Typography variant="h6" sx={{ mt: 0.75 }} noWrap>
             {isLoading && !stockName ? '…' : stockName || symbol}
-          </h2>
-          <p className="font-mono text-sm text-ink-muted dark:text-ink-dark-muted mt-0.5">{symbol}</p>
-          <p className="text-xl font-mono font-semibold tabular-nums text-ink-primary dark:text-ink-dark-primary mt-2">
+          </Typography>
+          <Typography variant="body2" sx={{ mt: 0.5, fontFamily: 'monospace', color: 'text.secondary' }}>
+            {symbol}
+          </Typography>
+          <Typography variant="h5" sx={{ mt: 1.5, fontFamily: 'monospace', fontWeight: 700, letterSpacing: '-0.02em' }}>
             {currentPrice > 0 ? fmtMoney(currentPrice, symbol) : isLoading ? '…' : '—'}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2 shrink-0">
-          <Button variant="secondary" size="sm" disabled={!canRescan} onClick={onRescan}>
+          </Typography>
+        </Box>
+
+        <Stack
+          direction="row"
+          spacing={1}
+          useFlexGap
+          flexWrap="wrap"
+          sx={{
+            flexShrink: 0,
+            '& .MuiButton-root': {
+              textTransform: 'none',
+              borderRadius: 1,
+              fontWeight: 600,
+              boxShadow: 'none',
+            },
+          }}
+        >
+          <Button
+            variant="outlined"
+            size="small"
+            disabled={!canRescan}
+            onClick={onRescan}
+            sx={{ borderColor: 'divider', bgcolor: alpha(theme.palette.primary.main, 0.03) }}
+          >
             Rescan
           </Button>
-          <Button size="sm" disabled={!symbol || isLoading} onClick={onCompare}>
+          <Button variant="contained" size="small" disabled={!symbol || isLoading} onClick={onCompare}>
             Compare
           </Button>
-          <Button variant="secondary" size="sm" type="button" disabled={!symbol} onClick={onCopyLink}>
+          <Button variant="outlined" size="small" type="button" disabled={!symbol} onClick={onCopyLink}>
             Copy link
           </Button>
-          <Button variant="secondary" size="sm" type="button" disabled={!symbol} onClick={onOpenYahoo}>
+          <Button variant="outlined" size="small" type="button" disabled={!symbol} onClick={onOpenYahoo}>
             Yahoo
           </Button>
           <AddToWatchlistButton
@@ -61,8 +103,8 @@ export function LookupInstrumentStrip({
             shortName={stockName || symbol}
             thesis={watchlistThesis}
           />
-        </div>
-      </div>
-    </div>
+        </Stack>
+      </Stack>
+    </Paper>
   );
 }

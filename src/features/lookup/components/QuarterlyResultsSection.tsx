@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { Box, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography, alpha, useTheme } from '@mui/material';
 import type {
   QuarterlyConsolidatedRawPeriod,
   QuarterlyPeriod,
@@ -39,11 +40,12 @@ function cellClass(
   value: number | null,
   compare: number | null,
   isFirstDataCol: boolean,
-): string {
-  if (!isFirstDataCol || value == null || compare == null) return '';
-  if (value > compare) return 'bg-emerald-50 dark:bg-emerald-950/40';
-  if (value < compare) return 'bg-red-50 dark:bg-red-950/40';
-  return '';
+  mode: 'light' | 'dark',
+): string | undefined {
+  if (!isFirstDataCol || value == null || compare == null) return undefined;
+  if (value > compare) return mode === 'dark' ? 'rgba(16,185,129,0.16)' : 'rgba(16,185,129,0.12)';
+  if (value < compare) return mode === 'dark' ? 'rgba(239,68,68,0.16)' : 'rgba(239,68,68,0.1)';
+  return undefined;
 }
 
 function comparisonIndex(mode: ComparisonMode, count: number): number | null {
@@ -98,16 +100,21 @@ export function QuarterlyResultsSection({
   data: QuarterlyResults;
   rawData?: QuarterlyResultsRaw;
 }) {
+  const theme = useTheme();
   const indian = isIndianSymbol(symbol);
   const periods = useMemo(() => sortRecentToOldest(data.periods), [data.periods]);
   const [comparisonMode, setComparisonMode] = useState<ComparisonMode>('qoq');
 
   if (periods.length === 0) {
     return (
-      <div className="card p-5">
-        <p className="label-caps mb-2">Quarterly results</p>
-        <p className="section-desc">Quarterly results unavailable for this symbol.</p>
-      </div>
+      <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.25 }, border: '1px solid', borderColor: 'divider' }}>
+        <Typography variant="overline" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: '0.1em' }}>
+          Quarterly results
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          Quarterly results unavailable for this symbol.
+        </Typography>
+      </Paper>
     );
   }
 
@@ -122,63 +129,75 @@ export function QuarterlyResultsSection({
   if (useRawTable) {
     const compareIdx = comparisonIndex(comparisonMode, rawPeriods.length);
     return (
-      <div className="card p-5">
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-          <p className="label-caps">Quarterly results</p>
-          <div className="flex items-center gap-2">
-            <div className="inline-flex rounded-md border border-border dark:border-border-dark overflow-hidden">
-              <button
-                type="button"
-                onClick={() => setComparisonMode('qoq')}
-                className={`px-2.5 py-1 text-xs ${
-                  comparisonMode === 'qoq'
-                    ? 'bg-surface-2 dark:bg-surface-dark-2 text-ink dark:text-ink-dark'
-                    : 'text-ink-muted dark:text-ink-dark-muted'
-                }`}
-              >
-                QoQ
-              </button>
-              <button
-                type="button"
-                onClick={() => setComparisonMode('yoy')}
-                className={`px-2.5 py-1 text-xs border-l border-border dark:border-border-dark ${
-                  comparisonMode === 'yoy'
-                    ? 'bg-surface-2 dark:bg-surface-dark-2 text-ink dark:text-ink-dark'
-                    : 'text-ink-muted dark:text-ink-dark-muted'
-                }`}
-              >
-                YoY
-              </button>
-            </div>
-            <span className="text-xs text-ink-muted dark:text-ink-dark-muted" title={comparisonHelp(comparisonMode)}>
+      <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.25 }, border: '1px solid', borderColor: 'divider' }}>
+        <Stack spacing={1.75}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }}>
+          <Typography variant="overline" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: '0.1em' }}>
+            Quarterly results
+          </Typography>
+          <Stack direction="row" spacing={1.25} alignItems="center" useFlexGap flexWrap="wrap">
+            <ToggleButtonGroup
+              exclusive
+              size="small"
+              value={comparisonMode}
+              onChange={(_, value: ComparisonMode | null) => value && setComparisonMode(value)}
+              sx={{
+                bgcolor: 'action.hover',
+                borderRadius: 1,
+                p: 0.25,
+                border: '1px solid',
+                borderColor: 'divider',
+                '& .MuiToggleButton-root': {
+                  border: 0,
+                  borderRadius: 1,
+                  px: 1.25,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontSize: 12,
+                },
+              }}
+            >
+              <ToggleButton value="qoq">QoQ</ToggleButton>
+              <ToggleButton value="yoy">YoY</ToggleButton>
+            </ToggleButtonGroup>
+            <Typography variant="caption" color="text.secondary" title={comparisonHelp(comparisonMode)}>
               Consolidated · {comparisonLabel(comparisonMode)}
-            </span>
-          </div>
-        </div>
+            </Typography>
+          </Stack>
+        </Stack>
 
-        <div className="overflow-x-auto -mx-1 px-1">
-          <table className="w-full text-sm min-w-[560px]">
+        <Box sx={{ overflowX: 'auto', mx: -0.5, px: 0.5 }}>
+          <Box component="table" sx={{ width: '100%', minWidth: 560, borderCollapse: 'collapse', fontSize: 14 }}>
             <thead>
-              <tr className="border-b border-border dark:border-border-dark">
-                <th className="text-left py-2 pr-3 text-xs font-medium text-ink-muted dark:text-ink-dark-muted uppercase tracking-wider">
+              <Box component="tr" sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
+                <Box component="th" sx={{ textAlign: 'left', py: 1.25, pr: 1.5, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'text.secondary' }}>
                   Metric
-                </th>
+                </Box>
                 {rawPeriods.map((p, i) => (
-                  <th
+                  <Box
+                    component="th"
                     key={p.endDate}
-                    className={`text-right py-2 px-2 text-xs font-medium uppercase tracking-wider whitespace-nowrap ${
-                      i === compareIdx
-                        ? 'text-ink-primary dark:text-ink-dark-primary'
-                        : 'text-ink-muted dark:text-ink-dark-muted'
-                    }`}
+                    sx={{
+                      textAlign: 'right',
+                      py: 1.25,
+                      px: 1,
+                      fontSize: 11,
+                      fontWeight: 700,
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      whiteSpace: 'nowrap',
+                      color: i === compareIdx ? 'text.primary' : 'text.secondary',
+                    }}
                   >
                     {p.label}
                     {i === compareIdx && (
-                      <span className="block text-[10px] font-normal normal-case text-ink-muted">(compare)</span>
+                      <Typography component="span" sx={{ display: 'block', mt: 0.25, fontSize: 10, fontWeight: 400, textTransform: 'none', color: 'text.secondary' }}>
+                        (compare)
+                      </Typography>
                     )}
-                  </th>
+                  </Box>
                 ))}
-              </tr>
+              </Box>
             </thead>
             <tbody>
               {visibleRawRows.map(({ key, kind, label }) => {
@@ -187,29 +206,38 @@ export function QuarterlyResultsSection({
                   : (rawPeriods[compareIdx]?.[key] as QuarterlyRawMetric | undefined);
                 const compareNumeric = rawMetricToNumber(compareMetric);
                 return (
-                  <tr key={String(key)} className="border-b border-border/50 dark:border-border-dark/50 last:border-0">
-                    <td className="py-2.5 pr-3 text-ink-secondary dark:text-ink-dark-secondary font-medium text-xs" title={String(key)}>
+                  <Box component="tr" key={String(key)} sx={{ borderBottom: '1px solid', borderColor: alpha(theme.palette.divider, 0.65), '&:last-child': { borderBottom: 0 } }}>
+                    <Box component="td" title={String(key)} sx={{ py: 1.25, pr: 1.5, fontSize: 12, fontWeight: 600, color: 'text.secondary' }}>
                       {label}
-                    </td>
+                    </Box>
                     {rawPeriods.map((p, i) => {
                       const metric = p[key] as QuarterlyRawMetric | undefined;
                       const cell = rawMetricCell(metric, kind, indian);
                       return (
-                        <td
+                        <Box
+                          component="td"
                           key={`${p.endDate}-${String(key)}`}
-                          className={`py-2 px-2 text-right font-mono tabular-nums text-xs ${cellClass(cell.numeric, compareNumeric, i === 0)}`}
+                          sx={{
+                            py: 1,
+                            px: 1,
+                            textAlign: 'right',
+                            fontFamily: 'monospace',
+                            fontSize: 12,
+                            bgcolor: cellClass(cell.numeric, compareNumeric, i === 0, theme.palette.mode),
+                          }}
                         >
-                          <span>{cell.formatted}</span>
-                        </td>
+                          {cell.formatted}
+                        </Box>
                       );
                     })}
-                  </tr>
+                  </Box>
                 );
               })}
             </tbody>
-          </table>
-        </div>
-      </div>
+          </Box>
+        </Box>
+        </Stack>
+      </Paper>
     );
   }
 
@@ -221,84 +249,105 @@ export function QuarterlyResultsSection({
   ];
 
   return (
-    <div className="card p-5">
-      <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
-        <p className="label-caps">Quarterly results</p>
-        <div className="flex items-center gap-2">
-          <div className="inline-flex rounded-md border border-border dark:border-border-dark overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setComparisonMode('qoq')}
-              className={`px-2.5 py-1 text-xs ${
-                comparisonMode === 'qoq'
-                  ? 'bg-surface-2 dark:bg-surface-dark-2 text-ink dark:text-ink-dark'
-                  : 'text-ink-muted dark:text-ink-dark-muted'
-              }`}
-            >
-              QoQ
-            </button>
-            <button
-              type="button"
-              onClick={() => setComparisonMode('yoy')}
-              className={`px-2.5 py-1 text-xs border-l border-border dark:border-border-dark ${
-                comparisonMode === 'yoy'
-                  ? 'bg-surface-2 dark:bg-surface-dark-2 text-ink dark:text-ink-dark'
-                  : 'text-ink-muted dark:text-ink-dark-muted'
-              }`}
-            >
-              YoY
-            </button>
-          </div>
-          <span className="text-xs text-ink-muted dark:text-ink-dark-muted" title={comparisonHelp(comparisonMode)}>
+    <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.25 }, border: '1px solid', borderColor: 'divider' }}>
+      <Stack spacing={1.75}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }}>
+        <Typography variant="overline" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: '0.1em' }}>
+          Quarterly results
+        </Typography>
+        <Stack direction="row" spacing={1.25} alignItems="center" useFlexGap flexWrap="wrap">
+          <ToggleButtonGroup
+            exclusive
+            size="small"
+            value={comparisonMode}
+            onChange={(_, value: ComparisonMode | null) => value && setComparisonMode(value)}
+            sx={{
+              bgcolor: 'action.hover',
+              borderRadius: 1,
+              p: 0.25,
+              border: '1px solid',
+              borderColor: 'divider',
+              '& .MuiToggleButton-root': {
+                border: 0,
+                borderRadius: 1,
+                px: 1.25,
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: 12,
+              },
+            }}
+          >
+            <ToggleButton value="qoq">QoQ</ToggleButton>
+            <ToggleButton value="yoy">YoY</ToggleButton>
+          </ToggleButtonGroup>
+          <Typography variant="caption" color="text.secondary" title={comparisonHelp(comparisonMode)}>
             {comparisonLabel(comparisonMode)}
-          </span>
-        </div>
-      </div>
-      <div className="overflow-x-auto -mx-1 px-1">
-        <table className="w-full text-sm min-w-[520px]">
+          </Typography>
+        </Stack>
+      </Stack>
+      <Box sx={{ overflowX: 'auto', mx: -0.5, px: 0.5 }}>
+        <Box component="table" sx={{ width: '100%', minWidth: 520, borderCollapse: 'collapse', fontSize: 14 }}>
           <thead>
-            <tr className="border-b border-border dark:border-border-dark">
-              <th className="text-left py-2 pr-3 text-xs font-medium text-ink-muted dark:text-ink-dark-muted uppercase tracking-wider">
+            <Box component="tr" sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box component="th" sx={{ textAlign: 'left', py: 1.25, pr: 1.5, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'text.secondary' }}>
                 Metric
-              </th>
+              </Box>
               {periods.map((p, i) => (
-                <th
+                <Box
+                  component="th"
                   key={p.endDate}
-                  className={`text-right py-2 px-2 text-xs font-medium uppercase tracking-wider whitespace-nowrap ${
-                    i === compareIdx
-                      ? 'text-ink-primary dark:text-ink-dark-primary'
-                      : 'text-ink-muted dark:text-ink-dark-muted'
-                  }`}
+                  sx={{
+                    textAlign: 'right',
+                    py: 1.25,
+                    px: 1,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                    whiteSpace: 'nowrap',
+                    color: i === compareIdx ? 'text.primary' : 'text.secondary',
+                  }}
                 >
                   {p.label}
                   {i === compareIdx && (
-                    <span className="block text-[10px] font-normal normal-case text-ink-muted">(compare)</span>
+                    <Typography component="span" sx={{ display: 'block', mt: 0.25, fontSize: 10, fontWeight: 400, textTransform: 'none', color: 'text.secondary' }}>
+                      (compare)
+                    </Typography>
                   )}
-                </th>
+                </Box>
               ))}
-            </tr>
+            </Box>
           </thead>
           <tbody>
             {rows.map(({ key, label }) => (
-              <tr key={key} className="border-b border-border/50 dark:border-border-dark/50 last:border-0">
-                <td className="py-2.5 pr-3 text-ink-secondary dark:text-ink-dark-secondary font-medium">{label}</td>
+              <Box component="tr" key={key} sx={{ borderBottom: '1px solid', borderColor: alpha(theme.palette.divider, 0.65), '&:last-child': { borderBottom: 0 } }}>
+                <Box component="td" sx={{ py: 1.25, pr: 1.5, fontWeight: 600, color: 'text.secondary' }}>{label}</Box>
                 {periods.map((p, i) => {
                   const compare = compareIdx == null ? null : periods[compareIdx][key];
                   const val = p[key];
                   return (
-                    <td
+                    <Box
+                      component="td"
                       key={`${p.endDate}-${key}`}
-                      className={`py-2.5 px-2 text-right font-mono tabular-nums text-xs ${cellClass(val, compare, i === 0)}`}
+                      sx={{
+                        py: 1.25,
+                        px: 1,
+                        textAlign: 'right',
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                        bgcolor: cellClass(val, compare, i === 0, theme.palette.mode),
+                      }}
                     >
                       {fmtMetric(key, val, indian)}
-                    </td>
+                    </Box>
                   );
                 })}
-              </tr>
+              </Box>
             ))}
           </tbody>
-        </table>
-      </div>
-    </div>
+        </Box>
+      </Box>
+      </Stack>
+    </Paper>
   );
 }

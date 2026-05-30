@@ -1,4 +1,16 @@
 import { useState } from 'react';
+import {
+  Box,
+  Chip,
+  FormControl,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  Typography,
+  alpha,
+  useTheme,
+} from '@mui/material';
 import { PatternMatch } from '../../../types';
 import type { PatternChartBar } from '../patternChartCandles';
 import { PatternCandleChart } from './PatternCandleChart';
@@ -14,6 +26,7 @@ interface Props {
 }
 
 export function BullishPatternSection({ match, currentPrice, patternChartBars }: Props) {
+  const theme = useTheme();
   const priceDiff = currentPrice - match.buyPrice;
   const priceDiffPct = ((priceDiff / match.buyPrice) * 100).toFixed(2);
   const isAbove = priceDiff >= 0;
@@ -22,28 +35,40 @@ export function BullishPatternSection({ match, currentPrice, patternChartBars }:
   const stopLossPrice = parseFloat((match.buyPrice * (1 - slPct / 100)).toFixed(2));
 
   return (
-    <div className="space-y-4">
-      <div className="card p-5">
-        <p className="label-caps mb-3">Breakout</p>
-        <div className="flex flex-wrap items-center gap-3">
+    <Stack spacing={2}>
+      <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.25 }, border: '1px solid', borderColor: 'divider' }}>
+        <Stack spacing={1.5}>
+        <Typography variant="overline" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: '0.1em' }}>
+          Breakout
+        </Typography>
+        <Stack direction="row" spacing={1.5} useFlexGap flexWrap="wrap">
           <Badge label="Signal" highlight={signal === 'BUY'}>
             {signal}
           </Badge>
           <Badge label="Pattern date">{match.candle3.date}</Badge>
-        </div>
-      </div>
+        </Stack>
+        </Stack>
+      </Paper>
 
-      <div className="card p-5">
-        <p className="label-caps mb-1">Pattern chart</p>
-        <p className="section-desc mb-4">{PAGE_COPY.analysis.patternChartNote}</p>
+      <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.25 }, border: '1px solid', borderColor: 'divider' }}>
+        <Stack spacing={1.5}>
+        <Box>
+          <Typography variant="overline" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: '0.1em' }}>
+            Pattern chart
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            {PAGE_COPY.analysis.patternChartNote}
+          </Typography>
+        </Box>
         <PatternCandleChart
           bars={patternChartBars}
           buyPrice={match.buyPrice}
           buyTriggerPrice={match.buyTriggerPrice}
         />
-      </div>
+        </Stack>
+      </Paper>
 
-      <div className="grid grid-cols-1 gap-3">
+      <Stack spacing={1.25}>
         <PriceCard
           label="Buy trigger"
           value={fmtNumber(match.buyTriggerPrice)}
@@ -56,40 +81,66 @@ export function BullishPatternSection({ match, currentPrice, patternChartBars }:
           sub={`0.98 × ${fmtNumber(match.candle3.close)}`}
           accent="green"
         />
-        <div className="card-muted p-4 text-center border-emerald-200/80 dark:border-emerald-900/50">
-          <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Current price</p>
-          <p className="text-2xl font-bold font-mono tabular-nums">{fmtNumber(currentPrice)}</p>
-          <p className={`text-sm font-semibold mt-1 ${isAbove ? 'text-emerald-600' : 'text-red-600'}`}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2,
+            textAlign: 'center',
+            border: '1px solid',
+            borderColor: isAbove ? 'success.light' : 'error.light',
+            bgcolor: isAbove ? alpha(theme.palette.success.main, 0.08) : alpha(theme.palette.error.main, 0.08),
+          }}
+        >
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            Current price
+          </Typography>
+          <Typography variant="h5" sx={{ mt: 0.75, fontFamily: 'monospace', fontWeight: 700 }}>
+            {fmtNumber(currentPrice)}
+          </Typography>
+          <Typography variant="body2" sx={{ mt: 0.75, fontWeight: 700, color: isAbove ? 'success.main' : 'error.main' }}>
             {isAbove ? '+' : ''}
             {priceDiffPct}% from buy
-          </p>
-        </div>
-      </div>
+          </Typography>
+        </Paper>
+      </Stack>
 
-      <div className="card border-red-200/80 dark:border-red-900/60 p-4 flex flex-col gap-3">
-        <div className="flex items-center gap-3">
-          <p className="text-xs font-semibold uppercase text-ink-muted">Stop loss %</p>
-          <select
+      <Paper
+        elevation={0}
+        sx={{ p: 2, border: '1px solid', borderColor: 'divider', bgcolor: alpha(theme.palette.error.main, 0.04) }}
+      >
+        <Stack spacing={1.5}>
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            Stop loss %
+          </Typography>
+          <FormControl size="small" sx={{ minWidth: 110 }}>
+            <Select
             value={slPct}
             onChange={(e) => setSlPct(Number(e.target.value))}
-            className="rounded-lg border border-border dark:border-border-dark bg-surface dark:bg-surface-dark-muted text-ink-primary dark:text-ink-dark-primary px-3 py-1.5 text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent dark:[color-scheme:dark]"
+              sx={{ borderRadius: 1 }}
           >
-            <option value={5}>5%</option>
-            <option value={10}>10%</option>
-            <option value={15}>15%</option>
-            <option value={20}>20%</option>
-          </select>
-        </div>
-        <div>
-          <p className="text-xs font-semibold uppercase text-red-600 mb-1">Stop loss price</p>
-          <p className="text-xl font-bold text-red-600 font-mono">{fmtNumber(stopLossPrice)}</p>
-        </div>
-      </div>
+              <MenuItem value={5}>5%</MenuItem>
+              <MenuItem value={10}>10%</MenuItem>
+              <MenuItem value={15}>15%</MenuItem>
+              <MenuItem value={20}>20%</MenuItem>
+            </Select>
+          </FormControl>
+        </Stack>
+        <Box>
+          <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'error.main' }}>
+            Stop loss price
+          </Typography>
+          <Typography variant="h6" sx={{ mt: 0.5, color: 'error.main', fontWeight: 700, fontFamily: 'monospace' }}>
+            {fmtNumber(stopLossPrice)}
+          </Typography>
+        </Box>
+        </Stack>
+      </Paper>
 
-      <div className="card p-5">
+      <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.25 }, border: '1px solid', borderColor: 'divider' }}>
         <QuantityTable buyPrice={match.buyPrice} />
-      </div>
-    </div>
+      </Paper>
+    </Stack>
   );
 }
 
@@ -103,18 +154,18 @@ function Badge({
   highlight?: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-0.5">
-      <span className="text-[10px] font-semibold uppercase text-ink-muted">{label}</span>
-      <span
-        className={`text-xs font-semibold uppercase px-2.5 py-1 rounded-full ${
-          highlight
-            ? 'bg-emerald-600 text-white'
-            : 'bg-surface-muted dark:bg-surface-dark-muted text-ink-secondary border border-border dark:border-border-dark'
-        }`}
-      >
-        {children}
-      </span>
-    </div>
+    <Stack spacing={0.5}>
+      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+        {label}
+      </Typography>
+      <Chip
+        size="small"
+        label={children}
+        color={highlight ? 'success' : 'default'}
+        variant={highlight ? 'filled' : 'outlined'}
+        sx={{ borderRadius: 1, fontWeight: 700, textTransform: 'uppercase' }}
+      />
+    </Stack>
   );
 }
 
@@ -129,15 +180,29 @@ function PriceCard({
   sub: string;
   accent: 'amber' | 'green';
 }) {
-  const colors =
-    accent === 'amber'
-      ? 'border-amber-200/80 dark:border-amber-800 bg-amber-50/80 dark:bg-amber-950/30'
-      : 'border-emerald-200/80 dark:border-emerald-900/50 bg-emerald-50/80 dark:bg-emerald-950/25';
+  const theme = useTheme();
+  const palette = accent === 'amber' ? theme.palette.warning : theme.palette.success;
+
   return (
-    <div className={`rounded-xl border p-4 text-center ${colors}`}>
-      <p className="text-xs font-semibold uppercase opacity-80 mb-1">{label}</p>
-      <p className="text-2xl font-bold font-mono">{value}</p>
-      <p className="text-xs mt-1 opacity-80">{sub}</p>
-    </div>
+    <Paper
+      elevation={0}
+      sx={{
+        p: 2,
+        textAlign: 'center',
+        border: '1px solid',
+        borderColor: palette.light,
+        bgcolor: alpha(palette.main, 0.08),
+      }}
+    >
+      <Typography variant="caption" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: palette.dark }}>
+        {label}
+      </Typography>
+      <Typography variant="h5" sx={{ mt: 0.75, fontWeight: 700, fontFamily: 'monospace' }}>
+        {value}
+      </Typography>
+      <Typography variant="caption" sx={{ display: 'block', mt: 0.75, color: 'text.secondary' }}>
+        {sub}
+      </Typography>
+    </Paper>
   );
 }

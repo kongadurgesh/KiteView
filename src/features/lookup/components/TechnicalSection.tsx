@@ -1,3 +1,4 @@
+import { Box, Grid, Paper, Stack, Typography } from '@mui/material';
 import type { TechnicalSummary } from '../technicalUtils';
 import { PriceChart1Y } from './PriceChart1Y';
 
@@ -8,9 +9,12 @@ interface Props {
 
 export function TechnicalSection({ technical, priceSeries }: Props) {
   return (
-    <div className="card p-5 space-y-4">
-      <p className="label-caps">Technicals</p>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+    <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.25 }, border: '1px solid', borderColor: 'divider' }}>
+      <Stack spacing={2}>
+      <Typography variant="overline" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: '0.1em' }}>
+        Technicals
+      </Typography>
+      <Grid container spacing={1.25}>
         <Stat label="Trend" value={technical.trendLabel} />
         <Stat
           label="vs 52W high"
@@ -30,20 +34,29 @@ export function TechnicalSection({ technical, priceSeries }: Props) {
           value={technical.aboveSma50 == null ? '—' : technical.aboveSma50 ? 'Yes' : 'No'}
         />
         <Stat label="RSI (14)" value={technical.rsi14 != null ? technical.rsi14.toFixed(1) : '—'} />
-      </div>
-      <div>
-        <p className="text-xs font-medium text-ink-muted dark:text-ink-dark-muted mb-2">1-year price</p>
+      </Grid>
+      <Box>
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+          1-year price
+        </Typography>
+        <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1.5, bgcolor: 'action.hover', px: 1, pt: 0.5 }}>
         <PriceChart1Y data={priceSeries} />
-      </div>
-    </div>
+        </Box>
+      </Box>
+      </Stack>
+    </Paper>
   );
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="card-muted px-3 py-2 rounded-lg">
-      <p className="text-[10px] uppercase tracking-wider text-ink-muted">{label}</p>
-      <p className="text-sm font-semibold font-mono mt-0.5">{value}</p>
-    </div>
+    <Grid size={{ xs: 6, sm: 4, lg: 3 }}>
+      <Box sx={{ height: '100%', px: 1.5, py: 1.25, borderRadius: 1.5, border: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700 }}>
+          {label}
+        </Typography>
+        <Typography sx={{ mt: 0.5, fontSize: 14, fontWeight: 700, fontFamily: 'monospace' }}>{value}</Typography>
+      </Box>
+    </Grid>
   );
 }

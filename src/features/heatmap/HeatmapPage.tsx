@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useMatch, useSearchParams } from 'react-router-dom';
+import { useMatch, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Alert,
   Box,
@@ -192,7 +192,8 @@ function squarify(items: QuoteFull[], width: number, height: number): TreemapRec
 }
 
 export function HeatmapPage() {
-  const { viewStock, goToPage } = useAppNavigation();
+  const navigate = useNavigate();
+  const { viewStock } = useAppNavigation();
   const theme = useTheme();
   const isActive = useMatch({ path: '/heatmap', end: true }) != null;
   const [searchParams, setSearchParams] = useSearchParams();
@@ -447,6 +448,14 @@ export function HeatmapPage() {
     lastUpdated ? ` Last updated ${fmtTime(lastUpdated)}.` : ''
   }`;
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate('/');
+  };
+
   return (
     <PageLayout className="max-w-7xl mt-6">
       <Stack spacing={2.25} sx={{ position: 'relative', isolation: 'isolate' }}>
@@ -513,10 +522,10 @@ export function HeatmapPage() {
                 variant="text"
                 size="small"
                 startIcon={<ArrowBackRoundedIcon fontSize="small" />}
-                onClick={() => goToPage('overview')}
+                onClick={handleBack}
                 sx={{ mb: 1, px: 0.5, minWidth: 0, textTransform: 'none', justifyContent: 'flex-start' }}
               >
-                Back to Overview
+                Back
               </Button>
               <Typography variant="h5" sx={{ mb: 0.75 }}>
                 {PAGE_COPY.heatmap.title}
