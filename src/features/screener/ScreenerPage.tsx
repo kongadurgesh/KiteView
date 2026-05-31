@@ -133,7 +133,16 @@ function MultiSelectDropdown({
   };
 
   return (
-    <Box ref={rootRef} sx={{ position: 'relative', minWidth, width: '100%', maxWidth, flexShrink: 0 }}>
+    <Box
+      ref={rootRef}
+      sx={{
+        position: 'relative',
+        width: '100%',
+        minWidth: { xs: '100%', sm: minWidth },
+        maxWidth: { xs: '100%', sm: maxWidth },
+        flexShrink: 0,
+      }}
+    >
       <Typography variant="caption" sx={{ mb: 0.75, display: 'block', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }}>
         {label}
       </Typography>
@@ -264,7 +273,16 @@ function RangeDropdown({
   const effectiveMax = Math.max(maxValue, minValue);
 
   return (
-    <Box ref={rootRef} sx={{ position: 'relative', minWidth: 136, maxWidth: 176, width: '100%', flexShrink: 0 }}>
+    <Box
+      ref={rootRef}
+      sx={{
+        position: 'relative',
+        width: '100%',
+        minWidth: { xs: '100%', sm: 136 },
+        maxWidth: { xs: '100%', sm: 176 },
+        flexShrink: 0,
+      }}
+    >
       <Typography variant="caption" sx={{ mb: 0.75, display: 'block', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }}>
         {label}
       </Typography>
@@ -819,9 +837,24 @@ export function ScreenerPage() {
         >
           <SectionHeader title="Scan controls" />
 
-          <Box sx={{ mt: 1.5, overflowX: 'auto', overflowY: 'hidden', pb: 1 }}>
-            <Stack direction="row" spacing={1} alignItems="flex-end" sx={{ minWidth: 'max-content' }}>
-              <Box sx={{ minWidth: 130 }}>
+          <Box
+            sx={{
+              mt: 1.5,
+              overflowX: { xs: 'visible', md: 'auto' },
+              overflowY: 'visible',
+              pb: 1,
+              touchAction: 'pan-y',
+            }}
+          >
+            <Stack
+              direction={{ xs: 'column', md: 'row' }}
+              spacing={1}
+              alignItems={{ xs: 'stretch', md: 'flex-end' }}
+              useFlexGap
+              flexWrap={{ xs: 'nowrap', md: 'nowrap' }}
+              sx={{ minWidth: { xs: 0, md: 'max-content' } }}
+            >
+              <Box sx={{ minWidth: { xs: '100%', md: 130 } }}>
                 <Typography variant="caption" sx={{ mb: 0.75, display: 'block', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }}>
                   Scan mode
                 </Typography>
@@ -836,13 +869,16 @@ export function ScreenerPage() {
                     p: 0.25,
                     border: '1px solid',
                     borderColor: 'divider',
+                    width: '100%',
                     '& .MuiToggleButton-root': {
                       border: 0,
                       borderRadius: 1,
-                      px: 1.25,
+                      px: { xs: 1.5, md: 1.25 },
                       textTransform: 'none',
                       fontWeight: 600,
                       fontSize: 12,
+                      minHeight: 36,
+                      flex: 1,
                     },
                   }}
                 >
@@ -853,7 +889,7 @@ export function ScreenerPage() {
 
               {scanMode === 'range' && (
                 <>
-                  <Box component="label" sx={{ minWidth: 150 }}>
+                  <Box component="label" sx={{ minWidth: { xs: '100%', md: 150 } }}>
                     <Typography variant="caption" sx={{ mb: 0.75, display: 'block', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }}>
                       From
                     </Typography>
@@ -876,7 +912,7 @@ export function ScreenerPage() {
                       }}
                     />
                   </Box>
-                  <Box component="label" sx={{ minWidth: 150 }}>
+                  <Box component="label" sx={{ minWidth: { xs: '100%', md: 150 } }}>
                     <Typography variant="caption" sx={{ mb: 0.75, display: 'block', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }}>
                       To
                     </Typography>
