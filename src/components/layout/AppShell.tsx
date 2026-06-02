@@ -60,7 +60,7 @@ export function AppShell({
   const appBarLeft = 72;
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
+    <Box sx={{ display: 'flex', height: '100dvh', overflow: 'hidden', bgcolor: 'background.default' }}>
       <Sidebar
         isDark={isDark}
         onToggleTheme={onToggleTheme}
@@ -69,7 +69,7 @@ export function AppShell({
         onMobileClose={() => onMobileMenuOpen(false)}
       />
 
-      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', minWidth: 0 }}>
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100dvh', minWidth: 0, overflow: 'hidden' }}>
         <Box
           sx={{
             position: 'fixed',
@@ -148,6 +148,8 @@ export function AppShell({
             alignItems: 'center',
             overflowY: 'auto',
             overflowX: 'hidden',
+            overscrollBehaviorY: 'contain',
+            WebkitOverflowScrolling: 'touch',
             scrollbarGutter: 'stable',
             width: '100%',
             minWidth: 0,

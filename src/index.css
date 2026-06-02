@@ -4,12 +4,19 @@
 
 @layer base {
   html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  html,
   body {
     @apply overflow-x-hidden;
   }
 
   body {
     @apply bg-surface-muted text-ink-primary antialiased;
+    overflow-y: hidden;
   }
 
   .dark body {
