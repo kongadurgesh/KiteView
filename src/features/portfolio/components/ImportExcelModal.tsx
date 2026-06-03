@@ -77,17 +77,55 @@ function detectColumns(headers: string[]): { isinCol: number; priceCol: number; 
   return { isinCol, priceCol, qtyCol };
 }
 
-async function resolveIsin(isin: string): Promise<{ symbol: string; shortname: string } | null> {
-  try {
-    const res = await fetch(`${API_BASE}/api/search?q=${encodeURIComponent(isin)}`);
-    const data = await res.json();
-    if (Array.isArray(data) && data.length > 0) {
-      return { symbol: data[0].symbol, shortname: data[0].shortname };
-    }
-    return null;
-  } catch {
-    return null;
+/** Validate and normalize ISIN format (12 chars, alphanumeric) */
+function validateAndNormalizeIsin(isin: string): string | null {
+  const normalized = isin.trim().toUpperCase();
+  // ISIN format: 12 characters (2 letter country code + 9 digit ISIN code + 1 check digit)
+  if (/^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(normalized)) {
+    return normalized;
   }
+  return null;
+}
+
+async function resolveIsin(isin: string): Promise<{ symbol: string; shortname: string } | null> {
+  const maxRetries = 2;
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout per attempt
+      
+      const res = await fetch(`${API_BASE}/api/resolve-isin?q=${encodeURIComponent(isin)}`, {
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!res.ok) {
+        // If it's a 404, don't retry
+        if (res.status === 404) return null;
+        throw new Error(`HTTP ${res.status}`);
+      }
+      
+      const data = await res.json();
+      if (data.symbol) {
+        return { symbol: data.symbol, shortname: data.shortname || data.symbol };
+      }
+      return null;
+    } catch (err) {
+      // If we haven't exceeded max retries, wait with exponential backoff
+      if (attempt < maxRetries) {
+        const delayMs = Math.pow(2, attempt) * 300; // 300ms, 600ms, 1200ms
+        await new Promise((r) => setTimeout(r, delayMs));
+        continue;
+      }
+      // Max retries exhausted
+      console.error(`[ISIN Resolution] Failed to resolve ${isin}:`, err);
+      return null;
+    }
+  }
+  
+  return null;
 }
 
 export function ImportExcelModal({ onImport, onClose }: ImportExcelModalProps) {
@@ -121,9 +159,11 @@ export function ImportExcelModal({ onImport, onClose }: ImportExcelModalProps) {
         const parsed: ImportRow[] = [];
         for (let i = 1; i < json.length; i++) {
           const row = json[i] as string[];
-          const isin = String(row[isinCol] ?? '').trim();
+          const rawIsin = String(row[isinCol] ?? '').trim();
+          const isin = validateAndNormalizeIsin(rawIsin);
           const price = parseFloat(String(row[priceCol] ?? ''));
           const qty = parseInt(String(row[qtyCol] ?? ''), 10);
+          // Skip if ISIN is invalid or other fields are invalid
           if (!isin || isNaN(price) || isNaN(qty) || qty <= 0 || price <= 0) continue;
           parsed.push({ isin, buyPrice: price, qty, symbol: '', stockName: '', status: 'pending' });
         }
@@ -181,8 +221,8 @@ export function ImportExcelModal({ onImport, onClose }: ImportExcelModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-2xl mx-4 p-6 max-h-[85vh] flex flex-col">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-4xl mx-4 p-6 max-h-[85vh] flex flex-col mt-16">
         <div className="flex items-center justify-between mb-5">
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Import from CSV</h3>
           <button onClick={onClose} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none">&times;</button>
@@ -198,7 +238,7 @@ export function ImportExcelModal({ onImport, onClose }: ImportExcelModalProps) {
               type="file"
               accept=".csv,text/csv"
               onChange={handleFile}
-              className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-900/30 file:text-blue-400 hover:file:bg-blue-900/50 cursor-pointer"
+              className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-white file:text-blue-600 hover:file:bg-blue-100 cursor-pointer"
             />
             {error && <p className="text-sm text-red-600 dark:text-red-400 font-medium">{error}</p>}
           </div>

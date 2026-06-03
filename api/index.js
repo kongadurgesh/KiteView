@@ -4,6 +4,7 @@ import profileHandler from '../backend/handlers/profile.js';
 import statsHandler from '../backend/handlers/stats.js';
 import searchHandler from '../backend/handlers/search.js';
 import resolveSymbolHandler from '../backend/handlers/resolve-symbol.js';
+import resolveIsinHandler from '../backend/handlers/resolve-isin.js';
 import screenerListHandler from '../backend/handlers/screener-list.js';
 import screenerScanHandler from '../backend/handlers/screener-scan.js';
 import chartBatchHandler from '../backend/handlers/chart-batch.js';
@@ -18,6 +19,7 @@ import indexConstituentsHandler from '../backend/handlers/index-constituents.js'
 const SINGLE = {
   'GET search': searchHandler,
   'GET resolve-symbol': resolveSymbolHandler,
+  'GET resolve-isin': resolveIsinHandler,
   'GET screener-list': screenerListHandler,
   'POST screener-scan': screenerScanHandler,
   'POST chart-batch': chartBatchHandler,
