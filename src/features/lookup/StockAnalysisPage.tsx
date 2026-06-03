@@ -248,12 +248,12 @@ export function StockAnalysisPage() {
                 stockStats={analysis.stockStats}
               />
               <SwotSection symbol={analysis.symbol} />
-              <TechnicalSection technical={analysis.technical} priceSeries={analysis.priceSeries} />
               <QuarterlyResultsSection
                 symbol={analysis.symbol}
                 data={analysis.quarterlyResults}
                 rawData={analysis.quarterlyResultsRaw}
               />
+              <TechnicalSection technical={analysis.technical} priceSeries={analysis.priceSeries} />
               <DvmSection dvm={analysis.dvm} />
               <CompanyProfileSection profile={analysis.profile} financials={analysis.financials} />
               <AnalystSection recs={analysis.recommendations} />
