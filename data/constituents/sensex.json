@@ -7,318 +7,168 @@
   "isProxy": false,
   "stocks": [
     {
-      "symbol": "AXISBANK.NS",
+      "symbol": "ADANIPORTS.BO",
+      "shortName": "Adani Ports & SEZ",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ASIANPAINT.BO",
+      "shortName": "Asian Paints",
+      "marketCap": 0
+    },
+    {
+      "symbol": "AXISBANK.BO",
       "shortName": "Axis Bank",
       "marketCap": 0
     },
     {
-      "symbol": "BEL.NS",
+      "symbol": "BAJAJFINSV.BO",
+      "shortName": "Bajaj Finserv",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BAJFINANCE.BO",
+      "shortName": "Bajaj Finance",
+      "marketCap": 0
+    },
+    {
+      "symbol": "BEL.BO",
       "shortName": "Bharat Electronics",
       "marketCap": 0
     },
     {
-      "symbol": "ETERNAL.NS",
-      "shortName": "Eternal",
+      "symbol": "BHARTIARTL.BO",
+      "shortName": "Bharti Airtel",
       "marketCap": 0
     },
     {
-      "symbol": "HCLTECH.NS",
-      "shortName": "HCLTech",
+      "symbol": "ETERNAL.BO",
+      "shortName": "Eternal Ltd",
       "marketCap": 0
     },
     {
-      "symbol": "HDFCBANK.NS",
+      "symbol": "HCLTECH.BO",
+      "shortName": "HCL Technologies",
+      "marketCap": 0
+    },
+    {
+      "symbol": "HDFCBANK.BO",
       "shortName": "HDFC Bank",
       "marketCap": 0
     },
     {
-      "symbol": "ICICIBANK.NS",
+      "symbol": "HINDUNILVR.BO",
+      "shortName": "Hindustan Unilever",
+      "marketCap": 0
+    },
+    {
+      "symbol": "ICICIBANK.BO",
       "shortName": "ICICI Bank",
       "marketCap": 0
     },
     {
-      "symbol": "INDIGO.NS",
-      "shortName": "IndiGo",
+      "symbol": "INDUSINDBK.BO",
+      "shortName": "IndusInd Bank",
       "marketCap": 0
     },
     {
-      "symbol": "INFY.NS",
+      "symbol": "INFY.BO",
       "shortName": "Infosys",
       "marketCap": 0
     },
     {
-      "symbol": "ITC.NS",
-      "shortName": "ITC",
+      "symbol": "INDIGO.BO",
+      "shortName": "InterGlobe Aviation",
       "marketCap": 0
     },
     {
-      "symbol": "KOTAKBANK.NS",
+      "symbol": "ITC.BO",
+      "shortName": "ITC Ltd",
+      "marketCap": 0
+    },
+    {
+      "symbol": "KOTAKBANK.BO",
       "shortName": "Kotak Mahindra Bank",
       "marketCap": 0
     },
     {
-      "symbol": "LT.NS",
+      "symbol": "LT.BO",
       "shortName": "Larsen & Toubro",
       "marketCap": 0
     },
     {
-      "symbol": "M&M.NS",
+      "symbol": "M&M.BO",
       "shortName": "Mahindra & Mahindra",
       "marketCap": 0
     },
     {
-      "symbol": "MARUTI.NS",
+      "symbol": "MARUTI.BO",
       "shortName": "Maruti Suzuki",
       "marketCap": 0
     },
     {
-      "symbol": "NTPC.NS",
-      "shortName": "NTPC",
+      "symbol": "NESTLEIND.BO",
+      "shortName": "Nestle India",
       "marketCap": 0
     },
     {
-      "symbol": "POWERGRID.NS",
-      "shortName": "Power Grid",
+      "symbol": "NTPC.BO",
+      "shortName": "NTPC Ltd",
       "marketCap": 0
     },
     {
-      "symbol": "RELIANCE.NS",
+      "symbol": "POWERGRID.BO",
+      "shortName": "Power Grid Corp",
+      "marketCap": 0
+    },
+    {
+      "symbol": "RELIANCE.BO",
       "shortName": "Reliance Industries",
       "marketCap": 0
     },
     {
-      "symbol": "SBIN.NS",
+      "symbol": "SBIN.BO",
       "shortName": "State Bank of India",
       "marketCap": 0
     },
     {
-      "symbol": "SUNPHARMA.NS",
-      "shortName": "Sun Pharma",
+      "symbol": "SUNPHARMA.BO",
+      "shortName": "Sun Pharmaceutical",
       "marketCap": 0
     },
     {
-      "symbol": "TCS.NS",
+      "symbol": "TCS.BO",
       "shortName": "Tata Consultancy Services",
       "marketCap": 0
     },
     {
-      "symbol": "TATASTEEL.NS",
+      "symbol": "TATAMOTORS.BO",
+      "shortName": "Tata Motors",
+      "marketCap": 0
+    },
+    {
+      "symbol": "TATASTEEL.BO",
       "shortName": "Tata Steel",
       "marketCap": 0
     },
     {
-      "symbol": "TECHM.NS",
+      "symbol": "TECHM.BO",
       "shortName": "Tech Mahindra",
       "marketCap": 0
     },
     {
-      "symbol": "TITAN.NS",
+      "symbol": "TITAN.BO",
       "shortName": "Titan Company",
       "marketCap": 0
     },
     {
-      "symbol": "TRENT.NS",
-      "shortName": "Trent",
+      "symbol": "TRENT.BO",
+      "shortName": "Trent Ltd",
       "marketCap": 0
     },
     {
-      "symbol": "REPLACED.NS",
-      "shortName": "Constituent removed",
-      "marketCap": 0
-    },
-    {
-      "symbol": "SUN.NS",
-      "shortName": "Reliance Communications",
-      "marketCap": 0
-    },
-    {
-      "symbol": "COAL.NS",
-      "shortName": "Reliance Infra",
-      "marketCap": 0
-    },
-    {
-      "symbol": "LUPIN.NS",
-      "shortName": "Tata Power",
-      "marketCap": 0
-    },
-    {
-      "symbol": "ASIAN.NS",
-      "shortName": "Hindalco Industries",
-      "marketCap": 0
-    },
-    {
-      "symbol": "YES.NS",
-      "shortName": "Lupin",
-      "marketCap": 0
-    },
-    {
-      "symbol": "VEDANTA.NS",
-      "shortName": "Dr. Reddy's Laboratories",
-      "marketCap": 0
-    },
-    {
-      "symbol": "TATA.NS",
-      "shortName": "Oil and Natural Gas Corporation",
-      "marketCap": 0
-    },
-    {
-      "symbol": "WIPRO.NS",
-      "shortName": "Bajaj Auto",
-      "marketCap": 0
-    },
-    {
-      "symbol": "JSW.NS",
-      "shortName": "HDFC",
-      "marketCap": 0
-    },
-    {
-      "symbol": "ZOMATO.NS",
-      "shortName": "JSW Steel",
-      "marketCap": 0
-    },
-    {
-      "symbol": "DATE.NS",
-      "shortName": "S.No.",
-      "marketCap": 0
-    },
-    {
-      "symbol": "17.NS",
-      "shortName": "2",
-      "marketCap": 0
-    },
-    {
-      "symbol": "15.NS",
-      "shortName": "3",
-      "marketCap": 0
-    },
-    {
-      "symbol": "18.NS",
-      "shortName": "4",
-      "marketCap": 0
-    },
-    {
-      "symbol": "19.NS",
-      "shortName": "5",
-      "marketCap": 0
-    },
-    {
-      "symbol": "22.NS",
-      "shortName": "6",
-      "marketCap": 0
-    },
-    {
-      "symbol": "2.NS",
-      "shortName": "7",
-      "marketCap": 0
-    },
-    {
-      "symbol": "3.NS",
-      "shortName": "17",
-      "marketCap": 0
-    },
-    {
-      "symbol": "27.NS",
-      "shortName": "21",
-      "marketCap": 0
-    },
-    {
-      "symbol": "6.NS",
-      "shortName": "27",
-      "marketCap": 0
-    },
-    {
-      "symbol": "13.NS",
-      "shortName": "35",
-      "marketCap": 0
-    },
-    {
-      "symbol": "31.NS",
-      "shortName": "36",
-      "marketCap": 0
-    },
-    {
-      "symbol": "20.NS",
-      "shortName": "37",
-      "marketCap": 0
-    },
-    {
-      "symbol": "8.NS",
-      "shortName": "43",
-      "marketCap": 0
-    },
-    {
-      "symbol": "9.NS",
-      "shortName": "48",
-      "marketCap": 0
-    },
-    {
-      "symbol": "5.NS",
-      "shortName": "50",
-      "marketCap": 0
-    },
-    {
-      "symbol": "1.NS",
-      "shortName": "73",
-      "marketCap": 0
-    },
-    {
-      "symbol": "4.NS",
-      "shortName": "76",
-      "marketCap": 0
-    },
-    {
-      "symbol": "14.NS",
-      "shortName": "77",
-      "marketCap": 0
-    },
-    {
-      "symbol": "11.NS",
-      "shortName": "79",
-      "marketCap": 0
-    },
-    {
-      "symbol": "7.NS",
-      "shortName": "87",
-      "marketCap": 0
-    },
-    {
-      "symbol": "EQUITIES.NS",
-      "shortName": "Global",
-      "marketCap": 0
-    },
-    {
-      "symbol": "ASIA.NS",
-      "shortName": "Regional",
-      "marketCap": 0
-    },
-    {
-      "symbol": "ENERGY.NS",
-      "shortName": "Industry indices",
-      "marketCap": 0
-    },
-    {
-      "symbol": "US.NS",
-      "shortName": "Americas",
-      "marketCap": 0
-    },
-    {
-      "symbol": "UK.NS",
-      "shortName": "Europe",
-      "marketCap": 0
-    },
-    {
-      "symbol": "CHINA.NS",
-      "shortName": "Asia",
-      "marketCap": 0
-    },
-    {
-      "symbol": "AUSTRALIA.NS",
-      "shortName": "Oceania",
-      "marketCap": 0
-    },
-    {
-      "symbol": "FEDERAL.NS",
-      "shortName": "Enforcement",
+      "symbol": "ULTRACEMCO.BO",
+      "shortName": "UltraTech Cement",
       "marketCap": 0
     }
   ]
