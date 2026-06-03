@@ -7,6 +7,7 @@ import swotBatchHandler from './backend/handlers/swot-batch.js';
 import indexConstituentsHandler from './backend/handlers/index-constituents.js';
 import searchHandler from './backend/handlers/search.js';
 import resolveSymbolHandler from './backend/handlers/resolve-symbol.js';
+import resolveIsinHandler from './backend/handlers/resolve-isin.js';
 
 const app = express();
 const PORT = 3006;
@@ -290,6 +291,7 @@ app.post('/api/heatmap-batch', async (req, res) => {
 
 app.get('/api/search', searchHandler);
 app.get('/api/resolve-symbol', resolveSymbolHandler);
+app.get('/api/resolve-isin', resolveIsinHandler);
 
 async function fetchChartPayload(symbol, range, interval) {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=${range}&interval=${interval}&includePrePost=false`;
