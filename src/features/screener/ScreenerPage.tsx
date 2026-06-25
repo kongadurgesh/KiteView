@@ -53,6 +53,10 @@ type SortKey =
 type SortDir = 'asc' | 'desc';
 
 const PATTERN_OPTIONS: ScreenerPatternName[] = ['Bullish Harami', 'Bullish Engulfing'];
+const SIGNAL_OPTIONS: { value: 'BUY' | 'WAIT'; label: 'BUY' | 'WAIT' }[] = [
+  { value: 'BUY', label: 'BUY' },
+  { value: 'WAIT', label: 'WAIT' }
+];
 
 const INDEX_OPTIONS = heatmapIndicesByGroup('indian')
   .filter((opt) => HEATMAP_INDICES.some((item) => item.id === opt.id) && opt.id !== 'all')
@@ -468,6 +472,7 @@ export function ScreenerPage() {
   const [marketCapMax, setMarketCapMax] = useState('');
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
+  const [selectedSignals, setSelectedSignals] = useState<string[]>([]);
   const [scanning, setScanning] = useState(false);
   const [loadingList, setLoadingList] = useState(false);
   const [loadingIndexUniverse, setLoadingIndexUniverse] = useState(false);
@@ -656,7 +661,12 @@ export function ScreenerPage() {
   };
 
   const sortedResults = useMemo(() => {
-    const rows = [...results];
+    let rows = [...results];
+
+    if(selectedSignals.length > 0) {
+      rows = rows.filter((r) => selectedSignals.includes(r.signal));
+    }
+    rows = [...rows];
     rows.sort((a, b) => {
       let cmp = 0;
       switch (sortKey) {
@@ -705,7 +715,7 @@ export function ScreenerPage() {
       return sortDir === 'asc' ? cmp : -cmp;
     });
     return rows;
-  }, [results, sortKey, sortDir]);
+  }, [results, sortKey, sortDir, selectedSignals]);
 
   const visibleFoundCount = sortedResults.length;
 
@@ -1046,7 +1056,7 @@ export function ScreenerPage() {
         </Alert>
       )}
 
-      {sortedResults.length === 0 && !scanning && progress.total > 0 && (
+      {results.length === 0 && !scanning && progress.total > 0 && (
         <Paper
           variant="outlined"
           sx={{
@@ -1064,18 +1074,18 @@ export function ScreenerPage() {
         </Paper>
       )}
 
-      {sortedResults.length > 0 && (
+      {results.length > 0 && (
         <Paper variant="outlined" sx={{ overflow: 'hidden', boxShadow: '0 3px 14px rgba(15,23,42,0.05)' }}>
           <Box sx={{ overflowX: 'auto' }}>
             <Box component="table" sx={{ width: '100%', minWidth: 1280, borderCollapse: 'separate', borderSpacing: 0, fontSize: 14 }}>
               <Box component="thead" sx={{ bgcolor: 'action.hover' }}>
                 <tr>
                   <TableSerialHeader sticky />
-                  <SortHeader label="Stock" k="name" current={sortKey} dir={sortDir} onSort={toggleSort} align="left" stickyAfterSerial />
-                  <SortHeader label="Signal" k="signal" current={sortKey} dir={sortDir} onSort={toggleSort} />
+                  <SortHeader width={240} label="Stock" k="name" current={sortKey} dir={sortDir} onSort={toggleSort} align="left" stickyAfterSerial />
+                  <TableFilterSortHeader label="Signal" k="signal" current={sortKey} dir={sortDir} onSort={toggleSort} align="right" options={SIGNAL_OPTIONS} selected={selectedSignals} onChange={setSelectedSignals} />
                   <SortHeader label="SWOT" k="swot" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="Pattern date" k="patternDate" current={sortKey} dir={sortDir} onSort={toggleSort} />
-                  <SortHeader label="Current Price" k="cmp" current={sortKey} dir={sortDir} onSort={toggleSort} />
+                  <SortHeader label="CMP" k="cmp" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="% vs Buy" k="distBuy" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="Buy Price" k="buyPrice" current={sortKey} dir={sortDir} onSort={toggleSort} />
                   <SortHeader label="Dist Low" k="distLow" current={sortKey} dir={sortDir} onSort={toggleSort} />
@@ -1085,7 +1095,7 @@ export function ScreenerPage() {
                 </tr>
               </Box>
               <Box component="tbody">
-                {sortedResults.map((r, rowIndex) => (
+                {sortedResults.length > 0  ?(sortedResults.map((r, rowIndex) => (
                   <Box
                     component="tr"
                     key={r.symbol}
@@ -1227,7 +1237,17 @@ export function ScreenerPage() {
                       {r.marketCapCr ? fmtMarketCapCr(r.marketCapCr) : '—'}
                     </Box>
                   </Box>
-                ))}
+                ))
+              ):(
+                  <Box component="tr">
+                    <Box component="td" colSpan={12} sx={{ p: 3, textAlign: 'center' }}>
+                      <Typography variant="body2" color="text.secondary">
+                        No Stocks match your filters.
+                      </Typography>
+                    </Box>
+                  </Box>
+              )
+                }
               </Box>
             </Box>
           </Box>
@@ -1247,10 +1267,11 @@ export function ScreenerPage() {
   );
 }
 
-function SortHeader({ label, k, current, dir, onSort, align = 'right', stickyAfterSerial }: {
+function SortHeader({ label, k, current, dir, onSort, align = 'right', stickyAfterSerial, width }: {
   label: string; k: SortKey; current: SortKey; dir: SortDir;
   onSort: (key: SortKey) => void; align?: 'left' | 'right';
   stickyAfterSerial?: boolean;
+  width?: number | string;
 }) {
   const isActive = current === k;
   const stickyLeft = align === 'left' ? (stickyAfterSerial ? 44 : 0) : undefined;
@@ -1272,11 +1293,142 @@ function SortHeader({ label, k, current, dir, onSort, align = 'right', stickyAft
         background: align === 'left' ? 'var(--mui-palette-action-hover)' : undefined,
         boxShadow: align === 'left' ? '2px 0 4px -2px rgba(0,0,0,0.14)' : undefined,
         color: isActive ? 'var(--mui-palette-primary-main)' : 'var(--mui-palette-text-secondary)',
+        width: width,
+        minWidth: width,
       }}
       onClick={() => onSort(k)}
     >
       {label}
       {isActive && <span style={{ marginLeft: 4 }}>{dir === 'asc' ? '↑' : '↓'}</span>}
+    </th>
+  );
+}
+
+function TableFilterSortHeader({
+  label, k, current, dir, onSort, align = 'right', stickyAfterSerial,
+  options, selected, onChange, width
+}: {
+  label: string; k: SortKey; current: SortKey; dir: SortDir;
+  onSort: (key: SortKey) => void; align?: 'left' | 'right';
+  stickyAfterSerial?: boolean;
+  options: { label: string; value: string }[];
+  selected: string[];
+  onChange: (values: string[]) => void;
+  width?: number | string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
+  const buttonRef = useRef<HTMLDivElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDocMouseDown = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (!buttonRef.current?.contains(target) && !menuRef.current?.contains(target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onDocMouseDown);
+    return () => document.removeEventListener('mousedown', onDocMouseDown);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || !buttonRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    // Position the dropdown slightly offset from the filter icon
+    setMenuStyle({ position: 'fixed', left: rect.left - 80, top: rect.bottom + 8, width: 140, zIndex: 60 });
+  }, [open]);
+
+  const toggle = (value: string) => {
+    if (selected.includes(value)) {
+      onChange(selected.filter((item) => item !== value));
+    } else {
+      onChange([...selected, value]);
+    }
+  };
+
+  const isActive = current === k;
+  const isFiltered = selected.length > 0;
+  const stickyLeft = align === 'left' ? (stickyAfterSerial ? 44 : 0) : undefined;
+
+  return (
+    <th
+      style={{
+        padding: '12px',
+        fontWeight: 600,
+        fontSize: 12,
+        letterSpacing: '0.06em',
+        textTransform: 'uppercase',
+        userSelect: 'none',
+        whiteSpace: 'nowrap',
+        textAlign: align,
+        position: align === 'left' ? 'sticky' : 'static',
+        left: stickyLeft,
+        zIndex: align === 'left' ? 10 : undefined,
+        background: align === 'left' ? 'var(--mui-palette-action-hover)' : undefined,
+        boxShadow: align === 'left' ? '2px 0 4px -2px rgba(0,0,0,0.14)' : undefined,
+        color: isActive ? 'var(--mui-palette-primary-main)' : 'var(--mui-palette-text-secondary)',
+        width: width,
+        minWidth: width
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: align === 'right' ? 'flex-end' : 'flex-start', gap: 0.5 }}>
+        <Box sx={{ cursor: 'pointer' }} onClick={() => onSort(k)}>
+          {label}
+          {isActive && <span style={{ marginLeft: 4 }}>{dir === 'asc' ? '↑' : '↓'}</span>}
+        </Box>
+        <Box
+          ref={buttonRef}
+          onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
+          sx={{
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            color: isFiltered ? 'primary.main' : 'inherit',
+            opacity: isFiltered ? 1 : 0.6,
+            '&:hover': { opacity: 1 }
+          }}
+          title="Filter Signal"
+        >
+          {/* Inline SVG funnel icon to avoid adding new MUI icon imports */}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          </svg>
+        </Box>
+      </Box>
+
+      {open && createPortal(
+        <Paper ref={menuRef} style={menuStyle} variant="outlined" sx={{ borderRadius: 1, boxShadow: '0 8px 24px rgba(15,23,42,0.15)' }}>
+          <Box sx={{ p: 1 }}>
+            <Typography variant="caption" sx={{ px: 1, mb: 0.5, display: 'block', fontWeight: 700, color: 'text.secondary' }}>
+              FILTER SIGNAL
+            </Typography>
+            {options.map((option) => (
+              <Box
+                key={option.value}
+                component="label"
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  borderRadius: 1,
+                  px: 1,
+                  py: 0.5,
+                  cursor: 'pointer',
+                  '&:hover': { bgcolor: 'action.hover' },
+                }}
+              >
+                <Checkbox size="small" checked={selected.includes(option.value)} onChange={() => toggle(option.value)} sx={{ p: 0.5 }} />
+                <Typography sx={{ fontSize: 12, fontWeight: 500, textTransform: 'none', color: 'text.primary' }}>
+                  {option.label}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Paper>,
+        document.body,
+      )}
     </th>
   );
 }

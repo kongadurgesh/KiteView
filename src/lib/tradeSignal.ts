@@ -4,7 +4,7 @@ export type TradeSignal = 'BUY' | 'WAIT';
 export function getTradeSignal(
   cmp: number,
   buyPrice: number,
-  tolerancePct = 2,
+  tolerancePct = 2.05,
 ): TradeSignal {
   if (cmp <= 0 || buyPrice <= 0) return 'WAIT';
   return cmp <= buyPrice * (1 + tolerancePct / 100) ? 'BUY' : 'WAIT';
