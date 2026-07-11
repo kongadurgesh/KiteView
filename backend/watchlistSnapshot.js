@@ -59,7 +59,7 @@ async function fetchChart(symbol, range) {
 
 function tradeSignal(cmp, buyPrice) {
   if (cmp <= 0 || buyPrice <= 0) return 'WAIT';
-  return cmp <= buyPrice * 1.02 ? 'BUY' : 'WAIT';
+  return cmp <= buyPrice * 1.025 ? 'BUY' : 'WAIT';
 }
 
 export async function buildWatchlistSnapshot(symbol) {
