@@ -111,6 +111,8 @@ Transaction-based portfolio tracker with analytics.
 
 Research lists with live snapshots and optional browser alerts.
 
+- SWOT values are now enriched client-side as a fallback when Trendlyne cannot be reached from the server, so Screener and Watchlist remain populated in dev and production.
+
 - **Multiple lists**: create, rename, delete; default list on first visit
 - **Add from Analysis or Screener**: seeds entry buy price and pattern date when a breakout is present
 - **Live table** via `POST /api/watchlist-snapshot`: **#** row index, CMP, BUY/WAIT, buy price, pattern date, SWOT S/W

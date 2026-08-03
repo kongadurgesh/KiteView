@@ -10,8 +10,12 @@ export function nseSymbolToTrendlyneTicker(symbol) {
   return symbol.trim().toUpperCase().replace(/\.(NS|BO)$/i, '');
 }
 
-function swotWidgetUrl(ticker) {
-  return `https://trendlyne.com/web-widget/swot-widget/Poppins/${encodeURIComponent(ticker)}/?${SWOT_WIDGET_COLORS}`;
+function swotWidgetUrls(ticker) {
+  const encoded = encodeURIComponent(ticker);
+  return [
+    `https://trendlyne.com/web-widget/swot-widget/Poppins/${encoded}/?${SWOT_WIDGET_COLORS}`,
+    `https://www.trendlyne.com/web-widget/swot-widget/Poppins/${encoded}/?${SWOT_WIDGET_COLORS}`,
+  ];
 }
 
 function parseSwotCounts(html) {
@@ -65,16 +69,37 @@ export async function fetchTrendlyneSwotCounts(symbolOrTicker, { useCache = true
   }
 
   try {
-    const response = await fetch(swotWidgetUrl(ticker), {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; KiteView/1.0)' },
-    });
-    if (!response.ok) return null;
-    const html = await response.text();
-    const counts = parseSwotCounts(html);
-    if (counts.strengths == null || counts.weaknesses == null) return null;
-    swotCache.set(ticker, { counts, expires: Date.now() + SWOT_CACHE_TTL_MS });
-    return counts;
-  } catch {
+    let lastError = null;
+    for (const url of swotWidgetUrls(ticker)) {
+      try {
+        const response = await fetch(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; KiteView/1.0)',
+            Referer: 'https://www.google.com/',
+          },
+        });
+        if (!response.ok) {
+          lastError = new Error(`SWOT request failed with ${response.status}`);
+          continue;
+        }
+        const html = await response.text();
+        const counts = parseSwotCounts(html);
+        if (counts.strengths == null || counts.weaknesses == null) {
+          lastError = new Error('SWOT HTML did not contain card counts');
+          continue;
+        }
+        swotCache.set(ticker, { counts, expires: Date.now() + SWOT_CACHE_TTL_MS });
+        return counts;
+      } catch (err) {
+        lastError = err;
+      }
+    }
+    if (lastError) {
+      console.warn(`[swot] ${ticker} failed`, lastError.message);
+    }
+    return null;
+  } catch (err) {
+    console.warn(`[swot] ${ticker} unexpected failure`, err?.message || err);
     return null;
   }
 }
