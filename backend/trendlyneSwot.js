@@ -15,19 +15,33 @@ function swotWidgetUrl(ticker) {
 }
 
 function parseSwotCounts(html) {
-  const parseCard = (className) => {
-    const re = new RegExp(
-      `swot_cards\\s+${className}[^>]*>[\\s\\S]*?tag_number[^>]*>\\s*(\\d+)`,
-      'i',
-    );
-    const m = html.match(re);
-    return m ? Number(m[1]) : null;
+  const normalizeCount = (value) => {
+    const parsed = Number.parseInt(String(value).replace(/[^0-9-]/g, ''), 10);
+    return Number.isFinite(parsed) ? parsed : null;
   };
+
+  const findCardValue = (className) => {
+    const cardRe = new RegExp(`<[^>]+class=["']([^"']*${className}[^"']*)["'][^>]*>`, 'i');
+    const cardMatch = html.match(cardRe);
+    if (!cardMatch) return null;
+
+    const cardStart = cardMatch.index + cardMatch[0].length;
+    const cardEnd = html.indexOf('</div>', cardStart);
+    if (cardEnd === -1) return null;
+
+    const cardHtml = html.slice(cardStart, cardEnd);
+    const tagNumberMatch = cardHtml.match(/tag_number[^>]*>[\s\S]*?([0-9]+(?:\.[0-9]+)?)/i);
+    if (tagNumberMatch) return normalizeCount(tagNumberMatch[1]);
+
+    const numberMatch = cardHtml.match(/([0-9]+(?:\.[0-9]+)?)/);
+    return numberMatch ? normalizeCount(numberMatch[1]) : null;
+  };
+
   return {
-    strengths: parseCard('strengths-fill'),
-    weaknesses: parseCard('weakness-fill'),
-    opportunities: parseCard('opportunity-fill'),
-    threats: parseCard('threats-fill'),
+    strengths: findCardValue('strengths-fill'),
+    weaknesses: findCardValue('weakness-fill'),
+    opportunities: findCardValue('opportunity-fill'),
+    threats: findCardValue('threats-fill'),
   };
 }
 
