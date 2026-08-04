@@ -1025,6 +1025,8 @@ function PositionTableRow({
             textAlign: "right",
             fontFamily: "monospace",
             fontSize: 12,
+            whiteSpace: "nowrap",
+            minWidth: { xs: 92, sm: 112 },
           }}
         >
           <SwotValue counts={swot} />
@@ -1187,8 +1189,9 @@ function SwotValue({ counts }: { counts?: SwotCounts | null }) {
         display: "inline-flex",
         alignItems: "center",
         gap: 0.5,
-        flexWrap: "wrap",
+        flexWrap: "nowrap",
         justifyContent: "flex-end",
+        whiteSpace: "nowrap",
       }}
     >
       <Box component="span" sx={{ color: "success.main" }}>
