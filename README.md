@@ -99,7 +99,7 @@ Transaction-based portfolio tracker with analytics.
 
 - **Transactions**: BUY/SELL with qty, price, date
 - **Import**: `.csv` only (native parser; no spreadsheet dependency)
-- **Positions**: avg buy, qty, invested, live value, P&L (₹ and %)
+- **Positions**: avg buy, SWOT S/W/O/T, qty, invested, live value, P&L (₹ and %)
 - **Live prices**: batch quotes for all holdings
 - **Sortable** positions table with **#** row index; expanded row shows numbered transaction history
 - **Performance chart**: portfolio vs Nifty 50, Bank Nifty, Midcap 50, Nifty 200 (normalized or absolute; 1M–ALL)

@@ -1,5 +1,12 @@
-import { useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+  type ReactNode,
+} from "react";
+import { useNavigate } from "react-router-dom";
 import {
   alpha,
   Box,
@@ -11,28 +18,47 @@ import {
   Stack,
   Typography,
   useTheme,
-} from '@mui/material';
-import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
-import KeyboardArrowUpRoundedIcon from '@mui/icons-material/KeyboardArrowUpRounded';
-import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
-import { Portfolio, Position, Transaction } from '../../types';
-import { loadPortfolioFromCloud, savePortfolio, addTransaction, getPositions, removePosition, clearPortfolio, savePortfolioToCloud } from '../../utils/portfolio';
-import { useAuth } from '../../auth/AuthContext';
-import { fetchBatchQuotesDetailed } from '../../services/fetchStockData';
-import { PageLayout } from '../../components/layout/PageLayout';
-import { PAGE_COPY } from '../../content/pageCopy';
-import { fmtNumber } from '../../lib/format';
-import { AddTransactionModal } from './components/AddTransactionModal';
-import { ImportExcelModal } from './components/ImportExcelModal';
-import { TransactionHistory } from './components/TransactionHistory';
-import { PerformanceChart } from './components/PerformanceChart';
-import { RiskDashboard } from './components/RiskDashboard';
-import { TableSerialCell, TableSerialHeader } from '../../components/ui';
-import { SectionHeader } from '../../components/ui';
-type SortKey = 'name' | 'qty' | 'avgBuy' | 'cmp' | 'invested' | 'current' | 'pnl' | 'pnlPct' | 'todayPnl' | 'todayPnlPct';
-type SortDir = 'asc' | 'desc';
+} from "@mui/material";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
+import KeyboardArrowUpRoundedIcon from "@mui/icons-material/KeyboardArrowUpRounded";
+import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
+import { Portfolio, Position, Transaction } from "../../types";
+import {
+  loadPortfolioFromCloud,
+  savePortfolio,
+  addTransaction,
+  getPositions,
+  removePosition,
+  clearPortfolio,
+  savePortfolioToCloud,
+} from "../../utils/portfolio";
+import { useAuth } from "../../auth/AuthContext";
+import { fetchBatchQuotesDetailed } from "../../services/fetchStockData";
+import { fetchSwotBatch, type SwotCounts } from "../../services/apiBatch";
+import { PageLayout } from "../../components/layout/PageLayout";
+import { PAGE_COPY } from "../../content/pageCopy";
+import { fmtNumber } from "../../lib/format";
+import { AddTransactionModal } from "./components/AddTransactionModal";
+import { ImportExcelModal } from "./components/ImportExcelModal";
+import { TransactionHistory } from "./components/TransactionHistory";
+import { PerformanceChart } from "./components/PerformanceChart";
+import { RiskDashboard } from "./components/RiskDashboard";
+import { TableSerialCell, TableSerialHeader } from "../../components/ui";
+import { SectionHeader } from "../../components/ui";
+type SortKey =
+  | "name"
+  | "qty"
+  | "avgBuy"
+  | "cmp"
+  | "invested"
+  | "current"
+  | "pnl"
+  | "pnlPct"
+  | "todayPnl"
+  | "todayPnlPct";
+type SortDir = "asc" | "desc";
 
 interface PositionRow {
   pos: Position;
@@ -54,28 +80,47 @@ function buildRow(
   const prevClose = livePrevClose[pos.symbol];
   const currentValue = cmp * pos.totalQty;
   const unrealized = cmp ? (cmp - pos.avgBuyPrice) * pos.totalQty : 0;
-  const unrealizedPct = pos.investedAmount > 0 && cmp
-    ? (unrealized / pos.investedAmount) * 100
-    : 0;
+  const unrealizedPct =
+    pos.investedAmount > 0 && cmp ? (unrealized / pos.investedAmount) * 100 : 0;
   const isClosed = pos.totalQty === 0;
-  const todayPnl = !isClosed && cmp && prevClose ? (cmp - prevClose) * pos.totalQty : 0;
+  const todayPnl =
+    !isClosed && cmp && prevClose ? (cmp - prevClose) * pos.totalQty : 0;
   const prevValue = !isClosed && prevClose ? prevClose * pos.totalQty : 0;
   const todayPnlPct = prevValue > 0 ? (todayPnl / prevValue) * 100 : 0;
-  return { pos, cmp, currentValue, unrealized, unrealizedPct, todayPnl, todayPnlPct, isClosed };
+  return {
+    pos,
+    cmp,
+    currentValue,
+    unrealized,
+    unrealizedPct,
+    todayPnl,
+    todayPnlPct,
+    isClosed,
+  };
 }
 
 function getSortValue(row: PositionRow, key: SortKey): number | string {
   switch (key) {
-    case 'name': return row.pos.stockName.toLowerCase();
-    case 'qty': return row.pos.totalQty;
-    case 'avgBuy': return row.pos.avgBuyPrice;
-    case 'cmp': return row.cmp;
-    case 'invested': return row.pos.investedAmount;
-    case 'current': return row.currentValue;
-    case 'pnl': return row.unrealized;
-    case 'pnlPct': return row.unrealizedPct;
-    case 'todayPnl': return row.todayPnl;
-    case 'todayPnlPct': return row.todayPnlPct;
+    case "name":
+      return row.pos.stockName.toLowerCase();
+    case "qty":
+      return row.pos.totalQty;
+    case "avgBuy":
+      return row.pos.avgBuyPrice;
+    case "cmp":
+      return row.cmp;
+    case "invested":
+      return row.pos.investedAmount;
+    case "current":
+      return row.currentValue;
+    case "pnl":
+      return row.unrealized;
+    case "pnlPct":
+      return row.unrealizedPct;
+    case "todayPnl":
+      return row.todayPnl;
+    case "todayPnlPct":
+      return row.todayPnlPct;
   }
 }
 
@@ -87,14 +132,18 @@ export function PortfolioPage() {
   const [cloudLoading, setCloudLoading] = useState(false);
   const cloudReady = useRef(false);
   const [livePrices, setLivePrices] = useState<Record<string, number>>({});
-  const [livePrevClose, setLivePrevClose] = useState<Record<string, number>>({});
+  const [livePrevClose, setLivePrevClose] = useState<Record<string, number>>(
+    {},
+  );
   const [loadingPrices, setLoadingPrices] = useState(false);
+  const [swotMap, setSwotMap] = useState<Record<string, SwotCounts>>({});
   const [showModal, setShowModal] = useState(false);
   const [showImport, setShowImport] = useState(false);
-  const [showDeletePortfolioModal, setShowDeletePortfolioModal] = useState(false);
+  const [showDeletePortfolioModal, setShowDeletePortfolioModal] =
+    useState(false);
   const [expandedSymbol, setExpandedSymbol] = useState<string | null>(null);
-  const [sortKey, setSortKey] = useState<SortKey>('name');
-  const [sortDir, setSortDir] = useState<SortDir>('asc');
+  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
 
   // Load from cloud when user changes
   useEffect(() => {
@@ -120,6 +169,31 @@ export function PortfolioPage() {
 
   const positions = getPositions(portfolio);
   const activePositions = positions.filter((p) => p.totalQty > 0);
+  const positionSymbols = useMemo(
+    () => positions.map((p) => p.symbol),
+    [positions],
+  );
+
+  useEffect(() => {
+    if (positionSymbols.length === 0) {
+      setSwotMap({});
+      return;
+    }
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const nextSwotMap = await fetchSwotBatch(positionSymbols);
+        if (!cancelled) setSwotMap(nextSwotMap);
+      } catch {
+        if (!cancelled) setSwotMap({});
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [positionSymbols.join(",")]);
 
   const refreshPrices = useCallback(async () => {
     const symbols = activePositions.map((p) => p.symbol);
@@ -138,7 +212,7 @@ export function PortfolioPage() {
     } finally {
       setLoadingPrices(false);
     }
-  }, [activePositions.map((p) => p.symbol).join(',')]);
+  }, [activePositions.map((p) => p.symbol).join(",")]);
 
   useEffect(() => {
     refreshPrices();
@@ -150,21 +224,29 @@ export function PortfolioPage() {
       const va = getSortValue(a, sortKey);
       const vb = getSortValue(b, sortKey);
       let cmp = 0;
-      if (typeof va === 'string' && typeof vb === 'string') cmp = va.localeCompare(vb);
+      if (typeof va === "string" && typeof vb === "string")
+        cmp = va.localeCompare(vb);
       else cmp = (va as number) - (vb as number);
-      return sortDir === 'asc' ? cmp : -cmp;
+      return sortDir === "asc" ? cmp : -cmp;
     });
     return built;
   }, [positions, livePrices, livePrevClose, sortKey, sortDir]);
 
   const toggleSort = (key: SortKey) => {
-    if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
-    else { setSortKey(key); setSortDir('desc'); }
+    if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else {
+      setSortKey(key);
+      setSortDir("desc");
+    }
   };
 
   const handleAdd = (data: {
-    symbol: string; stockName: string; type: 'BUY' | 'SELL';
-    qty: number; price: number; date: string;
+    symbol: string;
+    stockName: string;
+    type: "BUY" | "SELL";
+    qty: number;
+    price: number;
+    date: string;
   }) => {
     const txn: Transaction = {
       id: crypto.randomUUID(),
@@ -177,7 +259,7 @@ export function PortfolioPage() {
       savePortfolio(updated);
       setShowModal(false);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to add transaction');
+      alert(err instanceof Error ? err.message : "Failed to add transaction");
     }
   };
 
@@ -189,17 +271,24 @@ export function PortfolioPage() {
     setExpandedSymbol(null);
   };
 
-  const handleImportRows = (importedRows: { symbol: string; stockName: string; qty: number; price: number }[]) => {
+  const handleImportRows = (
+    importedRows: {
+      symbol: string;
+      stockName: string;
+      qty: number;
+      price: number;
+    }[],
+  ) => {
     let updated = portfolio;
     for (const row of importedRows) {
       const txn: Transaction = {
         id: crypto.randomUUID(),
         symbol: row.symbol,
         stockName: row.stockName,
-        type: 'BUY',
+        type: "BUY",
         qty: row.qty,
         price: row.price,
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toISOString().split("T")[0],
         createdAt: Date.now(),
       };
       updated = addTransaction(updated, txn);
@@ -218,8 +307,11 @@ export function PortfolioPage() {
   };
 
   const handleBack = useCallback(() => {
-    if (window.history.length > 1) { navigate(-1); return; }
-    navigate('/');
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate("/");
   }, [navigate]);
 
   const maxSellQty: Record<string, number> = {};
@@ -240,9 +332,10 @@ export function PortfolioPage() {
     totalRealizedPnl += p.realizedPnl;
   }
   const totalUnrealizedPnl = totalCurrentValue - totalInvested;
-  const totalPnlPct = totalInvested > 0
-    ? ((totalUnrealizedPnl + totalRealizedPnl) / totalInvested) * 100
-    : 0;
+  const totalPnlPct =
+    totalInvested > 0
+      ? ((totalUnrealizedPnl + totalRealizedPnl) / totalInvested) * 100
+      : 0;
 
   let todayPnl = 0;
   let totalPrevValue = 0;
@@ -254,29 +347,125 @@ export function PortfolioPage() {
       totalPrevValue += prevClose * p.totalQty;
     }
   }
-  const todayPnlPct = totalPrevValue > 0 ? (todayPnl / totalPrevValue) * 100 : 0;
+  const todayPnlPct =
+    totalPrevValue > 0 ? (todayPnl / totalPrevValue) * 100 : 0;
 
   return (
     <PageLayout className="max-w-7xl mt-6">
-      <Stack spacing={2.25} sx={{ position: 'relative', isolation: 'isolate' }}>
+      <Stack spacing={2.25} sx={{ position: "relative", isolation: "isolate" }}>
         {/* ambient blobs */}
-        <Box aria-hidden sx={{ position: 'absolute', zIndex: -1, width: { xs: 240, md: 320 }, height: { xs: 240, md: 320 }, borderRadius: '50%', top: -100, left: -100, filter: 'blur(38px)', opacity: 0.34, background: 'radial-gradient(circle, rgba(245,158,11,0.3) 0%, rgba(234,179,8,0.14) 55%, transparent 72%)' }} />
-        <Box aria-hidden sx={{ position: 'absolute', zIndex: -1, width: { xs: 260, md: 340 }, height: { xs: 260, md: 340 }, borderRadius: '50%', bottom: -120, right: -80, filter: 'blur(42px)', opacity: 0.24, background: 'radial-gradient(circle, rgba(16,185,129,0.24) 0%, rgba(99,102,241,0.12) 58%, transparent 76%)' }} />
+        <Box
+          aria-hidden
+          sx={{
+            position: "absolute",
+            zIndex: -1,
+            width: { xs: 240, md: 320 },
+            height: { xs: 240, md: 320 },
+            borderRadius: "50%",
+            top: -100,
+            left: -100,
+            filter: "blur(38px)",
+            opacity: 0.34,
+            background:
+              "radial-gradient(circle, rgba(245,158,11,0.3) 0%, rgba(234,179,8,0.14) 55%, transparent 72%)",
+          }}
+        />
+        <Box
+          aria-hidden
+          sx={{
+            position: "absolute",
+            zIndex: -1,
+            width: { xs: 260, md: 340 },
+            height: { xs: 260, md: 340 },
+            borderRadius: "50%",
+            bottom: -120,
+            right: -80,
+            filter: "blur(42px)",
+            opacity: 0.24,
+            background:
+              "radial-gradient(circle, rgba(16,185,129,0.24) 0%, rgba(99,102,241,0.12) 58%, transparent 76%)",
+          }}
+        />
 
         {/* hero */}
-        <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, minHeight: { xs: 190, md: 176 }, border: '1px solid', borderColor: 'divider', backdropFilter: 'blur(8px)', overflow: 'hidden', position: 'relative', background: 'radial-gradient(1200px 180px at 0% -10%, rgba(245,158,11,0.15), transparent 50%), radial-gradient(800px 180px at 100% 120%, rgba(16,185,129,0.12), transparent 55%)' }}>
-          <Box sx={{ position: 'absolute', inset: 0, opacity: 0.5, pointerEvents: 'none', background: 'linear-gradient(120deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.12) 35%, rgba(255,255,255,0.03) 70%)', transform: 'translateX(-40%)', animation: 'ovHeroSweep 6s ease-in-out infinite' }} />
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} justifyContent="space-between" alignItems={{ xs: 'flex-start', md: 'center' }} sx={{ minHeight: '100%' }}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 2, sm: 2.5 },
+            minHeight: { xs: 190, md: 176 },
+            border: "1px solid",
+            borderColor: "divider",
+            backdropFilter: "blur(8px)",
+            overflow: "hidden",
+            position: "relative",
+            background:
+              "radial-gradient(1200px 180px at 0% -10%, rgba(245,158,11,0.15), transparent 50%), radial-gradient(800px 180px at 100% 120%, rgba(16,185,129,0.12), transparent 55%)",
+          }}
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              inset: 0,
+              opacity: 0.5,
+              pointerEvents: "none",
+              background:
+                "linear-gradient(120deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.12) 35%, rgba(255,255,255,0.03) 70%)",
+              transform: "translateX(-40%)",
+              animation: "ovHeroSweep 6s ease-in-out infinite",
+            }}
+          />
+          <Stack
+            direction={{ xs: "column", md: "row" }}
+            spacing={2}
+            justifyContent="space-between"
+            alignItems={{ xs: "flex-start", md: "center" }}
+            sx={{ minHeight: "100%" }}
+          >
             <Box>
-              <MuiButton variant="text" size="small" startIcon={<ArrowBackRoundedIcon fontSize="small" />} onClick={handleBack} sx={{ mb: 1, px: 0.5, minWidth: 0, textTransform: 'none', justifyContent: 'flex-start' }}>
+              <MuiButton
+                variant="text"
+                size="small"
+                startIcon={<ArrowBackRoundedIcon fontSize="small" />}
+                onClick={handleBack}
+                sx={{
+                  mb: 1,
+                  px: 0.5,
+                  minWidth: 0,
+                  textTransform: "none",
+                  justifyContent: "flex-start",
+                }}
+              >
                 Back
               </MuiButton>
-              <Typography variant="h5" sx={{ mb: 0.75 }}>{PAGE_COPY.portfolio.title}</Typography>
-              <Typography variant="body2" color="text.secondary">{PAGE_COPY.portfolio.description}</Typography>
-              <Stack direction="row" spacing={1} sx={{ mt: 1.5, flexWrap: 'wrap', rowGap: 1 }}>
-                <Chip size="small" label="Cloud Sync" color="primary" variant="outlined" />
-                <Chip size="small" label="Live P&L" color="success" variant="outlined" />
-                <Chip size="small" label="Risk Analytics" color="warning" variant="outlined" />
+              <Typography variant="h5" sx={{ mb: 0.75 }}>
+                {PAGE_COPY.portfolio.title}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {PAGE_COPY.portfolio.description}
+              </Typography>
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{ mt: 1.5, flexWrap: "wrap", rowGap: 1 }}
+              >
+                <Chip
+                  size="small"
+                  label="Cloud Sync"
+                  color="primary"
+                  variant="outlined"
+                />
+                <Chip
+                  size="small"
+                  label="Live P&L"
+                  color="success"
+                  variant="outlined"
+                />
+                <Chip
+                  size="small"
+                  label="Risk Analytics"
+                  color="warning"
+                  variant="outlined"
+                />
               </Stack>
             </Box>
             <Box />
@@ -284,50 +473,135 @@ export function PortfolioPage() {
         </Paper>
 
         {/* loading / unauth states */}
-        {(authLoading || cloudLoading) ? (
-          <Stack alignItems="center" justifyContent="center" spacing={1.5} sx={{ py: 12 }}>
+        {authLoading || cloudLoading ? (
+          <Stack
+            alignItems="center"
+            justifyContent="center"
+            spacing={1.5}
+            sx={{ py: 12 }}
+          >
             <CircularProgress size={28} />
-            <Typography variant="body2" color="text.secondary">Loading…</Typography>
+            <Typography variant="body2" color="text.secondary">
+              Loading…
+            </Typography>
           </Stack>
         ) : !user ? (
-          <Paper elevation={0} sx={{ py: 10, px: 4, border: '1px solid', borderColor: 'divider', textAlign: 'center' }}>
-            <LockOutlinedIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.75 }}>Sign in to access your portfolio</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>Your data is stored securely in the cloud and accessible from any browser.</Typography>
-            <MuiButton variant="contained" onClick={openLoginModal} sx={{ textTransform: 'none', borderRadius: 1, fontWeight: 700 }}>Sign In</MuiButton>
+          <Paper
+            elevation={0}
+            sx={{
+              py: 10,
+              px: 4,
+              border: "1px solid",
+              borderColor: "divider",
+              textAlign: "center",
+            }}
+          >
+            <LockOutlinedIcon
+              sx={{ fontSize: 48, color: "text.disabled", mb: 2 }}
+            />
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.75 }}>
+              Sign in to access your portfolio
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Your data is stored securely in the cloud and accessible from any
+              browser.
+            </Typography>
+            <MuiButton
+              variant="contained"
+              onClick={openLoginModal}
+              sx={{ textTransform: "none", borderRadius: 1, fontWeight: 700 }}
+            >
+              Sign In
+            </MuiButton>
           </Paper>
         ) : (
           <>
             {/* Portfolio section */}
             <CollapsibleSection title="Portfolio">
               {/* action buttons */}
-              <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" justifyContent="flex-end" sx={{ mb: 2.5 }}>
-                <MuiButton size="small" variant="outlined" disabled={loadingPrices} onClick={refreshPrices} startIcon={loadingPrices ? <CircularProgress size={12} color="inherit" /> : undefined} sx={{ textTransform: 'none', borderRadius: 1 }}>
-                  {loadingPrices ? 'Refreshing…' : 'Refresh Prices'}
+              <Stack
+                direction="row"
+                spacing={1}
+                useFlexGap
+                flexWrap="wrap"
+                justifyContent="flex-end"
+                sx={{ mb: 2.5 }}
+              >
+                <MuiButton
+                  size="small"
+                  variant="outlined"
+                  disabled={loadingPrices}
+                  onClick={refreshPrices}
+                  startIcon={
+                    loadingPrices ? (
+                      <CircularProgress size={12} color="inherit" />
+                    ) : undefined
+                  }
+                  sx={{ textTransform: "none", borderRadius: 1 }}
+                >
+                  {loadingPrices ? "Refreshing…" : "Refresh Prices"}
                 </MuiButton>
-                <MuiButton size="small" variant="outlined" onClick={() => setShowImport(true)} sx={{ textTransform: 'none', borderRadius: 1 }}>Import CSV</MuiButton>
-                <MuiButton size="small" variant="contained" onClick={() => setShowModal(true)} sx={{ textTransform: 'none', borderRadius: 1, fontWeight: 700 }}>+ Add Transaction</MuiButton>
+                <MuiButton
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setShowImport(true)}
+                  sx={{ textTransform: "none", borderRadius: 1 }}
+                >
+                  Import CSV
+                </MuiButton>
+                <MuiButton
+                  size="small"
+                  variant="contained"
+                  onClick={() => setShowModal(true)}
+                  sx={{
+                    textTransform: "none",
+                    borderRadius: 1,
+                    fontWeight: 700,
+                  }}
+                >
+                  + Add Transaction
+                </MuiButton>
                 {positions.length > 0 && (
-                  <MuiButton size="small" variant="outlined" color="error" onClick={() => setShowDeletePortfolioModal(true)} sx={{ textTransform: 'none', borderRadius: 1 }}>Delete Portfolio</MuiButton>
+                  <MuiButton
+                    size="small"
+                    variant="outlined"
+                    color="error"
+                    onClick={() => setShowDeletePortfolioModal(true)}
+                    sx={{ textTransform: "none", borderRadius: 1 }}
+                  >
+                    Delete Portfolio
+                  </MuiButton>
                 )}
               </Stack>
 
               {/* summary cards */}
               {activePositions.length > 0 && (
-                <Stack direction={{ xs: 'row', sm: 'row' }} spacing={1.5} useFlexGap flexWrap="wrap" sx={{ mb: 0 }}>
-                  <SummaryCard label="Invested" value={fmtNumber(totalInvested)} />
-                  <SummaryCard label="Current Value" value={fmtNumber(totalCurrentValue)} />
+                <Stack
+                  direction={{ xs: "row", sm: "row" }}
+                  spacing={1.5}
+                  useFlexGap
+                  flexWrap="wrap"
+                  sx={{ mb: 0 }}
+                >
+                  <SummaryCard
+                    label="Invested"
+                    value={fmtNumber(totalInvested)}
+                  />
+                  <SummaryCard
+                    label="Current Value"
+                    value={fmtNumber(totalCurrentValue)}
+                  />
                   <SummaryCard
                     label="Total P&L"
-                    value={`${totalUnrealizedPnl >= 0 ? '+' : ''}${fmtNumber(totalUnrealizedPnl)}`}
+                    value={`${totalUnrealizedPnl >= 0 ? "+" : ""}${fmtNumber(totalUnrealizedPnl)}`}
                     gain={totalUnrealizedPnl >= 0}
-                    sub={`${totalPnlPct >= 0 ? '+' : ''}${totalPnlPct.toFixed(2)}%${totalRealizedPnl !== 0 ? ` · Realized: ${totalRealizedPnl >= 0 ? '+' : ''}${fmtNumber(totalRealizedPnl)}` : ''}`}
+                    sub={`${totalPnlPct >= 0 ? "+" : ""}${totalPnlPct.toFixed(2)}%${totalRealizedPnl !== 0 ? ` · Realized: ${totalRealizedPnl >= 0 ? "+" : ""}${fmtNumber(totalRealizedPnl)}` : ""}`}
                   />
                   <SummaryCard
                     label="Day's P&L"
-                    value={`${todayPnl >= 0 ? '+' : ''}${fmtNumber(todayPnl)}`}
+                    value={`${todayPnl >= 0 ? "+" : ""}${fmtNumber(todayPnl)}`}
                     gain={todayPnl >= 0}
-                    sub={`${todayPnlPct >= 0 ? '+' : ''}${todayPnlPct.toFixed(2)}%`}
+                    sub={`${todayPnlPct >= 0 ? "+" : ""}${todayPnlPct.toFixed(2)}%`}
                   />
                 </Stack>
               )}
@@ -340,57 +614,141 @@ export function PortfolioPage() {
 
             {/* Risk section */}
             <CollapsibleSection title="Risk Analytics">
-              <RiskDashboard portfolio={portfolio} livePrices={livePrices} embedded />
+              <RiskDashboard
+                portfolio={portfolio}
+                livePrices={livePrices}
+                embedded
+              />
             </CollapsibleSection>
 
             {/* Holdings section */}
             <CollapsibleSection title="Holdings">
               {positions.length === 0 ? (
-                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ textAlign: "center", py: 4 }}
+                >
                   No positions yet. Add a transaction to get started.
                 </Typography>
               ) : (
-                <Box sx={{ overflowX: 'auto', mx: -1 }}>
-                  <Box component="table" sx={{ width: '100%', minWidth: 980, borderCollapse: 'collapse', fontSize: 13 }}>
-                    <Box component="thead" sx={{ bgcolor: 'action.hover', borderBottom: '1px solid', borderColor: 'divider' }}>
+                <Box sx={{ overflowX: "auto", mx: -1 }}>
+                  <Box
+                    component="table"
+                    sx={{
+                      width: "100%",
+                      minWidth: 980,
+                      borderCollapse: "collapse",
+                      fontSize: 13,
+                    }}
+                  >
+                    <Box
+                      component="thead"
+                      sx={{
+                        bgcolor: "action.hover",
+                        borderBottom: "1px solid",
+                        borderColor: "divider",
+                      }}
+                    >
                       <Box component="tr">
                         <TableSerialHeader />
-                        {([
-                          ['name', 'Name', 'left'],
-                          ['qty', 'Qty', 'right'],
-                          ['avgBuy', 'Avg Buy', 'right'],
-                          ['cmp', 'CMP', 'right'],
-                          ['invested', 'Invested', 'right'],
-                          ['current', 'Current', 'right'],
-                          ['pnl', 'P&L', 'right'],
-                          ['pnlPct', 'P&L %', 'right'],
-                          ['todayPnl', 'Day P&L', 'right'],
-                          ['todayPnlPct', 'Day %', 'right'],
-                        ] as [SortKey, string, 'left' | 'right'][]).map(([k, lbl, al]) => (
-                          <SortHeader key={k} label={lbl} sortKey={k} current={sortKey} dir={sortDir} onSort={toggleSort} align={al} />
+                        <SortHeader
+                          label="Name"
+                          sortKey="name"
+                          current={sortKey}
+                          dir={sortDir}
+                          onSort={toggleSort}
+                          align="left"
+                        />
+                        <Box
+                          component="th"
+                          sx={{
+                            px: 1.5,
+                            py: 1.25,
+                            textAlign: "right",
+                            fontWeight: 700,
+                            fontSize: 12,
+                            letterSpacing: "0.04em",
+                            color: "text.secondary",
+                            minWidth: 150,
+                          }}
+                        >
+                          SWOT
+                        </Box>
+                        {(
+                          [
+                            ["qty", "Qty", "right"],
+                            ["avgBuy", "Avg Buy", "right"],
+                            ["cmp", "CMP", "right"],
+                            ["invested", "Invested", "right"],
+                            ["current", "Current", "right"],
+                            ["pnl", "P&L", "right"],
+                            ["pnlPct", "P&L %", "right"],
+                            ["todayPnl", "Day P&L", "right"],
+                            ["todayPnlPct", "Day %", "right"],
+                          ] as [SortKey, string, "left" | "right"][]
+                        ).map(([k, lbl, al]) => (
+                          <SortHeader
+                            key={k}
+                            label={lbl}
+                            sortKey={k}
+                            current={sortKey}
+                            dir={sortDir}
+                            onSort={toggleSort}
+                            align={al}
+                          />
                         ))}
-                        <Box component="th" sx={{ px: 1.5, py: 1.25, width: 48 }} />
+                        <Box
+                          component="th"
+                          sx={{ px: 1.5, py: 1.25, width: 48 }}
+                        />
                       </Box>
                     </Box>
                     <Box component="tbody">
-                      {rows.map(({ pos, cmp, currentValue, unrealized, unrealizedPct, todayPnl: rowTodayPnl, todayPnlPct: rowTodayPnlPct, isClosed }, rowIndex) => (
-                        <PositionTableRow
-                          key={pos.symbol}
-                          rowIndex={rowIndex}
-                          pos={pos}
-                          cmp={cmp}
-                          currentValue={currentValue}
-                          todayPnl={rowTodayPnl}
-                          todayPnlPct={rowTodayPnlPct}
-                          unrealized={unrealized}
-                          unrealizedPct={unrealizedPct}
-                          isClosed={isClosed}
-                          isExpanded={expandedSymbol === pos.symbol}
-                          loadingPrices={loadingPrices}
-                          onToggle={() => setExpandedSymbol(expandedSymbol === pos.symbol ? null : pos.symbol)}
-                          onRemove={() => handleRemove(pos.symbol)}
-                        />
-                      ))}
+                      {rows.map(
+                        (
+                          {
+                            pos,
+                            cmp,
+                            currentValue,
+                            unrealized,
+                            unrealizedPct,
+                            todayPnl: rowTodayPnl,
+                            todayPnlPct: rowTodayPnlPct,
+                            isClosed,
+                          },
+                          rowIndex,
+                        ) => (
+                          <PositionTableRow
+                            key={pos.symbol}
+                            rowIndex={rowIndex}
+                            pos={pos}
+                            cmp={cmp}
+                            currentValue={currentValue}
+                            todayPnl={rowTodayPnl}
+                            todayPnlPct={rowTodayPnlPct}
+                            unrealized={unrealized}
+                            unrealizedPct={unrealizedPct}
+                            swot={swotMap[pos.symbol]}
+                            isClosed={isClosed}
+                            isExpanded={expandedSymbol === pos.symbol}
+                            loadingPrices={loadingPrices}
+                            onToggle={() =>
+                              setExpandedSymbol(
+                                expandedSymbol === pos.symbol
+                                  ? null
+                                  : pos.symbol,
+                              )
+                            }
+                            onRemove={() => handleRemove(pos.symbol)}
+                            onOpenAnalysis={(symbol) =>
+                              navigate(
+                                `/analysis?symbol=${encodeURIComponent(symbol)}`,
+                              )
+                            }
+                          />
+                        ),
+                      )}
                     </Box>
                   </Box>
                 </Box>
@@ -399,33 +757,79 @@ export function PortfolioPage() {
 
             {/* modals */}
             {showModal && (
-              <AddTransactionModal onAdd={handleAdd} onClose={() => setShowModal(false)} maxSellQty={maxSellQty} />
+              <AddTransactionModal
+                onAdd={handleAdd}
+                onClose={() => setShowModal(false)}
+                maxSellQty={maxSellQty}
+              />
             )}
             {showImport && (
-              <ImportExcelModal onImport={handleImportRows} onClose={() => setShowImport(false)} />
+              <ImportExcelModal
+                onImport={handleImportRows}
+                onClose={() => setShowImport(false)}
+              />
             )}
             {showDeletePortfolioModal && (
               <Paper
                 elevation={8}
                 sx={{
-                  position: 'fixed', inset: 0, zIndex: 1300,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  bgcolor: alpha(theme.palette.background.default, 0.7), backdropFilter: 'blur(4px)',
+                  position: "fixed",
+                  inset: 0,
+                  zIndex: 1300,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  bgcolor: alpha(theme.palette.background.default, 0.7),
+                  backdropFilter: "blur(4px)",
                 }}
                 onClick={() => setShowDeletePortfolioModal(false)}
               >
                 <Paper
                   elevation={4}
-                  sx={{ p: 3, maxWidth: 400, width: '90%', borderRadius: 2, border: '1px solid', borderColor: 'divider' }}
+                  sx={{
+                    p: 3,
+                    maxWidth: 400,
+                    width: "90%",
+                    borderRadius: 2,
+                    border: "1px solid",
+                    borderColor: "divider",
+                  }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>Delete portfolio</Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                    Delete entire portfolio? This will remove all positions and transaction history.
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, mb: 1.5 }}
+                  >
+                    Delete portfolio
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 3 }}
+                  >
+                    Delete entire portfolio? This will remove all positions and
+                    transaction history.
                   </Typography>
                   <Stack direction="row" spacing={1} justifyContent="flex-end">
-                    <MuiButton variant="outlined" onClick={() => setShowDeletePortfolioModal(false)} sx={{ textTransform: 'none', borderRadius: 1 }}>Cancel</MuiButton>
-                    <MuiButton variant="contained" color="error" onClick={handleClearPortfolio} sx={{ textTransform: 'none', borderRadius: 1, fontWeight: 700 }}>Delete Portfolio</MuiButton>
+                    <MuiButton
+                      variant="outlined"
+                      onClick={() => setShowDeletePortfolioModal(false)}
+                      sx={{ textTransform: "none", borderRadius: 1 }}
+                    >
+                      Cancel
+                    </MuiButton>
+                    <MuiButton
+                      variant="contained"
+                      color="error"
+                      onClick={handleClearPortfolio}
+                      sx={{
+                        textTransform: "none",
+                        borderRadius: 1,
+                        fontWeight: 700,
+                      }}
+                    >
+                      Delete Portfolio
+                    </MuiButton>
                   </Stack>
                 </Paper>
               </Paper>
@@ -444,21 +848,62 @@ export function PortfolioPage() {
   );
 }
 
-function CollapsibleSection({ title, children, defaultOpen = true }: {
-  title: string; children: ReactNode; defaultOpen?: boolean;
+function CollapsibleSection({
+  title,
+  children,
+  defaultOpen = true,
+}: {
+  title: string;
+  children: ReactNode;
+  defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const theme = useTheme();
   return (
-    <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', overflow: 'hidden', background: theme.palette.mode === 'dark' ? 'linear-gradient(165deg, rgba(17,24,39,0.9), rgba(3,7,18,0.9))' : 'linear-gradient(165deg, rgba(255,255,255,0.96), rgba(248,250,252,0.95))' }}>
+    <Paper
+      elevation={0}
+      sx={{
+        border: "1px solid",
+        borderColor: "divider",
+        overflow: "hidden",
+        background:
+          theme.palette.mode === "dark"
+            ? "linear-gradient(165deg, rgba(17,24,39,0.9), rgba(3,7,18,0.9))"
+            : "linear-gradient(165deg, rgba(255,255,255,0.96), rgba(248,250,252,0.95))",
+      }}
+    >
       <Box
         component="button"
         type="button"
         onClick={() => setOpen((v) => !v)}
-        sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, px: { xs: 2, sm: 2.5 }, py: 1.75, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' }, transition: 'background 0.15s' }}
+        sx={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 2,
+          px: { xs: 2, sm: 2.5 },
+          py: 1.75,
+          textAlign: "left",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          "&:hover": { bgcolor: "action.hover" },
+          transition: "background 0.15s",
+        }}
       >
         <SectionHeader title={title} />
-        {open ? <KeyboardArrowUpRoundedIcon fontSize="small" sx={{ color: 'text.secondary', flexShrink: 0 }} /> : <KeyboardArrowDownRoundedIcon fontSize="small" sx={{ color: 'text.secondary', flexShrink: 0 }} />}
+        {open ? (
+          <KeyboardArrowUpRoundedIcon
+            fontSize="small"
+            sx={{ color: "text.secondary", flexShrink: 0 }}
+          />
+        ) : (
+          <KeyboardArrowDownRoundedIcon
+            fontSize="small"
+            sx={{ color: "text.secondary", flexShrink: 0 }}
+          />
+        )}
       </Box>
       <Collapse in={open}>
         <Box sx={{ px: { xs: 2, sm: 2.5 }, pb: 2.5, pt: 0.5 }}>{children}</Box>
@@ -467,17 +912,43 @@ function CollapsibleSection({ title, children, defaultOpen = true }: {
   );
 }
 
-function PositionTableRow({ rowIndex, pos, cmp, currentValue, unrealized, unrealizedPct, todayPnl, todayPnlPct, isClosed, isExpanded, loadingPrices, onToggle, onRemove }: {
+function PositionTableRow({
+  rowIndex,
+  pos,
+  cmp,
+  currentValue,
+  unrealized,
+  unrealizedPct,
+  todayPnl,
+  todayPnlPct,
+  swot,
+  isClosed,
+  isExpanded,
+  loadingPrices,
+  onToggle,
+  onRemove,
+  onOpenAnalysis,
+}: {
   rowIndex: number;
-  pos: Position; cmp: number; currentValue: number; unrealized: number; unrealizedPct: number;
-  todayPnl: number; todayPnlPct: number;
-  isClosed: boolean; isExpanded: boolean; loadingPrices: boolean;
-  onToggle: () => void; onRemove: () => void;
+  pos: Position;
+  cmp: number;
+  currentValue: number;
+  unrealized: number;
+  unrealizedPct: number;
+  todayPnl: number;
+  todayPnlPct: number;
+  swot?: SwotCounts | null;
+  isClosed: boolean;
+  isExpanded: boolean;
+  loadingPrices: boolean;
+  onToggle: () => void;
+  onRemove: () => void;
+  onOpenAnalysis: (symbol: string) => void;
 }) {
   const theme = useTheme();
-  const pnlColor = unrealized >= 0 ? 'success.main' : 'error.main';
-  const dayColor = todayPnl >= 0 ? 'success.main' : 'error.main';
-  const mono = { fontFamily: 'monospace' };
+  const pnlColor = unrealized >= 0 ? "success.main" : "error.main";
+  const dayColor = todayPnl >= 0 ? "success.main" : "error.main";
+  const mono = { fontFamily: "monospace" };
 
   return (
     <>
@@ -485,57 +956,213 @@ function PositionTableRow({ rowIndex, pos, cmp, currentValue, unrealized, unreal
         component="tr"
         onClick={onToggle}
         sx={{
-          borderBottom: '1px solid',
+          borderBottom: "1px solid",
           borderColor: alpha(theme.palette.divider, 0.65),
-          cursor: 'pointer',
+          cursor: "pointer",
           opacity: isClosed ? 0.5 : 1,
-          '&:hover': { bgcolor: 'action.hover' },
-          '&:last-child': { borderBottom: 0 },
+          "&:hover": { bgcolor: "action.hover" },
+          "&:last-child": { borderBottom: 0 },
         }}
       >
         <TableSerialCell index={rowIndex} />
-        <Box component="td" sx={{ px: 1.5, py: 1.25, textAlign: 'left' }}>
-          <Typography variant="body2" sx={{ fontWeight: 700, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pos.stockName}</Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>{pos.symbol}</Typography>
-          {isClosed && <Chip label="Closed" size="small" sx={{ fontSize: 9, height: 16, ml: 0.5 }} />}
+        <Box component="td" sx={{ px: 1.5, py: 1.25, textAlign: "left" }}>
+          <Box
+            component="button"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenAnalysis(pos.symbol);
+            }}
+            sx={{
+              background: "none",
+              border: "none",
+              p: 0,
+              textAlign: "left",
+              cursor: "pointer",
+              color: "inherit",
+              "&:hover .name-text": { color: "primary.main" },
+            }}
+          >
+            <Typography
+              variant="body2"
+              className="name-text"
+              sx={{
+                fontWeight: 700,
+                maxWidth: 160,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {pos.stockName}
+            </Typography>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontFamily: "monospace", display: "block" }}
+            >
+              {pos.symbol}
+            </Typography>
+          </Box>
+          {isClosed && (
+            <Chip
+              label="Closed"
+              size="small"
+              sx={{ fontSize: 9, height: 16, ml: 0.5 }}
+            />
+          )}
         </Box>
-        <Box component="td" sx={{ px: 1.5, py: 1.25, textAlign: 'right', ...mono }}>{isClosed ? '—' : pos.totalQty}</Box>
-        <Box component="td" sx={{ px: 1.5, py: 1.25, textAlign: 'right', ...mono }}>{isClosed ? '—' : fmtNumber(pos.avgBuyPrice)}</Box>
-        <Box component="td" sx={{ px: 1.5, py: 1.25, textAlign: 'right', ...mono }}>
-          {isClosed ? '—' : cmp ? fmtNumber(cmp) : (loadingPrices ? '…' : '—')}
+        <Box
+          component="td"
+          sx={{
+            px: 1.5,
+            py: 1.25,
+            textAlign: "right",
+            fontFamily: "monospace",
+            fontSize: 12,
+          }}
+        >
+          <SwotValue counts={swot} />
         </Box>
-        <Box component="td" sx={{ px: 1.5, py: 1.25, textAlign: 'right', ...mono }}>{isClosed ? '—' : fmtNumber(pos.investedAmount)}</Box>
-        <Box component="td" sx={{ px: 1.5, py: 1.25, textAlign: 'right', ...mono }}>{isClosed ? '—' : cmp ? fmtNumber(currentValue) : '—'}</Box>
-        <Box component="td" sx={{ px: 1.5, py: 1.25, textAlign: 'right', fontWeight: 600, color: isClosed ? 'text.disabled' : pnlColor, ...mono }}>
-          {isClosed ? '—' : `${unrealized >= 0 ? '+' : ''}${fmtNumber(unrealized)}`}
+        <Box
+          component="td"
+          sx={{ px: 1.5, py: 1.25, textAlign: "right", ...mono }}
+        >
+          {isClosed ? "—" : pos.totalQty}
         </Box>
-        <Box component="td" sx={{ px: 1.5, py: 1.25, textAlign: 'right', fontWeight: 600, color: isClosed ? 'text.disabled' : pnlColor, ...mono }}>
-          {isClosed ? '—' : `${unrealizedPct >= 0 ? '+' : ''}${unrealizedPct.toFixed(2)}%`}
+        <Box
+          component="td"
+          sx={{ px: 1.5, py: 1.25, textAlign: "right", ...mono }}
+        >
+          {isClosed ? "—" : fmtNumber(pos.avgBuyPrice)}
         </Box>
-        <Box component="td" sx={{ px: 1.5, py: 1.25, textAlign: 'right', fontWeight: 600, color: isClosed ? 'text.disabled' : dayColor, ...mono }}>
-          {isClosed ? '—' : cmp ? `${todayPnl >= 0 ? '+' : ''}${fmtNumber(todayPnl)}` : '—'}
+        <Box
+          component="td"
+          sx={{ px: 1.5, py: 1.25, textAlign: "right", ...mono }}
+        >
+          {isClosed ? "—" : cmp ? fmtNumber(cmp) : loadingPrices ? "…" : "—"}
         </Box>
-        <Box component="td" sx={{ px: 1.5, py: 1.25, textAlign: 'right', fontWeight: 600, color: isClosed ? 'text.disabled' : dayColor, ...mono }}>
-          {isClosed ? '—' : cmp ? `${todayPnlPct >= 0 ? '+' : ''}${todayPnlPct.toFixed(2)}%` : '—'}
+        <Box
+          component="td"
+          sx={{ px: 1.5, py: 1.25, textAlign: "right", ...mono }}
+        >
+          {isClosed ? "—" : fmtNumber(pos.investedAmount)}
         </Box>
-        <Box component="td" sx={{ px: 1, py: 1.25, textAlign: 'center' }}>
-          <Stack direction="row" spacing={0.5} justifyContent="flex-end" alignItems="center">
+        <Box
+          component="td"
+          sx={{ px: 1.5, py: 1.25, textAlign: "right", ...mono }}
+        >
+          {isClosed ? "—" : cmp ? fmtNumber(currentValue) : "—"}
+        </Box>
+        <Box
+          component="td"
+          sx={{
+            px: 1.5,
+            py: 1.25,
+            textAlign: "right",
+            fontWeight: 600,
+            color: isClosed ? "text.disabled" : pnlColor,
+            ...mono,
+          }}
+        >
+          {isClosed
+            ? "—"
+            : `${unrealized >= 0 ? "+" : ""}${fmtNumber(unrealized)}`}
+        </Box>
+        <Box
+          component="td"
+          sx={{
+            px: 1.5,
+            py: 1.25,
+            textAlign: "right",
+            fontWeight: 600,
+            color: isClosed ? "text.disabled" : pnlColor,
+            ...mono,
+          }}
+        >
+          {isClosed
+            ? "—"
+            : `${unrealizedPct >= 0 ? "+" : ""}${unrealizedPct.toFixed(2)}%`}
+        </Box>
+        <Box
+          component="td"
+          sx={{
+            px: 1.5,
+            py: 1.25,
+            textAlign: "right",
+            fontWeight: 600,
+            color: isClosed ? "text.disabled" : dayColor,
+            ...mono,
+          }}
+        >
+          {isClosed
+            ? "—"
+            : cmp
+              ? `${todayPnl >= 0 ? "+" : ""}${fmtNumber(todayPnl)}`
+              : "—"}
+        </Box>
+        <Box
+          component="td"
+          sx={{
+            px: 1.5,
+            py: 1.25,
+            textAlign: "right",
+            fontWeight: 600,
+            color: isClosed ? "text.disabled" : dayColor,
+            ...mono,
+          }}
+        >
+          {isClosed
+            ? "—"
+            : cmp
+              ? `${todayPnlPct >= 0 ? "+" : ""}${todayPnlPct.toFixed(2)}%`
+              : "—"}
+        </Box>
+        <Box component="td" sx={{ px: 1, py: 1.25, textAlign: "center" }}>
+          <Stack
+            direction="row"
+            spacing={0.5}
+            justifyContent="flex-end"
+            alignItems="center"
+          >
             <Box
               component="button"
               type="button"
-              onClick={(e: React.MouseEvent) => { e.stopPropagation(); onRemove(); }}
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation();
+                onRemove();
+              }}
               title="Remove position"
-              sx={{ background: 'none', border: 'none', cursor: 'pointer', p: 0.5, color: 'text.disabled', '&:hover': { color: 'error.main' }, display: 'flex', alignItems: 'center' }}
+              sx={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                p: 0.5,
+                color: "text.disabled",
+                "&:hover": { color: "error.main" },
+                display: "flex",
+                alignItems: "center",
+              }}
             >
               <DeleteOutlineRoundedIcon fontSize="small" />
             </Box>
-            {isExpanded ? <KeyboardArrowUpRoundedIcon fontSize="small" sx={{ color: 'text.secondary' }} /> : <KeyboardArrowDownRoundedIcon fontSize="small" sx={{ color: 'text.secondary' }} />}
+            {isExpanded ? (
+              <KeyboardArrowUpRoundedIcon
+                fontSize="small"
+                sx={{ color: "text.secondary" }}
+              />
+            ) : (
+              <KeyboardArrowDownRoundedIcon
+                fontSize="small"
+                sx={{ color: "text.secondary" }}
+              />
+            )}
           </Stack>
         </Box>
       </Box>
       {isExpanded && (
         <Box component="tr">
-          <Box component="td" colSpan={12}>
+          <Box component="td" colSpan={13}>
             <TransactionHistory transactions={pos.transactions} />
           </Box>
         </Box>
@@ -544,9 +1171,64 @@ function PositionTableRow({ rowIndex, pos, cmp, currentValue, unrealized, unreal
   );
 }
 
-function SortHeader({ label, sortKey, current, dir, onSort, align = 'right' }: {
-  label: string; sortKey: SortKey; current: SortKey; dir: SortDir;
-  onSort: (key: SortKey) => void; align?: 'left' | 'right';
+function SwotValue({ counts }: { counts?: SwotCounts | null }) {
+  if (!counts || counts.strengths == null || counts.weaknesses == null)
+    return <>—</>;
+
+  return (
+    <Box
+      component="span"
+      sx={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 0.5,
+        flexWrap: "wrap",
+        justifyContent: "flex-end",
+      }}
+    >
+      <Box component="span" sx={{ color: "success.main" }}>
+        {counts.strengths}
+      </Box>
+      <Box component="span" sx={{ color: "text.secondary" }}>
+        /
+      </Box>
+      <Box component="span" sx={{ color: "error.main" }}>
+        {counts.weaknesses}
+      </Box>
+      {counts.opportunities != null && counts.threats != null && (
+        <>
+          <Box component="span" sx={{ color: "text.secondary" }}>
+            /
+          </Box>
+          <Box component="span" sx={{ color: "success.main" }}>
+            {counts.opportunities}
+          </Box>
+          <Box component="span" sx={{ color: "text.secondary" }}>
+            /
+          </Box>
+          <Box component="span" sx={{ color: "error.main" }}>
+            {counts.threats}
+          </Box>
+        </>
+      )}
+    </Box>
+  );
+}
+
+function SortHeader({
+  label,
+  sortKey,
+  current,
+  dir,
+  onSort,
+  align = "right",
+}: {
+  label: string;
+  sortKey: SortKey;
+  current: SortKey;
+  dir: SortDir;
+  onSort: (key: SortKey) => void;
+  align?: "left" | "right";
 }) {
   const isActive = current === sortKey;
   return (
@@ -554,27 +1236,82 @@ function SortHeader({ label, sortKey, current, dir, onSort, align = 'right' }: {
       component="th"
       onClick={() => onSort(sortKey)}
       sx={{
-        px: 1.5, py: 1.25,
+        px: 1.5,
+        py: 1.25,
         textAlign: align,
-        fontWeight: 700, fontSize: 12, letterSpacing: '0.04em',
-        color: isActive ? 'primary.main' : 'text.secondary',
-        cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap',
-        '&:hover': { color: 'text.primary' },
+        fontWeight: 700,
+        fontSize: 12,
+        letterSpacing: "0.04em",
+        color: isActive ? "primary.main" : "text.secondary",
+        cursor: "pointer",
+        userSelect: "none",
+        whiteSpace: "nowrap",
+        "&:hover": { color: "text.primary" },
       }}
     >
-      {label}{isActive ? (dir === 'asc' ? ' ↑' : ' ↓') : ''}
+      {label}
+      {isActive ? (dir === "asc" ? " ↑" : " ↓") : ""}
     </Box>
   );
 }
 
-function SummaryCard({ label, value, gain, sub }: {
-  label: string; value: string; gain?: boolean; sub?: string;
+function SummaryCard({
+  label,
+  value,
+  gain,
+  sub,
+}: {
+  label: string;
+  value: string;
+  gain?: boolean;
+  sub?: string;
 }) {
   return (
-    <Paper elevation={0} sx={{ flex: '1 1 140px', px: 2, py: 1.5, textAlign: 'center', border: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
-      <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary', display: 'block', mb: 0.5 }}>{label}</Typography>
-      <Typography variant="subtitle1" sx={{ fontWeight: 700, fontFamily: 'monospace', color: gain === undefined ? 'text.primary' : gain ? 'success.main' : 'error.main' }}>{value}</Typography>
-      {sub && <Typography variant="caption" color="text.secondary">{sub}</Typography>}
+    <Paper
+      elevation={0}
+      sx={{
+        flex: "1 1 140px",
+        px: 2,
+        py: 1.5,
+        textAlign: "center",
+        border: "1px solid",
+        borderColor: "divider",
+        bgcolor: "action.hover",
+      }}
+    >
+      <Typography
+        variant="caption"
+        sx={{
+          fontWeight: 700,
+          letterSpacing: "0.06em",
+          textTransform: "uppercase",
+          color: "text.secondary",
+          display: "block",
+          mb: 0.5,
+        }}
+      >
+        {label}
+      </Typography>
+      <Typography
+        variant="subtitle1"
+        sx={{
+          fontWeight: 700,
+          fontFamily: "monospace",
+          color:
+            gain === undefined
+              ? "text.primary"
+              : gain
+                ? "success.main"
+                : "error.main",
+        }}
+      >
+        {value}
+      </Typography>
+      {sub && (
+        <Typography variant="caption" color="text.secondary">
+          {sub}
+        </Typography>
+      )}
     </Paper>
   );
 }
