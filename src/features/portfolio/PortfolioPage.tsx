@@ -57,7 +57,8 @@ type SortKey =
   | "pnl"
   | "pnlPct"
   | "todayPnl"
-  | "todayPnlPct";
+  | "todayPnlPct"
+  | "swot";
 type SortDir = "asc" | "desc";
 
 interface PositionRow {
@@ -69,12 +70,14 @@ interface PositionRow {
   todayPnl: number;
   todayPnlPct: number;
   isClosed: boolean;
+  swot?: SwotCounts | null;
 }
 
 function buildRow(
   pos: Position,
   livePrices: Record<string, number>,
   livePrevClose: Record<string, number>,
+  swot?: SwotCounts | null,
 ): PositionRow {
   const cmp = livePrices[pos.symbol] ?? 0;
   const prevClose = livePrevClose[pos.symbol];
@@ -96,7 +99,12 @@ function buildRow(
     todayPnl,
     todayPnlPct,
     isClosed,
+    swot,
   };
+}
+
+function getSwotSortValue(swot?: SwotCounts | null): number {
+  return swot?.strengths ?? -1;
 }
 
 function getSortValue(row: PositionRow, key: SortKey): number | string {
@@ -121,6 +129,8 @@ function getSortValue(row: PositionRow, key: SortKey): number | string {
       return row.todayPnl;
     case "todayPnlPct":
       return row.todayPnlPct;
+    case "swot":
+      return getSwotSortValue(row.swot);
   }
 }
 
@@ -219,7 +229,9 @@ export function PortfolioPage() {
   }, [refreshPrices]);
 
   const rows: PositionRow[] = useMemo(() => {
-    const built = positions.map((p) => buildRow(p, livePrices, livePrevClose));
+    const built = positions.map((p) =>
+      buildRow(p, livePrices, livePrevClose, swotMap[p.symbol]),
+    );
     built.sort((a, b) => {
       const va = getSortValue(a, sortKey);
       const vb = getSortValue(b, sortKey);
@@ -230,7 +242,7 @@ export function PortfolioPage() {
       return sortDir === "asc" ? cmp : -cmp;
     });
     return built;
-  }, [positions, livePrices, livePrevClose, sortKey, sortDir]);
+  }, [positions, livePrices, livePrevClose, swotMap, sortKey, sortDir]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -660,21 +672,14 @@ export function PortfolioPage() {
                           onSort={toggleSort}
                           align="left"
                         />
-                        <Box
-                          component="th"
-                          sx={{
-                            px: 1.5,
-                            py: 1.25,
-                            textAlign: "right",
-                            fontWeight: 700,
-                            fontSize: 12,
-                            letterSpacing: "0.04em",
-                            color: "text.secondary",
-                            minWidth: 150,
-                          }}
-                        >
-                          SWOT
-                        </Box>
+                        <SortHeader
+                          label="SWOT"
+                          sortKey="swot"
+                          current={sortKey}
+                          dir={sortDir}
+                          onSort={toggleSort}
+                          align="right"
+                        />
                         {(
                           [
                             ["qty", "Qty", "right"],
