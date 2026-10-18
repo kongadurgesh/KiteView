@@ -161,7 +161,7 @@ export function ImportExcelModal({ onImport, onClose }: ImportExcelModalProps) {
           const row = json[i] as string[];
           const rawIsin = String(row[isinCol] ?? '').trim();
           const isin = validateAndNormalizeIsin(rawIsin);
-          const price = parseFloat(String(row[priceCol] ?? ''));
+          const price = parseFloat(String(row[priceCol] ?? '').replace(/,/g, ''));
           const qty = parseInt(String(row[qtyCol] ?? ''), 10);
           // Skip if ISIN is invalid or other fields are invalid
           if (!isin || isNaN(price) || isNaN(qty) || qty <= 0 || price <= 0) continue;
